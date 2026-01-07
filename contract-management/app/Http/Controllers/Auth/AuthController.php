@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordResetMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -126,6 +131,91 @@ class AuthController extends Controller
         $response->headers->set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
 
         return $response;
+    }
+
+    /**
+     * Show forgot password form
+     */
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Send password reset link
+     */
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'We cannot find a user with that email address.']);
+        }
+
+        // Generate temporary password
+        $temporaryPassword = 'epss@1234';
+
+        // Update user's password
+        $user->password = Hash::make($temporaryPassword);
+        $user->save();
+
+        // Send email with temporary password
+        try {
+            Mail::to($user->email)->send(new PasswordResetMail($user, $temporaryPassword));
+
+            // Log successful email sending
+            \Illuminate\Support\Facades\Log::info('Password reset email sent successfully to: ' . $user->email);
+
+            return back()->with([
+                'status' => 'SUCCESS: A temporary password has been sent to your email address (' . $user->email . '). Please check your inbox and spam folder.'
+            ]);
+        } catch (\Exception $e) {
+            // Log the error
+            \Illuminate\Support\Facades\Log::error('Failed to send password reset email to ' . $user->email . ': ' . $e->getMessage());
+
+            return back()->withErrors([
+                'email' => 'FAILED: Unable to send email. Please contact ICT support at ict@epss.gov.et. Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Show reset password form
+     */
+    public function showResetPassword(Request $request)
+    {
+        return view('auth.reset-password', ['request' => $request]);
+    }
+
+    /**
+     * Reset password
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 
     /**

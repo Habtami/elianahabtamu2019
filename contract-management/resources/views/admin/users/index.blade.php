@@ -187,12 +187,14 @@
                                             </button>
                                         </form>
 
+                                        @if (!$user->isSuperAdmin())
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                             @csrf
                                             <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 transition duration-200" title="Delete User">
                                                 <i class="fas fa-trash mr-1"></i>Delete
                                             </button>
                                         </form>
+                                        @endif
                                     @endif
                                 </div>
                             </td>

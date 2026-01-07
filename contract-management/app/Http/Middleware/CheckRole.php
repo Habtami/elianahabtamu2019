@@ -19,6 +19,12 @@ class CheckRole
             return redirect()->route('login');
         }
 
+        // Check if user has admin privileges (includes super_admin)
+        if (in_array('admin', $roles) && $request->user()->isAdmin()) {
+            return $next($request);
+        }
+
+        // Otherwise, check exact role match
         if (!in_array($request->user()->role, $roles)) {
             abort(403, 'Unauthorized action.');
         }

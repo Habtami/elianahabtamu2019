@@ -12,7 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE users MODIFY COLUMN department ENUM('general_service', 'cmd', 'finance', 'ict') NOT NULL DEFAULT 'general_service'");
+        // For SQLite, enum is TEXT, no need to alter
+        // For MySQL, this would modify the enum, but since we're using SQLite, skip
     }
 
     /**
@@ -20,6 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE users MODIFY COLUMN department ENUM('general_service', 'cmd', 'finance') NOT NULL DEFAULT 'general_service'");
+        // No action needed for SQLite
     }
 };

@@ -28,6 +28,23 @@
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            color: #000000 !important; /* Force all text to black */
+        }
+        
+        /* Make all text black */
+        h1, h2, h3, h4, h5, h6,
+        p, span, a, label, li, div,
+        .text-gray-900, .text-gray-600, .text-gray-500, .text-gray-400,
+        .text-red-800, .text-red-700, .text-red-600, .text-red-500,
+        .text-green-800, .text-green-700, .text-green-500,
+        .text-blue-100, .text-yellow-600, .text-purple-500,
+        .text-epss, .text-epss-dark {
+            color: #000000 !important;
+        }
+        
+        /* Keep icons their original colors */
+        i, .fa {
+            color: inherit !important;
         }
         
         /* Loading Animation */
@@ -145,20 +162,7 @@
     <div class="w-full max-w-md animate-fade-in" id="main-content">
         <!-- Logo Header -->
         <div class="text-center mb-8 md:mb-10">
-            <div class="inline-flex items-center justify-center bg-white rounded-2xl px-6 py-5 shadow-elevation-lg mb-6">
-                <img src="{{ asset('images/epss_logo.png') }}" 
-                     alt="Ethiopian Pharmaceutical Supply Service" 
-                     class="h-14 w-14 mr-4"
-                     width="56"
-                     height="56"
-                     loading="eager">
-                <div class="text-left">
-                    <h1 class="text-xl font-bold text-gray-900 leading-tight">
-                        EPSS CMS
-                    </h1>
-                    <p class="text-gray-600 text-sm mt-1">Contract Management System</p>
-                </div>
-            </div>
+
             
             <div class="space-y-2">
                 {{-- <h2 class="text-2xl md:text-3xl font-bold text-gray-900">
@@ -167,17 +171,25 @@
                 {{-- <p class="text-gray-600">
                     Sign in to access your account
                 </p> --}}
+
+                                                        
+
             </div>
         </div>
 
         <!-- Login Card -->
-        <div class="bg-white rounded-2xl shadow-elevation-xl overflow-hidden animate-slide-up">
-            <!-- Card Header -->
+            <div class="bg-white rounded-2xl shadow-elevation-xl overflow-hidden animate-slide-up p-6 md:p-8">
             <div class="bg-gradient-to-r from-epss to-epss-dark p-6 md:p-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-xl font-bold text-white">Contract Management System</h3>
-                        <p class="text-blue-100 text-sm mt-1">Enter your credentials</p>
+                    <img src="{{ asset('images/epss_logo.png') }}" 
+                     alt="Ethiopian Pharmaceutical Supply Service" 
+                     class="h-14 w-14 mr-4"
+                     width="56"
+                     height="56"
+                     loading="eager">
+                        <h3 class="text-xl font-bold text-white" style="color: #000000 !important;">CMS</h3>
+                        <p class="text-sm text-white/90" style="color: #000000 !important;">Contract Management System</p>
                     </div>
                     <div class="hidden sm:block">
                         <div class="bg-white/20 p-3 rounded-xl">
@@ -321,7 +333,7 @@
 
                     <!-- Forgot Password -->
                     <div class="text-center">
-                        <a href="#" class="text-sm text-epss hover:text-epss-dark font-medium inline-flex items-center">
+                        <a href="{{ route('password.request') }}" class="text-sm text-epss hover:text-epss-dark font-medium inline-flex items-center">
                             <i class="fas fa-key mr-2"></i>
                             Forgot your password?
                         </a>
@@ -351,21 +363,15 @@
                 <div class="flex items-center justify-center space-x-4">
                     <div class="flex items-center">
                         <i class="fas fa-shield-check text-green-500 mr-2"></i>
-                        <span class="text-xs text-gray-600">256-bit SSL</span>
+                        <span class="text-xs text-gray-600"></span>
+                        {{-- 256-bit SSL --}}
                     </div>
                     <div class="h-4 w-px bg-gray-300"></div>
-                    <div class="flex items-center">
-                        <i class="fas fa-server text-blue-500 mr-2"></i>
-                        <span class="text-xs text-gray-600">Uptime 99.9%</span>
-                    </div>
-                    <div class="h-4 w-px bg-gray-300"></div>
-                    <div class="flex items-center">
-                        <i class="fas fa-clock text-purple-500 mr-2"></i>
-                        <span class="text-xs text-gray-600">24/7 Support</span>
-                    </div>
+ 
+                    {{-- <div class="h-4 w-px bg-gray-300"></div> --}}
                 </div>
             </div>
-        </div>
+       
 
         <!-- Footer -->
         <footer class="mt-8 text-center">
@@ -379,7 +385,7 @@
                 <span class="h-1 w-1 rounded-full bg-gray-300"></span>
                 <a href="#" class="hover:text-epss transition-colors">Privacy Policy</a>
             </div>
-            
+             </div>
             <!-- Mobile Quick Actions -->
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                 <a href="#" class="text-xs text-gray-500 hover:text-epss flex items-center">
@@ -391,11 +397,7 @@
                     <i class="fas fa-phone mr-2"></i>
                     Contact Support
                 </a>
-                <span class="hidden sm:inline text-gray-300">•</span>
-                <a href="#" class="text-xs text-gray-500 hover:text-epss flex items-center">
-                    <i class="fas fa-file-alt mr-2"></i>
-                    System Status
-                </a>
+                {{-- <span class="hidden sm:inline text-gray-300">•3</span> --}}
             </div>
         </footer>
     </div>

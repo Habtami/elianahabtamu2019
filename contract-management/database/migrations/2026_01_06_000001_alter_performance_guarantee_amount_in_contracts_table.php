@@ -8,15 +8,17 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('contracts', function (Blueprint $table) {
-            $table->decimal('performance_guarantee_amount', 15, 2)->nullable()->change();
-        });
+        // For SQLite, decimal is TEXT, precision change not needed
+        // Schema::table('contracts', function (Blueprint $table) {
+        //     $table->decimal('performance_guarantee_amount', 15, 2)->nullable()->change();
+        // });
     }
 
     public function down()
     {
-        Schema::table('contracts', function (Blueprint $table) {
-            $table->decimal('performance_guarantee_amount', 10, 2)->nullable()->change();
-        });
+        // No action needed
+        // Schema::table('contracts', function (Blueprint $table) {
+        //     $table->decimal('performance_guarantee_amount', 10, 2)->nullable()->change();
+        // });
     }
 };

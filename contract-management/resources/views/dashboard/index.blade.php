@@ -297,7 +297,7 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
-            <div class="sidebar-logo-icon">CM</div>
+            <div class="sidebar-logo-icon">CMS</div>
         </div>
         <div class="sidebar-title">
             <h3>Contract Manager</h3>
@@ -358,7 +358,7 @@
         @endif
 
         <!-- User Management - Admin only -->
-        @if(auth()->user()->role === 'admin')
+        @if(auth()->user()->isAdmin())
         <div class="sidebar-menu-item">
             <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">
                 <i class="fas fa-users-cog"></i>
@@ -372,9 +372,9 @@
 
         <!-- Profile/Account - Available to all -->
         <div class="sidebar-menu-item">
-            <a href="#" onclick="event.preventDefault();">
+            <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
                 <i class="fas fa-user"></i>
-                <span>{{ auth()->user()->name }}</span>
+                <span>Profile</span>
             </a>
         </div>
 

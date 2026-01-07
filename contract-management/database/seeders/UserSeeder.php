@@ -16,6 +16,15 @@ class UserSeeder extends Seeder
         
         $users = [
             [
+                'name' => 'Super Administrator',
+                'email' => 'superadmin@epss.gov.et',
+                'password' => Hash::make('admin123'),
+                'role' => User::ROLE_SUPER_ADMIN,
+                'department' => User::DEPARTMENT_ICT,
+                'status' => true,
+                'email_verified_at' => now(),
+            ],
+            [
                 'name' => 'System Administrator',
                 'email' => 'admin@epss.gov.et',
                 'password' => Hash::make('admin123'),

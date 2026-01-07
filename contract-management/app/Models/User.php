@@ -30,6 +30,7 @@ class User extends Authenticatable
     ];
 
     // Role constants
+    const ROLE_SUPER_ADMIN = 'super_admin';
     const ROLE_ADMIN = 'admin';
     const ROLE_GENERAL_SERVICE = 'general_service';
     const ROLE_CMD = 'cmd';
@@ -47,6 +48,7 @@ class User extends Authenticatable
     public static function getRoles()
     {
         return [
+            self::ROLE_SUPER_ADMIN => 'Super Administrator',
             self::ROLE_ADMIN => 'System Administrator',
             self::ROLE_GENERAL_SERVICE => 'General Service Officer',
             self::ROLE_CMD => 'CMD Officer',
@@ -82,7 +84,13 @@ class User extends Authenticatable
     // Check if user is admin
     public function isAdmin()
     {
-        return $this->role === self::ROLE_ADMIN;
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN]);
+    }
+
+    // Check if user is super admin
+    public function isSuperAdmin()
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
     }
 
     // Check if user is active
@@ -111,6 +119,7 @@ class User extends Authenticatable
     public function canViewAllContracts()
     {
         return in_array($this->role, [
+            self::ROLE_SUPER_ADMIN,
             self::ROLE_ADMIN,
             self::ROLE_GENERAL_SERVICE,
             self::ROLE_CMD,
@@ -124,6 +133,7 @@ class User extends Authenticatable
     public function getAllowedDepartments()
     {
         switch ($this->role) {
+            case self::ROLE_SUPER_ADMIN:
             case self::ROLE_ADMIN:
             case self::ROLE_GENERAL_SERVICE:
             case self::ROLE_CMD:
