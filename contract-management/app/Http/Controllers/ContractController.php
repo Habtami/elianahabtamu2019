@@ -18,19 +18,22 @@ class ContractController extends Controller
         $query = Contract::forUser($user)->with('creator');
         
         // Search
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-        
+        $query->when($request->filled('search'), function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->input('search') . '%');
+        });
+
         // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-        
+        $query->when(
+            $request->filled('status') && array_key_exists($request->input('status'), Contract::getStatuses()),
+            function ($q) use ($request) {
+                $q->where('status', $request->input('status'));
+            }
+        );
+
         // Filter by department
-        if ($request->has('department') && $user->canViewAllContracts()) {
-            $query->where('department', $request->department);
-        }
+        $query->when($request->filled('department') && $user->canViewAllContracts(), function ($q) use ($request) {
+            $q->where('department', $request->input('department'));
+        });
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
@@ -61,7 +64,7 @@ class ContractController extends Controller
         if ($sortBy !== 'id' && $sortBy !== 'created_at') {
             $query->orderBy('id', 'desc');
         }
-        $contracts = $query->paginate($perPage)->appends($request->query());
+        $contracts = $query->paginate($perPage)->withQueryString();
 
         $departments = User::getContractDepartments();
         $statuses = Contract::getStatuses();

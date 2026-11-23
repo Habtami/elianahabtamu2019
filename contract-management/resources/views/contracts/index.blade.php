@@ -35,92 +35,174 @@
     .table-container {
         background: white;
         border-radius: 0.75rem;
-        border: 1px solid #E5E7EB;
+        border: 1px solid #F3F4F6;
         overflow: hidden;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
 
     .table-header {
-        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-        border-bottom: 2px solid #E5E7EB;
+        background: #F9FAFB;
+        border-bottom: 1px solid #E5E7EB;
     }
 
-    .table-row {
-        border-bottom: 1px solid #F1F5F9;
-        transition: all 0.2s ease;
+    .contracts-table {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
     }
 
-    .table-row:hover {
-        background: linear-gradient(135deg, #FAFBFC 0%, #F8FAFC 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .table-cell {
-        padding: 1.25rem 1rem;
+    .table-header th {
+        padding: 0.75rem 0.625rem;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #6B7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         text-align: left;
         vertical-align: middle;
     }
 
+    .table-header th.text-right {
+        text-align: right;
+    }
+
+    .table-header th.text-center {
+        text-align: center;
+    }
+
+    .table-th-sort {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .table-th-sort:hover {
+        background: #F3F4F6;
+    }
+
+    .sort-arrow {
+        font-size: 9px;
+    }
+
+    @media (max-width: 1400px) {
+        .table-header th {
+            padding: 0.75rem 0.375rem;
+            letter-spacing: 0;
+        }
+
+        .table-cell {
+            padding: 0.75rem 0.4375rem;
+        }
+
+        .sort-arrow {
+            font-size: 8px;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .table-header th {
+            padding: 0.625rem 0.25rem;
+            font-size: 9px;
+        }
+
+        .table-cell {
+            padding: 0.625rem 0.3125rem;
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .table-header th {
+            white-space: normal;
+            line-height: 1.15;
+        }
+    }
+
+    .table-row {
+        border-bottom: 1px solid #F3F4F6;
+        transition: background-color 0.15s ease;
+    }
+
+    .table-row:last-child {
+        border-bottom: none;
+    }
+
+    .table-row:hover {
+        background: #F9FAFB;
+    }
+
+    .table-cell {
+        padding: 0.75rem 0.625rem;
+        text-align: left;
+        vertical-align: middle;
+        overflow: hidden;
+        min-width: 0;
+    }
+
+    .table-cell.text-right {
+        text-align: right;
+    }
+
+    .table-cell.text-center {
+        text-align: center;
+    }
+
     .status-badge {
-        font-size: 0.75rem;
-        padding: 0.375rem 0.875rem;
+        font-size: 0.6875rem;
+        padding: 0.125rem 0.5rem;
         border-radius: 9999px;
-        font-weight: 700;
+        font-weight: 500;
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
+        border-width: 1px;
+        border-style: solid;
+        line-height: 1.25;
+        white-space: nowrap;
+    }
+
+    .filter-card {
+        background: #ffffff;
+        border: 1px solid #F3F4F6;
+        border-radius: 0.75rem;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
 
-    .search-input {
-        border: 2px solid #E2E8F0;
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
-        width: 100%;
-        transition: all 0.3s ease;
-        background: white;
-        font-size: 0.875rem;
+    .filter-control {
+        border: 1px solid #D1D5DB;
+        border-radius: 0.5rem;
+        background: #ffffff;
     }
 
-    .search-input:focus {
+    .filter-control:focus {
         outline: none;
-        border-color: var(--epss-blue);
-        box-shadow: 0 0 0 3px rgba(28, 117, 188, 0.1);
-        transform: translateY(-1px);
+        border-color: #3B82F6;
     }
 
-    .filter-select {
-        border: 2px solid #E2E8F0;
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
-        background: white;
-        color: #374151;
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
-        cursor: pointer;
+    .filter-pill {
+        border: 1px solid #BBF7D0;
+        border-radius: 9999px;
     }
 
-    .filter-select:focus {
-        outline: none;
-        border-color: var(--epss-blue);
-        box-shadow: 0 0 0 3px rgba(28, 117, 188, 0.1);
-        transform: translateY(-1px);
+    body.dark-theme .filter-card {
+        background: #111a2b;
+        border-color: #1e293b;
     }
 
-    .filter-tag {
-        background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
-        border: 1px solid #93C5FD;
-        color: #1E40AF;
-        font-weight: 600;
-        transition: all 0.2s ease;
+    body.dark-theme .filter-control {
+        background-color: #0f1a2c;
+        border-color: #334155;
+        color: #e2e8f0;
     }
 
-    .filter-tag:hover {
-        background: linear-gradient(135deg, #BFDBFE 0%, #93C5FD 100%);
-        transform: translateY(-1px);
+    body.dark-theme .filter-control::placeholder {
+        color: #64748b;
+    }
+
+    body.dark-theme .filter-pill {
+        background-color: #122b22;
+        border-color: #166534;
+        color: #86efac;
     }
 
     .action-button {
@@ -143,40 +225,38 @@
     }
 
     .contract-link {
-        transition: all 0.2s ease;
-        position: relative;
+        transition: color 0.2s ease;
     }
 
     .contract-link:hover {
         color: var(--epss-blue) !important;
-        transform: translateX(2px);
     }
 
-    .page-link {
-        border-radius: 0.5rem;
-        margin: 0 0.125rem;
-        transition: all 0.2s ease;
+    body.dark-theme .table-header th {
+        color: #94a3b8;
     }
 
-    .page-link:hover {
-        background: var(--epss-blue);
-        color: white;
-        transform: translateY(-1px);
+    body.dark-theme .table-th-sort:hover {
+        background: #1b2a45;
     }
 
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 1rem;
+    body.dark-theme .table-row:hover {
+        background: #16233a;
     }
 
-    .page-item {
-        margin: 0 0.125rem;
+    body.dark-theme .table-footer {
+        background: #111a2b;
+        border-color: #1e293b;
     }
 
-    .page-item.active .page-link {
-        background: var(--epss-blue);
-        border-color: var(--epss-blue);
+    body.dark-theme .table-footer .bg-blue-50 {
+        background: #1e3a5f !important;
+        border-color: #1d4ed8 !important;
+        color: #93c5fd !important;
+    }
+
+    body.dark-theme .table-footer a:hover {
+        background: #16233a;
     }
 </style>
 @endsection
@@ -232,40 +312,37 @@
         </div>
 
         <!-- Spacer -->
-        <div class="mb-12"></div>
+        <div class="mb-6"></div>
 
         <!-- Header -->
-        <div class="content-card p-8 mb-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div class="mb-6 lg:mb-0">
-                    <div class="flex items-center mb-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
-                            <i class="fas fa-file-contract text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-1">All Contracts</h1>
-                            <div class="h-1 w-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
-                        </div>
+        <div class="content-card px-5 py-4 mb-5">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md shrink-0">
+                        <i class="fas fa-file-contract text-white"></i>
                     </div>
-                    <p class="text-gray-600 text-lg">Manage and monitor all contracts in the system with advanced filtering and search capabilities</p>
+                    <div class="min-w-0">
+                        <h1 class="text-xl font-semibold text-gray-800 leading-tight">All Contracts</h1>
+                        <p class="text-sm text-gray-500 truncate">Manage and monitor all contracts in the system</p>
+                    </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <a href="{{ route('contracts.export-list', request()->only(['search', 'status', 'department'])) }}"
-                       class="action-button bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white flex items-center justify-center">
+                       class="inline-flex items-center rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-green-700">
                         <i class="fas fa-file-excel mr-2"></i>
                         Export Excel
                     </a>
                     @if(auth()->user()->canCreateContracts())
                     <a href="{{ route('contracts.create') }}"
-                       class="action-button bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex items-center justify-center">
+                       class="inline-flex items-center rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">
                         <i class="fas fa-plus mr-2"></i>
                         New Contract
                     </a>
                     @endif
                     @if(in_array(auth()->user()->role, ['admin','finance','gs_manager','cmd_manager']))
                     <a href="{{ route('contracts.reports') }}"
-                       class="action-button bg-white border-2 border-blue-500 text-blue-600 hover:bg-blue-50 flex items-center justify-center">
+                       class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100">
                         <i class="fas fa-chart-bar mr-2"></i>
                         View Reports
                     </a>
@@ -274,140 +351,109 @@
             </div>
         </div>
 
-        <!-- Search and Filters -->
-        <div class="mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <!-- Search -->
-                <div class="md:col-span-2">
-                    <form method="GET" action="{{ route('contracts.index') }}">
-                        <div class="relative">
-                            <input type="text"
-                                   name="search"
-                                   value="{{ request('search') }}"
-                                   placeholder="Search by contract name..."
-                                   class="search-input">
-                            <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </form>
+        <!-- Filters & Search -->
+        <form method="GET" action="{{ route('contracts.index') }}" id="contractFilterForm" class="filter-card p-4 mb-4">
+            @if(request('sort_by'))
+            <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
+            @endif
+            @if(request('sort_direction'))
+            <input type="hidden" name="sort_direction" value="{{ request('sort_direction') }}">
+            @endif
+            @if(request('per_page'))
+            <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+            @endif
+
+            <!-- Top Row: Search on the left, dropdowns on the right -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="relative w-full md:w-96">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+                    <input type="text"
+                           id="contractSearch"
+                           name="search"
+                           value="{{ request('search') }}"
+                           placeholder="Search by contract name..."
+                           autocomplete="off"
+                           class="filter-control w-full pl-9 pr-4 py-2 text-sm transition-shadow">
                 </div>
 
-                <!-- Status Filter -->
-                <div>
-                    <form method="GET" action="{{ route('contracts.index') }}">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <input type="hidden" name="department" value="{{ request('department') }}">
-                        <input type="hidden" name="per_page" value="{{ request('per_page', 5) }}">
-                        <select name="status"
-                                onchange="this.form.submit()"
-                                class="filter-select w-full">
-                            <option value="">All Status</option>
-                            @foreach($statuses as $key => $value)
-                                <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
-                                    {{ $value }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </form>
-                </div>
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <select name="status"
+                            onchange="this.form.submit()"
+                            class="filter-control w-full md:w-auto px-3 py-2 text-sm cursor-pointer">
+                        <option value="">All Status</option>
+                        @foreach($statuses as $key => $value)
+                            <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
+                                {{ $value }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                <!-- Department Filter -->
-                @if(auth()->user()->canViewAllContracts())
-                <div>
-                    <form method="GET" action="{{ route('contracts.index') }}">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                        <input type="hidden" name="per_page" value="{{ request('per_page', 5) }}">
-                        <select name="department"
-                                onchange="this.form.submit()"
-                                class="filter-select w-full">
-                            <option value="">All Departments</option>
-                            @foreach($departments as $key => $value)
-                                <option value="{{ $key }}" {{ request('department') == $key ? 'selected' : '' }}>
-                                    {{ $value }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </form>
-                </div>
-                @endif
-
-                <!-- Per Page -->
-                <div>
-                    <form method="GET" action="{{ route('contracts.index') }}">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                        <input type="hidden" name="department" value="{{ request('department') }}">
-                        <input type="hidden" name="page" value="1">
-                        <select name="per_page"
-                                onchange="this.form.submit()"
-                                class="filter-select w-full">
-                            <option value="5" {{ request('per_page', 5) == '5' ? 'selected' : '' }}>5 per page</option>
-                            <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 per page</option>
-                            <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 per page</option>
-                            <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 per page</option>
-                            <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 per page</option>
-                        </select>
-                    </form>
+                    @if(auth()->user()->canViewAllContracts())
+                    <select name="department"
+                            onchange="this.form.submit()"
+                            class="filter-control w-full md:w-auto px-3 py-2 text-sm cursor-pointer">
+                        <option value="">All Departments</option>
+                        @foreach($departments as $key => $value)
+                            <option value="{{ $key }}" {{ request('department') == $key ? 'selected' : '' }}>
+                                {{ $value }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @endif
                 </div>
             </div>
-            
-            <!-- Active Filters -->
-            @if(request()->has('search') || request()->has('status') || request()->has('department'))
-            <div class="mt-6 flex flex-wrap gap-3 items-center">
-                <span class="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
-                    <i class="fas fa-filter mr-1"></i>
-                    Active filters:
+
+            <!-- Bottom Row: Active filters & Clear all -->
+            @if(request()->filled('search')
+                || (request()->filled('status') && array_key_exists(request('status'), $statuses))
+                || (request()->filled('department') && auth()->user()->canViewAllContracts() && array_key_exists(request('department'), $departments)))
+            <div class="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-100">
+                <span class="text-sm text-gray-500 flex items-center gap-1.5">
+                    <i class="fas fa-filter text-sm"></i> Active:
                 </span>
 
-                @if(request()->has('search'))
-                <span class="filter-tag inline-flex items-center px-4 py-2 rounded-full text-sm">
-                    <i class="fas fa-search mr-2"></i>
+                @if(request()->filled('search'))
+                <span class="filter-pill inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-green-50 text-green-700">
                     Search: {{ request('search') }}
                     <a href="{{ route('contracts.index', array_merge(request()->except('search'), ['page' => 1])) }}"
-                       class="ml-3 text-blue-700 hover:text-blue-900 transition-colors">
-                        <i class="fas fa-times-circle"></i>
+                       class="ml-0.5 hover:text-green-900 transition-colors" title="Remove filter">
+                        <i class="fas fa-times text-xs"></i>
                     </a>
                 </span>
                 @endif
 
-                @if(request()->has('status'))
-                <span class="filter-tag inline-flex items-center px-4 py-2 rounded-full text-sm bg-gradient-to-r from-green-100 to-emerald-100 border-green-300 text-green-800">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Status: {{ $statuses[request('status')] ?? request('status') }}
+                @if(request()->filled('status') && array_key_exists(request('status'), $statuses))
+                <span class="filter-pill inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-green-50 text-green-700">
+                    Status: {{ $statuses[request('status')] }}
                     <a href="{{ route('contracts.index', array_merge(request()->except('status'), ['page' => 1])) }}"
-                       class="ml-3 text-green-700 hover:text-green-900 transition-colors">
-                        <i class="fas fa-times-circle"></i>
+                       class="ml-0.5 hover:text-green-900 transition-colors" title="Remove filter">
+                        <i class="fas fa-times text-xs"></i>
                     </a>
                 </span>
                 @endif
 
-                @if(request()->has('department') && auth()->user()->canViewAllContracts())
-                <span class="filter-tag inline-flex items-center px-4 py-2 rounded-full text-sm bg-gradient-to-r from-purple-100 to-violet-100 border-purple-300 text-purple-800">
-                    <i class="fas fa-building mr-2"></i>
-                    Department: {{ $departments[request('department')] ?? request('department') }}
+                @if(request()->filled('department') && auth()->user()->canViewAllContracts() && array_key_exists(request('department'), $departments))
+                <span class="filter-pill inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-green-50 text-green-700">
+                    Department: {{ $departments[request('department')] }}
                     <a href="{{ route('contracts.index', array_merge(request()->except('department'), ['page' => 1])) }}"
-                       class="ml-3 text-purple-700 hover:text-purple-900 transition-colors">
-                        <i class="fas fa-times-circle"></i>
+                       class="ml-0.5 hover:text-green-900 transition-colors" title="Remove filter">
+                        <i class="fas fa-times text-xs"></i>
                     </a>
                 </span>
                 @endif
 
                 <a href="{{ route('contracts.index') }}"
-                   class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-full">
-                    <i class="fas fa-trash-alt mr-1"></i>
-                    Clear all filters
+                   class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors ml-1">
+                    Clear all
                 </a>
             </div>
             @endif
-        </div>
+        </form>
 
         <!-- Contracts Table -->
         <div class="table-container">
             @if($contracts->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="contracts-table text-left">
                     <thead class="table-header">
                         @php
                             $sortLink = function (string $column, string $label, ?string $icon = null) use ($sortBy, $sortDirection) {
@@ -421,95 +467,97 @@
                                 if ($sortBy === $column) {
                                     $sortIcon = ($sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') . ' text-blue-600';
                                 }
-                                $html = '<a href="' . e($url) . '" class="inline-flex items-center hover:text-blue-600">';
+                                $html = '<a href="' . e($url) . '" class="inline-flex max-w-full items-center gap-1 transition-colors hover:text-gray-700">';
                                 if ($icon) {
-                                    $html .= '<i class="fas ' . e($icon) . ' mr-1"></i>';
+                                    $html .= '<i class="fas ' . e($icon) . ' mr-1 shrink-0"></i>';
                                 }
-                                $html .= e($label) . ' <i class="fas ' . $sortIcon . ' ml-1"></i></a>';
+                                $html .= '<span class="min-w-0 truncate">' . e($label) . '</span>';
+                                $html .= '<i class="fas ' . $sortIcon . ' sort-arrow shrink-0"></i></a>';
                                 return $html;
                             };
                         @endphp
                         <tr>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('id', 'ID') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('name', 'Contract Name') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('supplier_name', 'Supplier Name') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">Created By</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('start_date', 'Start Date') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('end_date', 'End Date') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('performance_guarantee_amount', 'PG Amount') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">PG End Date</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">{!! $sortLink('status', 'Status') !!}</th>
-                            <th class="table-cell font-semibold text-gray-700 whitespace-nowrap">Actions</th>
+                            <th class="table-th-sort" style="width:5%">{!! $sortLink('id', 'ID') !!}</th>
+                            <th class="table-th-sort" style="width:18%">{!! $sortLink('name', 'Contract Name') !!}</th>
+                            <th class="table-th-sort" style="width:9.5%">{!! $sortLink('supplier_name', 'Supplier') !!}</th>
+                            <th style="width:11%">Created By</th>
+                            <th class="table-th-sort" style="width:9.5%">{!! $sortLink('start_date', 'Start Date') !!}</th>
+                            <th class="table-th-sort" style="width:9.5%">{!! $sortLink('end_date', 'End Date') !!}</th>
+                            <th class="table-th-sort text-right" style="width:9%">{!! $sortLink('performance_guarantee_amount', 'PG Amount') !!}</th>
+                            <th style="width:9%">PG End Date</th>
+                            <th class="table-th-sort text-center" style="width:8%">{!! $sortLink('status', 'Status') !!}</th>
+                            <th class="text-right" style="width:11.5%">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($contracts as $contract)
                         <tr class="table-row">
-                            <td class="table-cell text-gray-600">#{{ $contract->id }}</td>
+                            <td class="table-cell text-xs text-gray-500 font-mono whitespace-nowrap">#{{ $contract->id }}</td>
                             <td class="table-cell">
                                 <a href="{{ route('contracts.show', $contract) }}"
-                                   class="contract-link font-semibold text-gray-800 block">
-                                    {{ \Illuminate\Support\Str::limit($contract->name, 30) }}
+                                   title="{{ $contract->name }}"
+                                   class="contract-link block truncate text-sm font-semibold text-gray-900">
+                                    {{ $contract->name }}
                                 </a>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    {{ \Illuminate\Support\Str::limit($contract->description, 40) }}
+                                @if($contract->description)
+                                <p class="mt-0.5 truncate text-xs text-gray-500" title="{{ $contract->description }}">
+                                    {{ $contract->description }}
                                 </p>
-                            </td>
-                            <td class="table-cell">
-                                <span class="font-medium text-gray-800">{{ $contract->supplier_name ?? 'N/A' }}</span>
-                            </td>
-                            <td class="table-cell">
-                                <div class="flex flex-col">
-                                    <span class="font-medium text-gray-800">{{ $contract->creator->name }}</span>
-                                    <span class="text-xs text-gray-500">{{ $contract->creator->getRoleDisplayName() }}</span>
-                                </div>
-                            </td>
-                            <td class="table-cell text-gray-600">{{ $contract->start_date->format('Y-m-d') }}</td>
-                            <td class="table-cell text-gray-600">
-                                {{ $contract->end_date->format('Y-m-d') }}
-                                @if($contract->extended_count > 0)
-                                <span class="text-xs text-yellow-600 font-medium ml-1">Extended {{ $contract->extended_count }}x</span>
                                 @endif
                             </td>
-                            <td class="table-cell text-gray-600">
+                            <td class="table-cell">
+                                <span class="block truncate text-sm text-gray-700" title="{{ $contract->supplier_name }}">{{ $contract->supplier_name ?? 'N/A' }}</span>
+                            </td>
+                            <td class="table-cell">
+                                <div class="block truncate text-sm text-gray-900" title="{{ $contract->creator->name }}">{{ $contract->creator->name }}</div>
+                                <div class="block truncate text-xs text-gray-400" title="{{ $contract->creator->getRoleDisplayName() }}">{{ $contract->creator->getRoleDisplayName() }}</div>
+                            </td>
+                            <td class="table-cell text-xs text-gray-600 whitespace-nowrap">{{ $contract->start_date->format('Y-m-d') }}</td>
+                            <td class="table-cell text-xs text-gray-600 whitespace-nowrap">
+                                {{ $contract->end_date->format('Y-m-d') }}
+                                @if($contract->extended_count > 0)
+                                <span class="mt-0.5 block truncate text-[10px] font-medium text-amber-600" title="Extended {{ $contract->extended_count }}x">Extended {{ $contract->extended_count }}x</span>
+                                @endif
+                            </td>
+                            <td class="table-cell text-right text-xs font-medium text-gray-900 whitespace-nowrap">
                                 @if($contract->performance_guarantee_amount)
                                 ${{ number_format($contract->performance_guarantee_amount, 2) }}
                                 @else
                                 <span class="text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="table-cell text-gray-600">
+                            <td class="table-cell text-xs text-gray-600 whitespace-nowrap">
                                 @if($contract->performance_guarantee_end_date)
                                 {{ $contract->performance_guarantee_end_date->format('Y-m-d') }}
                                 @else
                                 <span class="text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="table-cell">
+                            <td class="table-cell text-center whitespace-nowrap">
                                 <span class="status-badge
-                                    @if($contract->status === 'active') bg-green-100 text-green-800
-                                    @elseif($contract->status === 'expiring') bg-yellow-100 text-yellow-800
-                                    @elseif($contract->status === 'expired') bg-red-100 text-red-800
-                                    @else bg-gray-100 text-gray-800 @endif">
+                                    @if($contract->status === 'active') bg-emerald-50 text-emerald-700 border-emerald-100
+                                    @elseif($contract->status === 'expiring') bg-amber-50 text-amber-700 border-amber-100
+                                    @elseif($contract->status === 'expired') bg-red-50 text-red-700 border-red-100
+                                    @else bg-gray-50 text-gray-600 border-gray-200 @endif">
                                     {{ ucfirst($contract->status) }}
                                 </span>
                                 @if($contract->status === 'expiring')
-                                <p class="text-xs text-yellow-600 mt-1">
+                                <div class="mt-1 truncate text-[10px] text-amber-600" title="{{ $contract->getDaysUntilContractEnd() }} days left">
                                     {{ $contract->getDaysUntilContractEnd() }} days left
-                                </p>
+                                </div>
                                 @endif
                             </td>
-                            <td class="table-cell">
-                                <div class="flex space-x-2">
+                            <td class="table-cell text-right">
+                                <div class="flex items-center justify-end gap-0.5">
                                     <a href="{{ route('contracts.show', $contract) }}"
-                                       class="text-[#1C75BC] hover:text-[#1664a0]"
-                                       title="View">
+                                       class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                       title="View Contract">
                                         <i class="fas fa-eye"></i>
                                     </a>
 
                                     @if($contract->canUserEdit(auth()->user()))
                                     <a href="{{ route('contracts.edit', $contract) }}"
-                                       class="text-green-600 hover:text-green-800"
+                                       class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -523,7 +571,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                class="text-red-600 hover:text-red-800"
+                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                 title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -535,6 +583,65 @@
                         @endforeach
                     </tbody>
                 </table>
+
+            <!-- Pagination Footer -->
+            @php
+                $paginator = $contracts->appends(request()->query());
+                $currentPage = $paginator->currentPage();
+                $lastPage = $paginator->lastPage();
+                $visiblePages = collect(range(1, max($lastPage, 1)))->filter(function ($page) use ($currentPage, $lastPage) {
+                    return $page === 1 || $page === $lastPage || abs($page - $currentPage) <= 1;
+                });
+                $previousVisiblePage = null;
+            @endphp
+            <div class="table-footer bg-white border-t border-gray-200 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-sm text-gray-500">
+                    Showing <span class="font-medium text-gray-900">{{ $paginator->firstItem() }}</span>
+                    to <span class="font-medium text-gray-900">{{ $paginator->lastItem() }}</span>
+                    of <span class="font-medium text-gray-900">{{ $paginator->total() }}</span> results
+                </div>
+
+                @if($paginator->hasPages())
+                <nav class="flex items-center gap-1" aria-label="Pagination">
+                    @if($paginator->onFirstPage())
+                    <span class="p-2 rounded-lg text-gray-300 cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                        <span class="sr-only">Previous</span>
+                    </span>
+                    @else
+                    <a href="{{ $paginator->previousPageUrl() }}" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-chevron-left"></i>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    @endif
+
+                    @foreach($visiblePages as $page)
+                        @if($previousVisiblePage !== null && $page - $previousVisiblePage > 1)
+                        <span class="px-2 text-gray-400">...</span>
+                        @endif
+
+                        @if($page === $currentPage)
+                        <span class="px-3.5 py-1.5 text-sm font-medium bg-blue-50 text-blue-600 rounded-lg border border-blue-100">{{ $page }}</span>
+                        @else
+                        <a href="{{ $paginator->url($page) }}" class="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">{{ $page }}</a>
+                        @endif
+
+                        @php $previousVisiblePage = $page; @endphp
+                    @endforeach
+
+                    @if($paginator->hasMorePages())
+                    <a href="{{ $paginator->nextPageUrl() }}" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-chevron-right"></i>
+                        <span class="sr-only">Next</span>
+                    </a>
+                    @else
+                    <span class="p-2 rounded-lg text-gray-300 cursor-not-allowed">
+                        <i class="fas fa-chevron-right"></i>
+                        <span class="sr-only">Next</span>
+                    </span>
+                    @endif
+                </nav>
+                @endif
             </div>
 
             @else
@@ -563,13 +670,6 @@
             </div>
             @endif
         </div>
-
-        <!-- Pagination -->
-        @if($contracts->count() > 0)
-        <div class="mt-6 flex justify-center">
-            {{ $contracts->appends(request()->query())->links() }}
-        </div>
-        @endif
 
 
     </div>
@@ -702,5 +802,27 @@ function renderStatSummary(data) {
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') closeStatModal();
 });
+
+(function () {
+    const form = document.getElementById('contractFilterForm');
+    const input = document.getElementById('contractSearch');
+    if (!form || !input) return;
+
+    let timer = null;
+    let appliedValue = input.value;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            if (input.value === appliedValue) return;
+            appliedValue = input.value;
+            form.submit();
+        }, 600);
+    });
+
+    form.addEventListener('submit', function () {
+        clearTimeout(timer);
+    });
+})();
 </script>
 @endsection

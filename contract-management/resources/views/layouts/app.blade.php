@@ -768,38 +768,6 @@
                     @endif
 
                     @php
-                        $showInsights = in_array($navUser->role, ['super_admin', 'admin', 'finance', 'gs_manager', 'cmd_manager'], true)
-                            || $navUser->canViewProcurementReport();
-                    @endphp
-                    @if($showInsights)
-                    <div class="sidebar-section-label">Insights</div>
-                    @endif
-
-                    @if(in_array($navUser->role, ['super_admin', 'admin', 'finance', 'gs_manager', 'cmd_manager'], true))
-                    <div class="sidebar-menu-item">
-                        <a href="{{ route('contracts.reports') }}" class="{{ request()->routeIs('contracts.reports') ? 'active' : '' }}" data-tooltip="Reports">
-                            <i class="fas fa-chart-column"></i><span>Reports</span>
-                        </a>
-                    </div>
-                    @endif
-
-                    @if($navUser->canViewProcurementReport())
-                    <div class="sidebar-menu-item">
-                        <a href="{{ route('procurement-report.index') }}" class="{{ request()->routeIs('procurement-report.*') ? 'active' : '' }}" data-tooltip="Procurement Report">
-                            <i class="fas fa-chart-pie"></i><span>Procurement Report</span>
-                        </a>
-                    </div>
-                    @endif
-
-                    @if(in_array($navUser->role, ['super_admin', 'admin', 'finance', 'gs_manager', 'cmd_manager', 'general_service', 'cmd'], true))
-                    <div class="sidebar-menu-item">
-                        <a href="{{ route('suppliers.performance-evaluation') }}" class="{{ request()->routeIs('suppliers.performance-evaluation') ? 'active' : '' }}" data-tooltip="Supplier Performance">
-                            <i class="fas fa-people-arrows"></i><span>Supplier Performance</span>
-                        </a>
-                    </div>
-                    @endif
-
-                    @php
                         $showOperations = $navUser->canAccessTireTracking()
                             || $navUser->canViewBatteries()
                             || $navUser->canViewPurchaseOrders()
@@ -867,6 +835,38 @@
                             @if($alertCount > 0)
                             <span class="sidebar-badge">{{ $alertCount }}</span>
                             @endif
+                        </a>
+                    </div>
+                    @endif
+
+                    @php
+                        $showInsights = in_array($navUser->role, ['super_admin', 'admin', 'finance', 'gs_manager', 'cmd_manager'], true)
+                            || $navUser->canViewProcurementReport();
+                    @endphp
+                    @if($showInsights)
+                    <div class="sidebar-section-label">Insights</div>
+                    @endif
+
+                    @if(in_array($navUser->role, ['super_admin', 'admin', 'finance', 'gs_manager', 'cmd_manager'], true))
+                    <div class="sidebar-menu-item">
+                        <a href="{{ route('contracts.reports') }}" class="{{ request()->routeIs('contracts.reports') ? 'active' : '' }}" data-tooltip="Reports">
+                            <i class="fas fa-chart-column"></i><span>Reports</span>
+                        </a>
+                    </div>
+                    @endif
+
+                    @if($navUser->canViewProcurementReport())
+                    <div class="sidebar-menu-item">
+                        <a href="{{ route('procurement-report.index') }}" class="{{ request()->routeIs('procurement-report.*') ? 'active' : '' }}" data-tooltip="Procurement Report">
+                            <i class="fas fa-chart-pie"></i><span>Procurement Report</span>
+                        </a>
+                    </div>
+                    @endif
+
+                    @if(in_array($navUser->role, ['super_admin', 'admin', 'finance', 'gs_manager', 'cmd_manager', 'general_service', 'cmd'], true))
+                    <div class="sidebar-menu-item">
+                        <a href="{{ route('suppliers.performance-evaluation') }}" class="{{ request()->routeIs('suppliers.performance-evaluation') ? 'active' : '' }}" data-tooltip="Supplier Performance">
+                            <i class="fas fa-people-arrows"></i><span>Supplier Performance</span>
                         </a>
                     </div>
                     @endif

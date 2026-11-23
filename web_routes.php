@@ -8,6 +8,7 @@ Route::get('/', function () {
 });
 
 // Contract Management Routes
+Route::get('/contracts/data', [ContractController::class, 'data'])->name('contracts.data');
 Route::resource('contracts', ContractController::class);
 
 // Contract Alerts

@@ -30,7 +30,11 @@ class ContractController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $contracts = $query->orderBy('created_at', 'desc')->paginate(15);
+        // keep server pagination for non-AJAX callers, but default per-page is 5
+        $perPage = $request->query('per_page', 5);
+        $contracts = $query->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->appends($request->except('page'));
 
         // Check for alerts
         foreach ($contracts as $contract) {
@@ -39,6 +43,48 @@ class ContractController extends Controller
         }
 
         return view('contracts.index', compact('contracts'));
+    }
+
+    /**
+     * Return JSON data for DataTables (client-side table)
+     */
+    public function data(Request $request)
+    {
+        $query = Contract::with('creator');
+
+        // same filters as index
+        if ($request->has('alert_type')) {
+            if ($request->alert_type === 'contract_end') {
+                $query->whereNotNull('end_date');
+            } elseif ($request->alert_type === 'performance_guarantee') {
+                $query->whereNotNull('performance_guarantee_end_date');
+            }
+        }
+
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $contracts = $query->orderBy('created_at', 'desc')->get();
+
+        $data = $contracts->map(function ($contract) {
+            $contract->contract_alert = $contract->shouldAlertContractEndDate();
+            $contract->pg_alert = $contract->shouldAlertPerformanceGuarantee();
+
+            return [
+                'id' => $contract->id,
+                'name' => $contract->name,
+                'start_date' => $contract->start_date ? $contract->start_date->format('Y-m-d') : null,
+                'end_date' => $contract->end_date ? $contract->end_date->format('Y-m-d') : null,
+                'performance_guarantee_amount' => $contract->performance_guarantee_amount ? number_format($contract->performance_guarantee_amount, 2) : 'N/A',
+                'performance_guarantee_end_date' => $contract->performance_guarantee_end_date ? $contract->performance_guarantee_end_date->format('Y-m-d') : 'N/A',
+                'status' => (!$contract->contract_alert && !$contract->pg_alert) ? 'Active' : ($contract->contract_alert ? 'Contract Expiring' : 'PG Expiring'),
+                'view_url' => route('contracts.show', $contract),
+                'edit_url' => route('contracts.edit', $contract),
+            ];
+        });
+
+        return response()->json(['data' => $data]);
     }
 
     /**
