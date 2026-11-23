@@ -148,7 +148,7 @@ class ForcePasswordChangeTest extends TestCase
 
     public function test_reset_command_sets_configured_default_for_all_users(): void
     {
-        $this->assertSame('epss1234', config('app.default_password'));
+        config(['app.default_password' => 'Configured@2026']);
 
         $first = $this->flaggedUser();
         $second = User::create([

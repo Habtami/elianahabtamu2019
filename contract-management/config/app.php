@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default (Temporary) Password
+    |--------------------------------------------------------------------------
+    |
+    | Password assigned to newly created users and restored on password
+    | reset. Users holding it are forced to change it on their next login.
+    |
+    */
+
+    'default_password' => env('DEFAULT_PASSWORD'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
