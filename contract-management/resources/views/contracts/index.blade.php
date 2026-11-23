@@ -191,7 +191,7 @@
                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                 <div>
                     <p class="kpi-title">Total Contracts</p>
-                    <p class="kpi-value">{{ $contracts->total() }}</p>
+                    <p class="kpi-value">{{ $totalContracts }}</p>
                     <p class="kpi-subtitle">All contracts in system</p>
                 </div>
                 <div class="kpi-icon"><i class="fas fa-file-contract"></i></div>

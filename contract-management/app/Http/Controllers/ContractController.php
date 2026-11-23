@@ -43,11 +43,13 @@ class ContractController extends Controller
             $sortDirection = 'desc';
         }
 
-        // Get counts before pagination
-        $statsQuery = clone $query;
-        $totalActive = (clone $statsQuery)->where('status', Contract::STATUS_ACTIVE)->count();
-        $totalExpiring = (clone $statsQuery)->where('status', Contract::STATUS_EXPIRING)->count();
-        $totalExpired = (clone $statsQuery)->where('status', Contract::STATUS_EXPIRED)->count();
+        // Summary cards always reflect the full set allowed for the user,
+        // matching the /dashboard/summary endpoints behind the detail modals.
+        $statsBase = Contract::forUser($user);
+        $totalContracts = (clone $statsBase)->count();
+        $totalActive = (clone $statsBase)->where('status', Contract::STATUS_ACTIVE)->count();
+        $totalExpiring = (clone $statsBase)->where('status', Contract::STATUS_EXPIRING)->count();
+        $totalExpired = (clone $statsBase)->where('status', Contract::STATUS_EXPIRED)->count();
 
         $perPage = $request->get('per_page', 5);
         $allowedPerPage = [5, 10, 25, 50, 100];
@@ -65,7 +67,7 @@ class ContractController extends Controller
         $statuses = Contract::getStatuses();
 
         return view('contracts.index', compact(
-            'contracts', 'departments', 'statuses', 'totalActive', 'totalExpiring', 'totalExpired',
+            'contracts', 'departments', 'statuses', 'totalContracts', 'totalActive', 'totalExpiring', 'totalExpired',
             'sortBy', 'sortDirection', 'perPage'
         ));
     }
