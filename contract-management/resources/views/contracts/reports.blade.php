@@ -418,7 +418,7 @@ function renderStatSummary(data) {
         return;
     }
 
-    list.innerHTML = items.map(function (item) {
+    list.innerHTML = items.map(function (item, index) {
         const title = item.url
             ? '<a href="' + escapeStatHtml(item.url) + '" class="font-medium text-[#1C75BC] hover:underline">' + escapeStatHtml(item.title) + '</a>'
             : '<span class="font-medium text-gray-800">' + escapeStatHtml(item.title) + '</span>';
@@ -428,8 +428,9 @@ function renderStatSummary(data) {
                 (statTones[item.tone] || statTones.gray) + '">' + escapeStatHtml(item.badge) + '</span>'
             : '';
 
-        return '<div class="flex items-start justify-between gap-3 py-2.5">' +
-            '<div class="min-w-0">' + title +
+        return '<div class="flex items-start gap-3 py-2.5">' +
+            '<div class="w-6 shrink-0 pt-0.5 text-right text-xs font-semibold text-gray-400">' + (index + 1) + '</div>' +
+            '<div class="min-w-0 flex-1">' + title +
             (item.subtitle ? '<div class="text-sm text-gray-600 truncate">' + escapeStatHtml(item.subtitle) + '</div>' : '') +
             (item.meta ? '<div class="text-xs text-gray-500 mt-0.5">' + escapeStatHtml(item.meta) + '</div>' : '') +
             '</div>' +
