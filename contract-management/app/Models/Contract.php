@@ -104,6 +104,12 @@ class Contract extends Model
         return MaterialGroup::activeNames();
     }
 
+    // Contract types available for contracts
+    public static function getContractTypes()
+    {
+        return ContractType::activeNames();
+    }
+
     // Relationship with supplier
     public function supplier()
     {

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
+use App\Models\ContractType;
+use App\Models\Department;
+use App\Models\MaterialGroup;
 use App\Models\User;
 use App\Models\Supplier;
 use App\Models\ActivityLog;
@@ -119,8 +122,157 @@ class ContractController extends Controller
         }
 
         $materialGroups = Contract::getMaterialGroups();
+        $contractTypes = Contract::getContractTypes();
 
-        return view('contracts.create', compact('departments', 'materialGroups'));
+        return view('contracts.create', compact('departments', 'materialGroups', 'contractTypes'));
+    }
+
+    public function storeMaterialGroup(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user->canCreateContracts()) {
+            return response()->json(['message' => 'You are not authorized to register material groups.'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:191',
+        ], [
+            'name.required' => 'Enter the material group name.',
+        ]);
+
+        $name = trim(preg_replace('/\s+/', ' ', $validated['name']));
+
+        $group = MaterialGroup::whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
+
+        if ($group) {
+            if (! $group->is_active) {
+                $group->update(['is_active' => true]);
+            }
+        } else {
+            $group = MaterialGroup::create([
+                'name' => $name,
+                'is_active' => true,
+                'sort_order' => ((int) MaterialGroup::max('sort_order')) + 1,
+            ]);
+        }
+
+        return response()->json([
+            'name' => $group->name,
+            'created' => $group->wasRecentlyCreated,
+            'message' => $group->wasRecentlyCreated
+                ? 'Material group registered.'
+                : 'That material group is already registered.',
+        ], $group->wasRecentlyCreated ? 201 : 200);
+    }
+
+    public function storeDepartment(Request $request)
+    {
+        $user = auth()->user();
+
+        $canManageAllDepartments = in_array($user->role, [
+            User::ROLE_SUPER_ADMIN,
+            User::ROLE_ADMIN,
+            User::ROLE_GS_MANAGER,
+            User::ROLE_CMD_MANAGER,
+        ], true);
+
+        if (! $canManageAllDepartments) {
+            return response()->json(['message' => 'You are not authorized to register departments.'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:191',
+        ], [
+            'name.required' => 'Enter the department name.',
+        ]);
+
+        $name = trim(preg_replace('/\s+/', ' ', $validated['name']));
+        $lookup = mb_strtolower($name);
+
+        foreach (User::getContractDepartments() as $key => $label) {
+            if (mb_strtolower((string) $key) === $lookup || mb_strtolower($label) === $lookup) {
+                return response()->json([
+                    'value' => (string) $key,
+                    'label' => $label,
+                    'created' => false,
+                    'message' => 'That department is already registered.',
+                ]);
+            }
+        }
+
+        $department = Department::whereRaw('LOWER(name) = ?', [$lookup])->first();
+
+        if ($department) {
+            if (! $department->is_active) {
+                $department->update(['is_active' => true]);
+            }
+        } else {
+            $department = Department::create([
+                'name' => $name,
+                'is_active' => true,
+                'sort_order' => ((int) Department::max('sort_order')) + 1,
+            ]);
+        }
+
+        return response()->json([
+            'value' => $department->name,
+            'label' => $department->name,
+            'created' => $department->wasRecentlyCreated,
+            'message' => $department->wasRecentlyCreated
+                ? 'Department registered.'
+                : 'That department is already registered.',
+        ], $department->wasRecentlyCreated ? 201 : 200);
+    }
+
+    public function storeContractType(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user->canCreateContracts()) {
+            return response()->json(['message' => 'You are not authorized to register contract types.'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:191',
+        ], [
+            'name.required' => 'Enter the contract type name.',
+        ]);
+
+        $name = trim(preg_replace('/\s+/', ' ', $validated['name']));
+        $lookup = mb_strtolower($name);
+
+        foreach (Contract::getContractTypes() as $type) {
+            if (mb_strtolower($type) === $lookup) {
+                return response()->json([
+                    'name' => $type,
+                    'created' => false,
+                    'message' => 'That contract type is already registered.',
+                ]);
+            }
+        }
+
+        $contractType = ContractType::whereRaw('LOWER(name) = ?', [$lookup])->first();
+
+        if ($contractType) {
+            if (! $contractType->is_active) {
+                $contractType->update(['is_active' => true]);
+            }
+        } else {
+            $contractType = ContractType::create([
+                'name' => $name,
+                'is_active' => true,
+                'sort_order' => ((int) ContractType::max('sort_order')) + 1,
+            ]);
+        }
+
+        return response()->json([
+            'name' => $contractType->name,
+            'created' => $contractType->wasRecentlyCreated,
+            'message' => $contractType->wasRecentlyCreated
+                ? 'Contract type registered.'
+                : 'That contract type is already registered.',
+        ], $contractType->wasRecentlyCreated ? 201 : 200);
     }
     
     public function store(Request $request)
@@ -139,8 +291,8 @@ class ContractController extends Controller
             'description' => 'nullable|string',
             'material_group' => ['required', 'string', Rule::in(Contract::getMaterialGroups())],
             'contract_amount' => 'nullable|numeric|min:0',
-            'department' => 'required|string',
-            'contract_type' => 'required|in:ICB,NCB',
+            'department' => ['required', 'string', Rule::in(array_keys(User::getContractDepartments()))],
+            'contract_type' => ['required', 'string', Rule::in(Contract::getContractTypes())],
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'alert_days' => 'required|integer|min:0',
@@ -150,6 +302,8 @@ class ContractController extends Controller
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
             'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
+        ], [
+            'end_date.after' => 'Invalid date sequence. Please enter a date after the previous date.',
         ]);
         
         // Check if user can create contract for selected department
@@ -254,8 +408,9 @@ class ContractController extends Controller
         }
 
         $materialGroups = Contract::getMaterialGroups();
+        $contractTypes = Contract::getContractTypes();
 
-        return view('contracts.edit', compact('contract', 'departments', 'materialGroups'));
+        return view('contracts.edit', compact('contract', 'departments', 'materialGroups', 'contractTypes'));
     }
 
     public function update(Request $request, Contract $contract)
@@ -272,8 +427,8 @@ class ContractController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'material_group' => ['required', 'string', Rule::in(Contract::getMaterialGroups())],
-            'contract_type' => 'required|string|in:ICB,NCB',
-            'department' => 'required|string|in:cmd,general_service,finance',
+            'contract_type' => ['required', 'string', Rule::in(Contract::getContractTypes())],
+            'department' => ['required', 'string', Rule::in(array_keys(User::getDepartments()))],
             'supplier_name' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
@@ -299,6 +454,8 @@ class ContractController extends Controller
             'currency_type' => 'nullable|string|in:Dollar,ETB',
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
             'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
+        ], [
+            'end_date.after' => 'Invalid date sequence. Please enter a date after the previous date.',
         ]);
         
         // Check if user can update contract for selected department

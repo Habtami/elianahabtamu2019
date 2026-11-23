@@ -145,23 +145,40 @@ class User extends Authenticatable
     // Get all departments
     public static function getDepartments()
     {
-        return [
+        return self::mergeRegisteredDepartments([
             self::DEPARTMENT_ICT => 'ICT Department',
             self::DEPARTMENT_CMD => 'CMD',
             self::DEPARTMENT_GENERAL_SERVICE => 'General Service',
             self::DEPARTMENT_FINANCE => 'Finance',
             self::DEPARTMENT_DDG_FPA_GS => 'DDG F,PA & GS',
-        ];
+        ]);
     }
 
     // Departments that can own contracts
     public static function getContractDepartments()
     {
-        return [
+        return self::mergeRegisteredDepartments([
             self::DEPARTMENT_CMD => 'CMD',
             self::DEPARTMENT_GENERAL_SERVICE => 'General Service',
             self::DEPARTMENT_FINANCE => 'Finance',
-        ];
+        ]);
+    }
+
+    // Append departments registered from the contract form (key = name)
+    protected static function mergeRegisteredDepartments(array $departments)
+    {
+        $labels = array_map('mb_strtolower', array_values($departments));
+
+        foreach (Department::activeNames() as $name) {
+            if (array_key_exists($name, $departments) || in_array(mb_strtolower($name), $labels, true)) {
+                continue;
+            }
+
+            $departments[$name] = $name;
+            $labels[] = mb_strtolower($name);
+        }
+
+        return $departments;
     }
 
     // Get display name for role

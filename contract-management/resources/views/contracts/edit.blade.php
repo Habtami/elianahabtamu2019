@@ -92,24 +92,7 @@
                             @enderror
                         </div>
 
-                        <!-- Material Group -->
-                        <div class="mb-6">
-                            <label for="material_group" class="form-label required">Material Group</label>
-                            <select id="material_group"
-                                    name="material_group"
-                                    class="form-input"
-                                    required>
-                                <option value="">Select Material Group</option>
-                                @foreach($materialGroups as $group)
-                                    <option value="{{ $group }}" {{ old('material_group', $contract->material_group) === $group ? 'selected' : '' }}>
-                                        {{ $group }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('material_group')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @include('contracts.partials.material-group', ['materialGroupValue' => $contract->material_group])
 
                         <!-- Contract Amount -->
                         <div class="mb-6">
@@ -127,40 +110,9 @@
                             @enderror
                         </div>
 
-                        <!-- Department -->
-                        <div class="mb-6">
-                            <label for="department" class="form-label required">Department</label>
-                            <select id="department"
-                                    name="department"
-                                    class="form-input"
-                                    required>
-                                <option value="">Select Department</option>
-                                @foreach($departments as $key => $value)
-                                    <option value="{{ $key }}" {{ old('department', $contract->department) == $key ? 'selected' : '' }}>
-                                        {{ $value }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('department')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @include('contracts.partials.department', ['departmentValue' => $contract->department])
 
-                        <!-- Contract Type -->
-                        <div class="mb-6">
-                            <label for="contract_type" class="form-label required">Contract Type</label>
-                            <select id="contract_type"
-                                    name="contract_type"
-                                    class="form-input"
-                                    required>
-                                <option value="">Select Contract Type</option>
-                                <option value="ICB" {{ old('contract_type', $contract->contract_type) == 'ICB' ? 'selected' : '' }}>ICB</option>
-                                <option value="NCB" {{ old('contract_type', $contract->contract_type) == 'NCB' ? 'selected' : '' }}>NCB</option>
-                            </select>
-                            @error('contract_type')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @include('contracts.partials.contract-type', ['contractTypeValue' => $contract->contract_type])
 
                         <!-- Supplier Name -->
                         <div class="mb-6">
@@ -205,8 +157,11 @@
                                 @error('end_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
+                                <p id="endDateSequenceError" class="text-red-500 text-sm mt-1 hidden"></p>
                             </div>
                         </div>
+
+                        @include('contracts.partials.date-sequence')
 
                         <!-- Alert Days -->
                         <div class="mb-6">

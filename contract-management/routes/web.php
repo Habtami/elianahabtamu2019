@@ -58,6 +58,9 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Contract Management Routes
     Route::get('/contracts/export', [ContractController::class, 'exportList'])->name('contracts.export-list');
+    Route::post('/contracts/material-groups', [ContractController::class, 'storeMaterialGroup'])->name('contracts.material-groups.store');
+    Route::post('/contracts/departments', [ContractController::class, 'storeDepartment'])->name('contracts.departments.store');
+    Route::post('/contracts/contract-types', [ContractController::class, 'storeContractType'])->name('contracts.contract-types.store');
     Route::resource('contracts', ContractController::class);
 
     // Contract Alerts
