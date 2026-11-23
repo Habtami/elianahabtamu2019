@@ -207,11 +207,11 @@
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Member Since:</span>
-                        <span class="font-medium">{{ $user->created_at->format('M d, Y') }}</span>
+                        <span class="font-medium">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Last Updated:</span>
-                        <span class="font-medium">{{ $user->updated_at->format('M d, Y') }}</span>
+                        <span class="font-medium">{{ $user->updated_at ? $user->updated_at->format('M d, Y') : 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Last Login:</span>

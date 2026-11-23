@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Supplier;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class SupplierController extends Controller
+{
+    public function performanceEvaluation()
+    {
+        $user = auth()->user();
+
+        // Check if user can view supplier performance evaluations
+        if (!in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_ADMIN, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER, User::ROLE_FINANCE])) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to view supplier performance evaluations.');
+        }
+
+        // Get suppliers with performance data
+        $suppliers = Supplier::active()
+            ->withCount('contracts')
+            ->get()
+            ->map(function ($supplier) {
+                // Calculate overall rating if not set
+                if (!$supplier->overall_rating && $supplier->quality_rating && $supplier->delivery_rating && $supplier->cost_rating) {
+                    $supplier->overall_rating = round(($supplier->quality_rating + $supplier->delivery_rating + ($supplier->cost_rating * 20)) / 3, 1);
+                }
+
+                // Set performance status based on overall rating
+                if (!$supplier->performance_status && $supplier->overall_rating) {
+                    if ($supplier->overall_rating >= 90) {
+                        $supplier->performance_status = 'Top Performer';
+                    } elseif ($supplier->overall_rating >= 70) {
+                        $supplier->performance_status = 'Average';
+                    } else {
+                        $supplier->performance_status = 'Needs Improvement';
+                    }
+                }
+
+                return $supplier;
+            });
+
+        // Get performance reports data
+        $weeklyBest = $suppliers->where('performance_status', 'Top Performer')->first();
+        $monthlyBest = $suppliers->sortByDesc('overall_rating')->first();
+        $quarterlyBest = $suppliers->where('performance_status', 'Top Performer')->first();
+        $annualBest = $suppliers->sortByDesc('overall_rating')->first();
+
+        return view('suppliers.performance-evaluation', compact(
+            'suppliers',
+            'weeklyBest',
+            'monthlyBest',
+            'quarterlyBest',
+            'annualBest'
+        ));
+    }
+
+    public function approveSupplier(Request $request, Supplier $supplier)
+    {
+        $user = auth()->user();
+
+        // Only GS Managers can approve suppliers
+        if ($user->role !== User::ROLE_GS_MANAGER) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Update supplier approval status (you might want to add an approved_at field)
+        $supplier->update([
+            'last_evaluation_date' => now(),
+        ]);
+
+        return response()->json(['success' => 'Supplier approved successfully']);
+    }
+}

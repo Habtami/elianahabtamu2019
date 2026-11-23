@@ -69,4 +69,27 @@ class ProfileController extends Controller
 
         return back()->with('info', 'No changes were made.');
     }
+
+    public function telegram()
+    {
+        $user = Auth::user();
+        return view('profile.telegram', compact('user'));
+    }
+
+    public function updateTelegram(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'telegram_chat_id' => 'nullable|string|max:255',
+        ]);
+
+        $user->update([
+            'phone' => $request->input('phone', $user->phone),
+            'telegram_chat_id' => $request->input('telegram_chat_id'),
+            'telegram_notifications' => $request->has('telegram_notifications'),
+        ]);
+
+        return back()->with('success', 'Telegram settings updated successfully.');
+    }
 }

@@ -37,6 +37,9 @@ class CheckContractAlerts extends Command
         $alerts = [];
 
         foreach ($contracts as $contract) {
+            // Update contract status before checking alerts
+            $contract->updateStatus();
+            
             $contractAlerts = [];
 
             // Check contract end date alert

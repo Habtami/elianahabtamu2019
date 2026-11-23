@@ -11,13 +11,22 @@ class Contract extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'supplier_id',
         'name',
         'description',
         'department',
+        'contract_type',
+        'supplier_name',
+        'material_group',
+        'contract_amount',
         'start_date',
         'end_date',
         'alert_days',
+        'performance_bond_type',
+        'issued_by',
+
         'performance_guarantee_amount',
+        'currency_type',
         'performance_guarantee_end_date',
         'performance_guarantee_alert_days',
         'created_by',
@@ -28,12 +37,39 @@ class Contract extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+
         'performance_guarantee_end_date' => 'date',
         'alert_days' => 'integer',
         'performance_guarantee_alert_days' => 'integer',
         'performance_guarantee_amount' => 'decimal:2',
+        'contract_amount' => 'decimal:2',
         'extended_count' => 'integer'
     ];
+
+    protected static function booted()
+    {
+        static::created(function ($contract) {
+            ActivityLog::log(
+                ActivityLog::TYPE_CONTRACT_CREATE,
+                $contract->id,
+                'contract',
+                null,
+                $contract->name,
+                ActivityLog::SEVERITY_INFO
+            );
+        });
+
+        static::deleted(function ($contract) {
+            ActivityLog::log(
+                ActivityLog::TYPE_CONTRACT_DELETE,
+                $contract->id,
+                'contract',
+                $contract->name,
+                null,
+                ActivityLog::SEVERITY_WARNING
+            );
+        });
+    }
 
     // Status constants
     const STATUS_ACTIVE = 'active';
@@ -62,6 +98,24 @@ class Contract extends Model
         return User::getDepartments()[$this->department] ?? $this->department;
     }
 
+    // Material groups available for contracts
+    public static function getMaterialGroups()
+    {
+        return MaterialGroup::activeNames();
+    }
+
+    // Relationship with supplier
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    // Relationship with the contract closing record
+    public function closure()
+    {
+        return $this->hasOne(ContractClosure::class);
+    }
+
     // Relationship with creator
     public function creator()
     {
@@ -80,16 +134,32 @@ class Contract extends Model
         return $this->hasMany(ContractHistory::class);
     }
 
+    // Relationship with contract end date histories
+    public function contractEndDateHistories()
+    {
+        return $this->hasMany(ActivityLog::class)->where('field_name', 'contract_end_date');
+    }
+
     // Relationship with performance guarantee histories
     public function performanceGuaranteeHistories()
     {
         return $this->hasMany(ActivityLog::class)->where('field_name', 'performance_guarantee');
     }
 
+    // Get performance guarantee edit count
+    public function getPerformanceGuaranteeEditCountAttribute()
+    {
+        return $this->performanceGuaranteeHistories()->count();
+    }
+
     // Calculate days until contract end
     public function getDaysUntilContractEnd()
     {
-        return now()->diffInDays($this->end_date, false);
+        if (!$this->end_date) {
+            return 0;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->end_date->copy()->startOfDay(), false);
     }
 
     // Calculate days until performance guarantee end
@@ -98,7 +168,8 @@ class Contract extends Model
         if (!$this->performance_guarantee_end_date) {
             return null;
         }
-        return now()->diffInDays($this->performance_guarantee_end_date, false);
+
+        return (int) now()->startOfDay()->diffInDays($this->performance_guarantee_end_date->copy()->startOfDay(), false);
     }
 
     // Check if contract is expiring soon
@@ -106,6 +177,12 @@ class Contract extends Model
     {
         $daysUntilEnd = $this->getDaysUntilContractEnd();
         return $daysUntilEnd > 0 && $daysUntilEnd <= $this->alert_days;
+    }
+
+    // Check if contract should alert end date
+    public function shouldAlertContractEndDate()
+    {
+        return $this->isExpiringSoon();
     }
 
     // Check if performance guarantee is expiring soon
@@ -116,6 +193,12 @@ class Contract extends Model
         }
         $daysUntilEnd = $this->getDaysUntilPerformanceGuaranteeEnd();
         return $daysUntilEnd > 0 && $daysUntilEnd <= $this->performance_guarantee_alert_days;
+    }
+
+    // Check if performance guarantee should alert
+    public function shouldAlertPerformanceGuarantee()
+    {
+        return $this->isPerformanceGuaranteeExpiringSoon();
     }
 
     // Update contract status
@@ -168,14 +251,15 @@ class Contract extends Model
         $this->save();
 
         // Log the activity
-        ActivityLog::create([
-            'contract_id' => $this->id,
-            'field_name' => 'contract_end_date',
-            'old_value' => $oldDate,
-            'new_value' => $newEndDate,
-            'edited_by' => $editedBy ?: auth()->user()->name,
-            'reason' => $reason
-        ]);
+        ActivityLog::log(
+            ActivityLog::TYPE_CONTRACT_UPDATE,
+            $this->id,
+            'contract_end_date',
+            $oldDate,
+            $newEndDate,
+            ActivityLog::SEVERITY_INFO,
+            $reason
+        );
 
         $this->updateStatus();
     }
@@ -190,14 +274,15 @@ class Contract extends Model
         $this->save();
 
         // Log the activity
-        ActivityLog::create([
-            'contract_id' => $this->id,
-            'field_name' => 'performance_guarantee',
-            'old_value' => json_encode(['amount' => $oldAmount, 'end_date' => $oldDate]),
-            'new_value' => json_encode(['amount' => $newAmount, 'end_date' => $newEndDate]),
-            'edited_by' => $editedBy ?: auth()->user()->name,
-            'reason' => $reason
-        ]);
+        ActivityLog::log(
+            ActivityLog::TYPE_CONTRACT_UPDATE,
+            $this->id,
+            'performance_guarantee',
+            json_encode(['amount' => $oldAmount, 'end_date' => $oldDate]),
+            json_encode(['amount' => $newAmount, 'end_date' => $newEndDate]),
+            ActivityLog::SEVERITY_INFO,
+            $reason
+        );
     }
 
     // Scope for active contracts

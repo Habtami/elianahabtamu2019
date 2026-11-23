@@ -56,12 +56,60 @@
                     </div>
 
                     <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Contract Type:</strong></div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-info">{{ $contract->contract_type ?? 'N/A' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Material Group:</strong></div>
+                        <div class="col-sm-8">{{ $contract->material_group ?: 'Not specified' }}</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Contract Amount:</strong></div>
+                        <div class="col-sm-8">
+                            {{ $contract->contract_amount !== null ? number_format((float) $contract->contract_amount, 2) . ' ETB' : 'Not specified' }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Department:</strong></div>
+                        <div class="col-sm-8">{{ $contract->getDepartmentDisplayName() }}</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Supplier:</strong></div>
+                        <div class="col-sm-8">
+                            @if($contract->supplier_name)
+                                {{ $contract->supplier_name }}
+                            @else
+                                <span class="text-muted">Not specified</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Status:</strong></div>
+                        <div class="col-sm-8">
+                            <span class="badge
+                                @if($contract->status === 'active') bg-success
+                                @elseif($contract->status === 'expiring') bg-warning text-dark
+                                @elseif($contract->status === 'expired') bg-danger
+                                @else bg-secondary @endif">
+                                {{ ucfirst($contract->status) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <div class="col-sm-4"><strong>Created By:</strong></div>
                         <div class="col-sm-8">
                             @if($contract->creator)
                                 {{ $contract->creator->name }}
-                                <small class="text-muted d-block">{{ $contract->creator->getRoleDisplayName() }}@if($contract->creator->department) ({{ ucfirst(str_replace('_', ' ', $contract->creator->department)) }})@endif</small>
-                                <small class="text-muted">Created on {{ $contract->created_at->format('M d, Y \a\t H:i') }}</small>
+                                <small class="text-muted d-block">{{ $contract->creator->getRoleDisplayName() }}@if($contract->creator->department) ({{ $contract->creator->getDepartmentDisplayName() }})@endif</small>
+                                <small class="text-muted">Created on {{ $contract->created_at ? $contract->created_at->format('M d, Y \a\t H:i') : 'N/A' }}</small>
                             @else
                                 <span class="text-muted">System / Unknown</span>
                             @endif
@@ -90,6 +138,28 @@
                     <div class="row mb-3">
                         <div class="col-sm-4"><strong>Alert Days:</strong></div>
                         <div class="col-sm-8">{{ $contract->alert_days }} days</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Performance Bond Type:</strong></div>
+                        <div class="col-sm-8">
+                            @if($contract->performance_bond_type)
+                                <span class="badge bg-info">{{ $contract->performance_bond_type }}</span>
+                            @else
+                                <span class="text-muted">Not set</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Issued By:</strong></div>
+                        <div class="col-sm-8">
+                            @if($contract->issued_by)
+                                {{ $contract->issued_by }}
+                            @else
+                                <span class="text-muted">Not set</span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="row mb-3">
@@ -124,6 +194,9 @@
                         <div class="col-sm-8">
                             @if($contract->performance_guarantee_amount)
                                 ${{ number_format($contract->performance_guarantee_amount, 2) }}
+                                @if($contract->currency_type)
+                                    <small class="text-muted">({{ $contract->currency_type }})</small>
+                                @endif
                             @else
                                 <span class="text-muted">Not set</span>
                             @endif
@@ -174,10 +247,10 @@
     </div>
 </div>
 
-@if($contract->histories->count() > 0)
+@if($contract->activityLogs->count() > 0)
 <div class="card mt-4">
     <div class="card-header bg-dark text-white">
-        <h4 class="card-title mb-0"><i class="fas fa-history"></i> Edit History</h4>
+        <h4 class="card-title mb-0"><i class="fas fa-history"></i> Activity Logs</h4>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -193,22 +266,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($contract->histories as $history)
+                    @foreach($contract->activityLogs->sortByDesc('created_at') as $log)
                     <tr>
-                        <td>{{ $history->created_at->format('M d, Y H:i') }}</td>
+                        <td>{{ $log->created_at ? $log->created_at->format('M d, Y H:i') : 'N/A' }}</td>
                         <td>
-                            @if($history->field_name == 'contract_end_date')
+                            @if($log->field_name == 'contract_end_date')
                                 <span class="badge bg-primary">Contract End Date</span>
-                            @elseif($history->field_name == 'performance_guarantee')
+                            @elseif($log->field_name == 'performance_guarantee')
                                 <span class="badge bg-warning text-dark">Performance Guarantee</span>
                             @else
-                                <span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $history->field_name)) }}</span>
+                                <span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $log->field_name)) }}</span>
                             @endif
                         </td>
-                        <td>{{ $history->getFormattedOldValue() }}</td>
-                        <td>{{ $history->getFormattedNewValue() }}</td>
-                        <td>{{ $history->edited_by ?? 'N/A' }}</td>
-                        <td>{{ $history->reason ?? 'N/A' }}</td>
+                        <td>{{ $log->getFormattedOldValue() }}</td>
+                        <td>{{ $log->getFormattedNewValue() }}</td>
+                        <td>{{ $log->edited_by ?? 'N/A' }}</td>
+                        <td>{{ $log->reason ?? 'N/A' }}</td>
                     </tr>
                     @endforeach
                 </tbody>

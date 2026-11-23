@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\User;
+use App\Models\Supplier;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ContractController extends Controller
 {
@@ -29,14 +31,63 @@ class ContractController extends Controller
         if ($request->has('department') && $user->canViewAllContracts()) {
             $query->where('department', $request->department);
         }
-        
-        $perPage = request('per_page', 10);
-        $contracts = $query->latest()->paginate($perPage);
-        
-        $departments = User::getDepartments();
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $allowedSorts = ['id', 'name', 'supplier_name', 'department', 'start_date', 'end_date', 'performance_guarantee_amount', 'status', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $sortDirection = strtolower($request->get('sort_direction', 'desc'));
+        if (!in_array($sortDirection, ['asc', 'desc'])) {
+            $sortDirection = 'desc';
+        }
+
+        // Get counts before pagination
+        $statsQuery = clone $query;
+        $totalActive = (clone $statsQuery)->where('status', Contract::STATUS_ACTIVE)->count();
+        $totalExpiring = (clone $statsQuery)->where('status', Contract::STATUS_EXPIRING)->count();
+        $totalExpired = (clone $statsQuery)->where('status', Contract::STATUS_EXPIRED)->count();
+
+        $perPage = $request->get('per_page', 5);
+        $allowedPerPage = [5, 10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 5;
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        if ($sortBy !== 'id' && $sortBy !== 'created_at') {
+            $query->orderBy('id', 'desc');
+        }
+        $contracts = $query->paginate($perPage)->appends($request->query());
+
+        $departments = User::getContractDepartments();
         $statuses = Contract::getStatuses();
-        
-        return view('contracts.index', compact('contracts', 'departments', 'statuses'));
+
+        return view('contracts.index', compact(
+            'contracts', 'departments', 'statuses', 'totalActive', 'totalExpiring', 'totalExpired',
+            'sortBy', 'sortDirection', 'perPage'
+        ));
+    }
+
+    public function exportList(Request $request)
+    {
+        $user = auth()->user();
+        $query = Contract::forUser($user)->with('creator');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('department') && $user->canViewAllContracts()) {
+            $query->where('department', $request->department);
+        }
+
+        $contracts = $query->orderBy('name')->get();
+
+        (new \App\Exports\ContractsExport($contracts))->download('contracts_export.xlsx');
     }
     
     public function create()
@@ -57,30 +108,40 @@ class ContractController extends Controller
             $departments = [User::DEPARTMENT_CMD => 'CMD'];
         } elseif ($user->role === User::ROLE_FINANCE) {
             $departments = [User::DEPARTMENT_FINANCE => 'Finance'];
-        } elseif (in_array($user->role, [User::ROLE_ADMIN, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER])) {
+        } elseif (in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_ADMIN, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER])) {
             // Managers and admins can create contracts for all departments
-            $departments = User::getDepartments();
+            $departments = User::getContractDepartments();
         }
 
-        return view('contracts.create', compact('departments'));
+        $materialGroups = Contract::getMaterialGroups();
+
+        return view('contracts.create', compact('departments', 'materialGroups'));
     }
     
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         if (!$user->canCreateContracts()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to create contracts.');
         }
-        
-        $request->validate([
+
+        $validated = $request->validate([
+            'supplier_name' => 'required|string|max:255',
+            'supplier_id' => 'nullable|exists:suppliers,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'department' => 'required|string|in:cmd,general_service,finance',
+            'material_group' => ['required', 'string', Rule::in(Contract::getMaterialGroups())],
+            'contract_amount' => 'nullable|numeric|min:0',
+            'department' => 'required|string',
+            'contract_type' => 'required|in:ICB,NCB',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'alert_days' => 'required|integer|min:1|max:365',
+            'alert_days' => 'required|integer|min:0',
+            'performance_bond_type' => 'nullable|in:CPO,Bank Guarantee,Insurance Bond,Small Enterprise Letter',
+            'issued_by' => 'nullable|string|max:255',
+            'currency_type' => 'nullable|in:Dollar,ETB',
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
             'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
@@ -91,20 +152,54 @@ class ContractController extends Controller
         if ($userDepartment && $request->department !== $userDepartment) {
             return back()->with('error', 'You can only create contracts for your department.');
         }
-        
+
+        // Handle supplier logic
+        $supplier = null;
+
+        // CASE 1: Supplier ID is provided (user selected from autocomplete)
+        if ($request->has('supplier_id') && $request->supplier_id) {
+            $supplier = Supplier::find($request->supplier_id);
+        }
+        // CASE 2: No supplier ID, check if supplier exists by name
+        else {
+            // Normalize supplier name for comparison
+            $supplierName = trim($request->supplier_name);
+
+            // Check if supplier already exists (case-insensitive search)
+            $supplier = Supplier::whereRaw('LOWER(name) = ?', [strtolower($supplierName)])->first();
+
+            // If supplier doesn't exist, create new one
+            if (!$supplier) {
+                $supplier = Supplier::create([
+                    'name' => $supplierName,
+                    'created_by' => auth()->id(),
+                    'created_by_name' => auth()->user()->name,
+                    'created_at' => now(),
+                ]);
+            }
+        }
+
+        // Create contract with supplier_id and supplier_name
         $contract = Contract::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'department' => $request->department,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'alert_days' => $request->alert_days,
-            'performance_guarantee_amount' => $request->performance_guarantee_amount,
-            'performance_guarantee_end_date' => $request->performance_guarantee_end_date,
-            'performance_guarantee_alert_days' => $request->performance_guarantee_alert_days,
-            'created_by' => $user->id,
-            'status' => Contract::STATUS_ACTIVE,
-            'extended_count' => 0
+            'supplier_id' => $supplier->id,
+            'supplier_name' => $supplier->name,
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'material_group' => $validated['material_group'],
+            'contract_amount' => $validated['contract_amount'] ?? null,
+            'department' => $validated['department'],
+            'contract_type' => $validated['contract_type'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'alert_days' => $validated['alert_days'],
+            'performance_bond_type' => $validated['performance_bond_type'] ?? null,
+            'issued_by' => $validated['issued_by'] ?? null,
+            'currency_type' => $validated['currency_type'] ?? null,
+            'performance_guarantee_amount' => $validated['performance_guarantee_amount'] ?? null,
+            'performance_guarantee_end_date' => $validated['performance_guarantee_end_date'] ?? null,
+            'performance_guarantee_alert_days' => $validated['performance_guarantee_alert_days'] ?? null,
+            'created_by' => auth()->id(),
+            'status' => 'active',
         ]);
         
         $contract->updateStatus();
@@ -153,9 +248,11 @@ class ContractController extends Controller
             $departments = [User::DEPARTMENT_FINANCE => 'Finance'];
         }
 
-        return view('contracts.edit', compact('contract', 'departments'));
+        $materialGroups = Contract::getMaterialGroups();
+
+        return view('contracts.edit', compact('contract', 'departments', 'materialGroups'));
     }
-    
+
     public function update(Request $request, Contract $contract)
     {
         $user = auth()->user();
@@ -169,11 +266,32 @@ class ContractController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'material_group' => ['required', 'string', Rule::in(Contract::getMaterialGroups())],
+            'contract_type' => 'required|string|in:ICB,NCB',
             'department' => 'required|string|in:cmd,general_service,finance',
+            'supplier_name' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'alert_days' => 'required|integer|min:1|max:365',
+            'alert_days' => [
+                'required',
+                'integer',
+                'min:0',
+                'max:365',
+                function ($attribute, $value, $fail) use ($request) {
+                    $startDate = new \DateTime($request->start_date);
+                    $endDate = new \DateTime($request->end_date);
+                    $contractDuration = $startDate->diff($endDate)->days;
+
+                    if ($value > $contractDuration) {
+                        $fail("Alert days ({$value}) cannot be greater than the contract duration ({$contractDuration} days).");
+                    }
+                },
+            ],
+            'performance_bond_type' => 'nullable|string|in:CPO,Bank Guarantee,Insurance Bond,Small Enterprise Letter',
+            'issued_by' => 'nullable|string|max:255',
+            'contract_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
+            'currency_type' => 'nullable|string|in:Dollar,ETB',
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
             'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
         ]);
@@ -186,11 +304,18 @@ class ContractController extends Controller
         $contract->update([
             'name' => $request->name,
             'description' => $request->description,
+            'material_group' => $request->material_group,
+            'contract_amount' => $request->contract_amount,
+            'contract_type' => $request->contract_type,
             'department' => $request->department,
+            'supplier_name' => $request->supplier_name,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'alert_days' => $request->alert_days,
+            'performance_bond_type' => $request->performance_bond_type,
+            'issued_by' => $request->issued_by,
             'performance_guarantee_amount' => $request->performance_guarantee_amount,
+            'currency_type' => $request->currency_type,
             'performance_guarantee_end_date' => $request->performance_guarantee_end_date,
             'performance_guarantee_alert_days' => $request->performance_guarantee_alert_days,
         ]);
@@ -363,15 +488,15 @@ class ContractController extends Controller
     {
         $user = auth()->user();
 
-        if (!in_array($user->role, [User::ROLE_ADMIN, User::ROLE_FINANCE, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER])) {
+        if (!in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_ADMIN, User::ROLE_FINANCE, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER])) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to view reports.');
         }
 
         // Get date range from request or default to last 12 months
         $dateRange = $request->get('date_range', '12_months');
-        $startDate = $this->getStartDateForRange($dateRange);
-        $endDate = now();
+        $startDate = $request->has('start_date') ? \Carbon\Carbon::parse($request->start_date) : $this->getStartDateForRange($dateRange);
+        $endDate = $request->has('end_date') ? \Carbon\Carbon::parse($request->end_date) : now();
 
         // Get statistics
         $totalContracts = Contract::forUser($user)->count();
@@ -385,22 +510,60 @@ class ContractController extends Controller
         $expiredPercentage = $totalContracts > 0 ? round(($expiredContracts / $totalContracts) * 100, 1) : 0;
 
         // Contracts by department
+        $departments = User::getContractDepartments();
         $contractsByDepartment = Contract::forUser($user)
             ->select('department', DB::raw('count(*) as count'))
             ->groupBy('department')
-            ->get();
+            ->get()
+            ->map(function($item) use ($departments) {
+                return (object)[
+                    'department' => $departments[$item->department] ?? ucfirst(str_replace('_', ' ', $item->department)),
+                    'count' => $item->count
+                ];
+            });
 
         // Contracts by month (dynamic based on date range)
-        $contractsByMonth = Contract::forUser($user)
+        $monthlyData = Contract::forUser($user)
             ->select(
                 DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 DB::raw('count(*) as count')
             )
             ->where('created_at', '>=', $startDate)
             ->where('created_at', '<=', $endDate)
-            ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
-            ->orderBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
-            ->get();
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('count', 'month')
+            ->toArray();
+
+        // Fill in missing months to ensure a continuous line in the chart
+        $contractsByMonth = collect();
+        $current = clone $startDate;
+        $end = clone $endDate;
+        
+        // Normalize to start of month for comparison
+        $current->day(1)->hour(0)->minute(0)->second(0);
+        $end->day(1)->hour(0)->minute(0)->second(0);
+
+        while ($current <= $end) {
+            $monthKey = $current->format('Y-m');
+            $contractsByMonth->push((object)[
+                'month' => $current->format('M Y'),
+                'count' => $monthlyData[$monthKey] ?? 0
+            ]);
+            $current->addMonth();
+        }
+
+        // If we only have one month (e.g., in January for YTD), add the previous month 
+        // with 0 to make the chart render better as a line
+        if ($contractsByMonth->count() === 1) {
+            $firstMonth = \Carbon\Carbon::createFromFormat('M Y', $contractsByMonth->first()->month);
+            $prevMonth = $firstMonth->subMonth();
+            $contractsByMonth->prepend((object)[
+                'month' => $prevMonth->format('M Y'),
+                'count' => 0
+            ]);
+        }
 
         // Contracts by status
         $contractsByStatus = Contract::forUser($user)
@@ -409,9 +572,11 @@ class ContractController extends Controller
             ->get();
 
         // Recent activity (latest contract updates)
-        $recentActivity = ActivityLog::with('contract')
+        $recentActivity = ActivityLog::with(['contract' => function ($query) {
+            $query->withTrashed();
+        }])
             ->whereHas('contract', function ($query) use ($user) {
-                $query->forUser($user);
+                $query->withTrashed()->forUser($user);
             })
             ->latest()
             ->take(10)
@@ -458,7 +623,7 @@ class ContractController extends Controller
     {
         $user = auth()->user();
 
-        if (!in_array($user->role, [User::ROLE_ADMIN, User::ROLE_FINANCE, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER])) {
+        if (!in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_ADMIN, User::ROLE_FINANCE, User::ROLE_GS_MANAGER, User::ROLE_CMD_MANAGER])) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to export reports.');
         }
@@ -514,17 +679,22 @@ class ContractController extends Controller
 
         // Contract Details
         $csvData[] = ['Contract Details'];
-        $csvData[] = ['Name', 'Department', 'Start Date', 'End Date', 'Status', 'Created By', 'Performance Guarantee Amount', 'Performance Guarantee End Date'];
+        $csvData[] = ['Name', 'Supplier Name', 'Department', 'Contract Type', 'Start Date', 'End Date', 'Status', 'Created By', 'Currency', 'Performance Guarantee Amount', 'Performance Guarantee End Date', 'Performance Bond Type', 'Issued By'];
         foreach ($contracts as $contract) {
             $csvData[] = [
                 $contract->name,
+                $contract->supplier_name ?? 'N/A',
                 ucfirst(str_replace('_', ' ', $contract->department)),
+                $contract->contract_type ?? 'N/A',
                 $contract->start_date?->format('Y-m-d'),
                 $contract->end_date?->format('Y-m-d'),
                 ucfirst($contract->status),
                 $contract->creator->name ?? 'N/A',
+                $contract->currency_type ?? 'N/A',
                 $contract->performance_guarantee_amount ? number_format($contract->performance_guarantee_amount, 2) : 'N/A',
-                $contract->performance_guarantee_end_date?->format('Y-m-d') ?? 'N/A'
+                $contract->performance_guarantee_end_date?->format('Y-m-d') ?? 'N/A',
+                $contract->performance_bond_type ?? 'N/A',
+                $contract->issued_by ?? 'N/A'
             ];
         }
 
@@ -632,18 +802,23 @@ class ContractController extends Controller
 
             // Contract Details
             fputcsv($file, ['Contract Details']);
-            fputcsv($file, ['Name', 'Department', 'Start Date', 'End Date', 'Status', 'Created By', 'Performance Guarantee Amount', 'Performance Guarantee End Date']);
+            fputcsv($file, ['Name', 'Supplier Name', 'Department', 'Contract Type', 'Start Date', 'End Date', 'Status', 'Created By', 'Currency', 'Performance Guarantee Amount', 'Performance Guarantee End Date', 'Performance Bond Type', 'Issued By']);
 
             foreach ($data['contracts'] as $contract) {
                 fputcsv($file, [
                     $contract->name,
+                    $contract->supplier_name ?? 'N/A',
                     ucfirst(str_replace('_', ' ', $contract->department)),
+                    $contract->contract_type ?? 'N/A',
                     $contract->start_date?->format('Y-m-d'),
                     $contract->end_date?->format('Y-m-d'),
                     ucfirst($contract->status),
                     $contract->creator->name ?? 'N/A',
+                    $contract->currency_type ?? 'N/A',
                     $contract->performance_guarantee_amount ? number_format($contract->performance_guarantee_amount, 2) : 'N/A',
-                    $contract->performance_guarantee_end_date?->format('Y-m-d') ?? 'N/A'
+                    $contract->performance_guarantee_end_date?->format('Y-m-d') ?? 'N/A',
+                    $contract->performance_bond_type ?? 'N/A',
+                    $contract->issued_by ?? 'N/A'
                 ]);
             }
 
@@ -700,16 +875,18 @@ class ContractController extends Controller
 
             // Contract Details
             fputcsv($file, ['Contract Details']);
-            fputcsv($file, ['Name', 'Department', 'Start Date', 'End Date', 'Status', 'Created By', 'Performance Guarantee Amount', 'Performance Guarantee End Date']);
+            fputcsv($file, ['Name', 'Department', 'Contract Type', 'Start Date', 'End Date', 'Status', 'Created By', 'Currency', 'Performance Guarantee Amount', 'Performance Guarantee End Date']);
 
             foreach ($data['contracts'] as $contract) {
                 fputcsv($file, [
                     $contract->name,
                     ucfirst(str_replace('_', ' ', $contract->department)),
+                    $contract->contract_type ?? 'N/A',
                     $contract->start_date?->format('Y-m-d'),
                     $contract->end_date?->format('Y-m-d'),
                     ucfirst($contract->status),
                     $contract->creator->name ?? 'N/A',
+                    $contract->currency_type ?? 'N/A',
                     $contract->performance_guarantee_amount ? number_format($contract->performance_guarantee_amount, 2) : 'N/A',
                     $contract->performance_guarantee_end_date?->format('Y-m-d') ?? 'N/A'
                 ]);

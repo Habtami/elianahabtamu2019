@@ -2,6 +2,14 @@
 
 @section('title', 'Contract Analytics Dashboard')
 
+@section('styles')
+<style>
+    .recent-activity-toggle { cursor: pointer; user-select: none; }
+    .recent-activity-toggle .ra-chevron { transition: transform .2s ease; }
+    .recent-activity-toggle[aria-expanded="true"] .ra-chevron { transform: rotate(180deg); }
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -15,7 +23,7 @@
                             <p class="mb-0 opacity-75">Comprehensive insights and performance metrics for contract management</p>
                         </div>
                         <div class="d-flex gap-2">
-                            <button onclick="refreshData()" class="btn btn-light btn-sm">
+                            <button onclick="refreshData(event)" class="btn btn-light btn-sm">
                                 <i class="fas fa-sync-alt me-1"></i>Refresh
                             </button>
                             <form action="{{ route('contracts.export') }}" method="POST" class="d-inline">
@@ -63,7 +71,9 @@
                     <!-- Enhanced Summary Statistics -->
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card border-left-primary shadow h-100 py-2" role="button" tabindex="0" style="cursor: pointer;"
+                                 onclick="openStatModal('total-contracts', 'Total Contracts')"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
@@ -85,7 +95,9 @@
                         </div>
 
                         <div class="col-md-3">
-                            <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card border-left-success shadow h-100 py-2" role="button" tabindex="0" style="cursor: pointer;"
+                                 onclick="openStatModal('active-contracts', 'Active Contracts')"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
@@ -108,7 +120,9 @@
                         </div>
 
                         <div class="col-md-3">
-                            <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card border-left-warning shadow h-100 py-2" role="button" tabindex="0" style="cursor: pointer;"
+                                 onclick="openStatModal('expiring-contracts', 'Expiring Soon')"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
@@ -134,7 +148,9 @@
                         </div>
 
                         <div class="col-md-3">
-                            <div class="card border-left-danger shadow h-100 py-2">
+                            <div class="card border-left-danger shadow h-100 py-2" role="button" tabindex="0" style="cursor: pointer;"
+                                 onclick="openStatModal('expired-contracts', 'Expired Contracts')"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
@@ -215,12 +231,20 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card shadow">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">
-                                        <i class="fas fa-history me-2"></i>Recent Activity
-                                    </h6>
-                                    <p class="mb-0 text-muted small">Latest contract updates</p>
+                                <div class="card-header py-3 d-flex align-items-center justify-content-between recent-activity-toggle"
+                                     role="button" tabindex="0"
+                                     aria-expanded="false" aria-controls="recentActivityBody"
+                                     onclick="toggleRecentActivity(this)"
+                                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                                    <div>
+                                        <h6 class="m-0 font-weight-bold text-primary">
+                                            <i class="fas fa-history me-2"></i>Recent Activity
+                                        </h6>
+                                        <p class="mb-0 text-muted small">Latest contract updates</p>
+                                    </div>
+                                    <i class="fas fa-chevron-down text-muted small ra-chevron"></i>
                                 </div>
+                                <div id="recentActivityBody" class="d-none">
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-hover" width="100%" cellspacing="0">
@@ -242,9 +266,13 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('contracts.show', $activity->contract) }}" class="text-decoration-none fw-bold">
-                                                            {{ Str::limit($activity->contract->name, 30) }}
-                                                        </a>
+                                                        @if($activity->contract)
+                                                            <a href="{{ route('contracts.show', $activity->contract) }}" class="text-decoration-none fw-bold">
+                                                                {{ Str::limit($activity->contract->name, 30) }}
+                                                            </a>
+                                                        @else
+                                                            <span class="text-muted italic">Deleted Contract</span>
+                                                        @endif
                                                     </td>
                                                     <td>
                                                         <span class="badge bg-primary">
@@ -255,7 +283,7 @@
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <div class="avatar avatar-sm me-2">
-                                                                <div class="avatar-initial rounded-circle bg-primary text-white">
+                                                                <div class="avatar-initial rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px; line-height: 24px;">
                                                                     {{ strtoupper(substr($activity->edited_by ?? 'S', 0, 1)) }}
                                                                 </div>
                                                             </div>
@@ -278,10 +306,38 @@
                                         </table>
                                     </div>
                                 </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stat detail modal -->
+<div id="statModal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="statModalTitle">
+    <div class="absolute inset-0 bg-black/50" onclick="closeStatModal()"></div>
+    <div class="relative mx-auto mt-10 mb-10 w-full max-w-2xl px-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-xl">
+            <div class="flex items-start justify-between px-5 py-4 border-b border-gray-200">
+                <div>
+                    <h3 id="statModalTitle" class="text-lg font-semibold text-gray-800"></h3>
+                    <p id="statModalMeta" class="text-sm text-gray-500 mt-0.5"></p>
+                </div>
+                <button type="button" onclick="closeStatModal()" aria-label="Close"
+                        class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-5">
+                <div id="statModalLoading" class="text-center py-10 text-gray-500">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading...
+                </div>
+                <div id="statModalEmpty" class="hidden text-center py-10">
+                    <i class="fas fa-inbox text-3xl text-gray-300"></i>
+                    <p class="mt-3 text-gray-600">No records found.</p>
+                </div>
+                <div id="statModalList" class="hidden divide-y divide-gray-100"></div>
             </div>
         </div>
     </div>
@@ -291,6 +347,103 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+let statRequestSeq = 0;
+
+const statTones = {
+    green: 'bg-green-100 text-green-800',
+    amber: 'bg-amber-100 text-amber-800',
+    red: 'bg-red-100 text-red-800',
+    blue: 'bg-blue-100 text-blue-800',
+    gray: 'bg-gray-100 text-gray-700',
+};
+
+function escapeStatHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
+
+function openStatModal(scope, title) {
+    const modal = document.getElementById('statModal');
+    if (!modal) return;
+
+    document.getElementById('statModalTitle').textContent = title;
+    document.getElementById('statModalMeta').textContent = '';
+    document.getElementById('statModalList').innerHTML = '';
+    document.getElementById('statModalList').classList.add('hidden');
+    document.getElementById('statModalEmpty').classList.add('hidden');
+    document.getElementById('statModalLoading').classList.remove('hidden');
+
+    modal.classList.remove('hidden');
+    loadStatSummary(scope);
+}
+
+function closeStatModal() {
+    const modal = document.getElementById('statModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function loadStatSummary(scope) {
+    const seq = ++statRequestSeq;
+
+    try {
+        const response = await fetch('{{ url('/dashboard/summary') }}/' + encodeURIComponent(scope), {
+            headers: { 'Accept': 'application/json' },
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) throw new Error(data.message || 'Unable to load details.');
+        if (seq !== statRequestSeq) return;
+
+        renderStatSummary(data);
+    } catch (error) {
+        if (seq !== statRequestSeq) return;
+        document.getElementById('statModalLoading').classList.add('hidden');
+        const empty = document.getElementById('statModalEmpty');
+        empty.querySelector('p').textContent = error.message;
+        empty.classList.remove('hidden');
+    }
+}
+
+function renderStatSummary(data) {
+    document.getElementById('statModalLoading').classList.add('hidden');
+    document.getElementById('statModalMeta').textContent = (data.count ?? 0) + ' record(s)';
+
+    const empty = document.getElementById('statModalEmpty');
+    const list = document.getElementById('statModalList');
+    const items = Array.isArray(data.items) ? data.items : [];
+
+    if (!items.length) {
+        empty.classList.remove('hidden');
+        return;
+    }
+
+    list.innerHTML = items.map(function (item) {
+        const title = item.url
+            ? '<a href="' + escapeStatHtml(item.url) + '" class="font-medium text-[#1C75BC] hover:underline">' + escapeStatHtml(item.title) + '</a>'
+            : '<span class="font-medium text-gray-800">' + escapeStatHtml(item.title) + '</span>';
+
+        const badge = item.badge
+            ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ' +
+                (statTones[item.tone] || statTones.gray) + '">' + escapeStatHtml(item.badge) + '</span>'
+            : '';
+
+        return '<div class="flex items-start justify-between gap-3 py-2.5">' +
+            '<div class="min-w-0">' + title +
+            (item.subtitle ? '<div class="text-sm text-gray-600 truncate">' + escapeStatHtml(item.subtitle) + '</div>' : '') +
+            (item.meta ? '<div class="text-xs text-gray-500 mt-0.5">' + escapeStatHtml(item.meta) + '</div>' : '') +
+            '</div>' +
+            (badge ? '<div class="shrink-0">' + badge + '</div>' : '') +
+            '</div>';
+    }).join('');
+
+    list.classList.remove('hidden');
+}
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeStatModal();
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize charts
     updateCharts();
@@ -299,13 +452,20 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(refreshData, 300000);
 });
 
+function toggleRecentActivity(header) {
+    const body = document.getElementById('recentActivityBody');
+    if (!body) return;
+    const open = body.classList.toggle('d-none') === false;
+    header.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 function updateCharts() {
     // Department Chart
     const departmentCtx = document.getElementById('departmentChart').getContext('2d');
     new Chart(departmentCtx, {
         type: 'doughnut',
         data: {
-            labels: @json($contractsByDepartment->pluck('department')->map(fn($d) => ucfirst(str_replace('_', ' ', $d)))),
+            labels: @json($contractsByDepartment->pluck('department')),
             datasets: [{
                 data: @json($contractsByDepartment->pluck('count')),
                 backgroundColor: [
@@ -450,12 +610,13 @@ function applyCustomDateRange() {
     }
 }
 
-function refreshData() {
-    // Show loading state
-    const refreshBtn = event.target.closest('button');
-    const originalHtml = refreshBtn.innerHTML;
-    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
-    refreshBtn.disabled = true;
+function refreshData(e) {
+    // Show loading state if triggered by a button click
+    const refreshBtn = e ? e.currentTarget : null;
+    if (refreshBtn && refreshBtn.tagName === 'BUTTON') {
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+        refreshBtn.disabled = true;
+    }
 
     // Reload the page to refresh data
     setTimeout(() => {

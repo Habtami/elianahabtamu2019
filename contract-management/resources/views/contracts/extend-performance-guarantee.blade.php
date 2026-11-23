@@ -182,7 +182,7 @@
                                 <tr>
                                     <td class="text-nowrap">
                                         <i class="far fa-clock me-1 text-muted"></i>
-                                        {{ $history->created_at->format('Y-m-d H:i:s') }}
+                                        {{ $history->created_at ? $history->created_at->format('Y-m-d H:i:s') : 'N/A' }}
                                     </td>
                                     <td>
                                         <div class="text-muted small">Amount/Date</div>

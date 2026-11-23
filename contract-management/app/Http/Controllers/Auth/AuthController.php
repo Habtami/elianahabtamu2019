@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\PasswordResetMail;
+use App\Mail\TemporaryPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\PasswordReset;
@@ -50,6 +51,19 @@ class AuthController extends Controller
 
             if (!$user->isActive()) {
                 Auth::logout();
+
+                // Log inactive user login attempt
+                \App\Models\ActivityLog::create([
+                    'activity_type' => \App\Models\ActivityLog::TYPE_FAILED_LOGIN,
+                    'user_id' => $user->id,
+                    'edited_by' => $user->name,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'severity' => \App\Models\ActivityLog::SEVERITY_WARNING,
+                    'field_name' => 'inactive_account',
+                    'reason' => 'Attempted login with inactive account'
+                ]);
+
                 return redirect()->back()
                     ->withErrors(['email' => 'Your account is inactive. Please contact administrator.'])
                     ->withInput();
@@ -57,10 +71,27 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            // Users holding a temporary password must set a new one first
+            if ($user->must_change_password) {
+                return redirect()->route('password.change')
+                    ->with('warning', 'እባክዎ መጀመሪያ ፓስዎርድዎን ይቀይሩ። Please change your password first.');
+            }
+
             // Redirect based on role
             $redirectRoute = $this->getRedirectRouteForRole($user->role);
             return redirect()->intended(route($redirectRoute));
         }
+
+        // Log failed login attempt
+        \App\Models\ActivityLog::create([
+            'activity_type' => \App\Models\ActivityLog::TYPE_FAILED_LOGIN,
+            'edited_by' => $request->email, // Since user not found or wrong password
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'severity' => \App\Models\ActivityLog::SEVERITY_WARNING,
+            'field_name' => 'invalid_credentials',
+            'reason' => 'Invalid email or password'
+        ]);
 
         return redirect()->back()
             ->withErrors(['email' => 'Invalid credentials.'])
@@ -151,34 +182,95 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
+            // Log failed password reset attempt for non-existent user
+            \App\Models\ActivityLog::create([
+                'activity_type' => \App\Models\ActivityLog::TYPE_PASSWORD_RESET_REQUEST,
+                'edited_by' => $request->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'severity' => \App\Models\ActivityLog::SEVERITY_INFO,
+                'field_name' => 'password_reset_attempt',
+                'reason' => 'Password reset requested for non-existent email'
+            ]);
+
             return back()->withErrors(['email' => 'We cannot find a user with that email address.']);
         }
 
-        // Generate temporary password
-        $temporaryPassword = 'epss@1234';
-
-        // Update user's password
-        $user->password = Hash::make($temporaryPassword);
-        $user->save();
-
-        // Send email with temporary password
-        try {
-            Mail::to($user->email)->send(new PasswordResetMail($user, $temporaryPassword));
-
-            // Log successful email sending
-            \Illuminate\Support\Facades\Log::info('Password reset email sent successfully to: ' . $user->email);
-
-            return back()->with([
-                'status' => 'SUCCESS: A temporary password has been sent to your email address (' . $user->email . '). Please check your inbox and spam folder.'
+        if (!$user->isActive()) {
+            // Log password reset attempt for inactive user
+            \App\Models\ActivityLog::create([
+                'activity_type' => \App\Models\ActivityLog::TYPE_PASSWORD_RESET_REQUEST,
+                'user_id' => $user->id,
+                'edited_by' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'severity' => \App\Models\ActivityLog::SEVERITY_WARNING,
+                'field_name' => 'password_reset_attempt',
+                'reason' => 'Password reset requested for inactive account'
             ]);
-        } catch (\Exception $e) {
-            // Log the error
-            \Illuminate\Support\Facades\Log::error('Failed to send password reset email to ' . $user->email . ': ' . $e->getMessage());
+
+            return back()->withErrors(['email' => 'Your account is inactive. Please contact administrator.']);
+        }
+
+        $temporaryPassword = Str::random(10);
+        $oldPassword = $user->password;
+        $oldMustChange = $user->must_change_password;
+
+        $user->forceFill([
+            'password' => Hash::make($temporaryPassword),
+            'must_change_password' => true,
+        ])->save();
+
+        try {
+            Mail::to($user->email)->send(new TemporaryPasswordMail($user, $temporaryPassword));
+        } catch (\Throwable $e) {
+            // Restore the previous hash so a failed send does not lock the account
+            $user->forceFill([
+                'password' => $oldPassword,
+                'must_change_password' => $oldMustChange,
+            ])->save();
+
+            \App\Models\ActivityLog::create([
+                'activity_type' => \App\Models\ActivityLog::TYPE_PASSWORD_RESET_REQUEST,
+                'user_id' => $user->id,
+                'edited_by' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'severity' => \App\Models\ActivityLog::SEVERITY_DANGER,
+                'field_name' => 'password_reset_attempt',
+                'reason' => 'Temporary password email failed: ' . $e->getMessage()
+            ]);
 
             return back()->withErrors([
-                'email' => 'FAILED: Unable to send email. Please contact ICT support at ict@epss.gov.et. Error: ' . $e->getMessage()
+                'email' => 'ጊዜያዊ ፓስዎርድ ኢሜይል መላክ አልተቻለም። እባክዎ በኋላ እንደገና ይሞክሩ ወይም አስተዳዳሪውን ያግኙ።',
             ]);
         }
+
+        \App\Models\ActivityLog::create([
+            'activity_type' => \App\Models\ActivityLog::TYPE_PASSWORD_RESET_REQUEST,
+            'user_id' => $user->id,
+            'edited_by' => $user->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'severity' => \App\Models\ActivityLog::SEVERITY_INFO,
+            'field_name' => 'password_reset_attempt',
+            'reason' => 'Temporary password sent successfully'
+        ]);
+
+        return back()->with('status', 'ጊዜያዊ ፓስዎርድ ወደ ኢሜይልዎ ተልኳል።');
+    }
+
+    /**
+     * Generate a random password
+     */
+    private function generateRandomPassword($length = 12)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $password;
     }
 
     /**
@@ -204,7 +296,9 @@ class AuthController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password)
+                    'password' => Hash::make(config('app.default_password')),
+                    'must_change_password' => true,
+                    'password_changed_at' => null,
                 ])->setRememberToken(Str::random(60));
 
                 $user->save();
@@ -223,14 +317,6 @@ class AuthController extends Controller
      */
     private function getRedirectRouteForRole($role)
     {
-        switch ($role) {
-            case User::ROLE_ADMIN:
-                return 'admin.users.index';
-            case User::ROLE_GS_MANAGER:
-            case User::ROLE_CMD_MANAGER:
-                return 'contracts.reports';
-            default:
-                return 'contracts.index';
-        }
+        return User::routeForRole($role);
     }
 }

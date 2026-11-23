@@ -168,7 +168,7 @@
                         </label>
                         <input type="password" name="password" id="password"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">Leave blank to keep current password</p>
+                        <p class="text-xs text-gray-500 mt-1">Leave blank to keep current password. A new password forces the user to change it at next login.</p>
                     </div>
 
                     <div>
@@ -208,14 +208,14 @@
                 <i class="fas fa-calendar-plus text-gray-400"></i>
                 <div>
                     <p class="text-sm text-gray-500">Created</p>
-                    <p class="text-sm font-medium">{{ $user->created_at->format('M j, Y g:i A') }}</p>
+                    <p class="text-sm font-medium">{{ $user->created_at ? $user->created_at->format('M j, Y g:i A') : 'N/A' }}</p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
                 <i class="fas fa-calendar-check text-gray-400"></i>
                 <div>
                     <p class="text-sm text-gray-500">Last Updated</p>
-                    <p class="text-sm font-medium">{{ $user->updated_at->format('M j, Y g:i A') }}</p>
+                            <p class="text-sm font-medium">{{ $user->updated_at ? $user->updated_at->format('M j, Y g:i A') : 'N/A' }}</p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">

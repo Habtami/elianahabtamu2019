@@ -18,6 +18,15 @@ class Supplier extends Model
         'address',
         'tin_number',
         'status',
+        'quality_rating',
+        'delivery_rating',
+        'cost_rating',
+        'communication_rating',
+        'overall_rating',
+        'performance_status',
+        'last_evaluation_date',
+        'created_by',
+        'created_by_name',
     ];
 
     /**
