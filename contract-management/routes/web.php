@@ -148,6 +148,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::post('/tires/{tireGive}/return', [TireGiveController::class, 'returnStore'])->name('tires.return.store');
 
     // Driver Management Routes
+    Route::get('/drivers/{driver}/history', [DriverController::class, 'history'])->name('drivers.history');
     Route::resource('drivers', DriverController::class);
     Route::patch('/drivers/{driver}/status', [DriverController::class, 'updateStatus'])->name('drivers.status');
     Route::post('/drivers/quick', [DriverController::class, 'quickStore'])->name('drivers.quick-store');

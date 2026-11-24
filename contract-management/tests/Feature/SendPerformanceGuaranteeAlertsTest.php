@@ -38,6 +38,7 @@ class SendPerformanceGuaranteeAlertsTest extends TestCase
             $table->string('activity_type');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('contract_id')->nullable();
+            $table->unsignedBigInteger('driver_id')->nullable();
             $table->string('field_name')->nullable();
             $table->text('old_value')->nullable();
             $table->text('new_value')->nullable();

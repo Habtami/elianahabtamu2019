@@ -185,7 +185,7 @@
                                                 <span class="fst-italic text-muted">"{{ $log->reason }}"</span>
                                             </div>
                                         @endif
-                                        @if($log->activity_type === 'contract_update' && $log->field_name !== 'contract')
+                                        @if(in_array($log->activity_type, ['contract_update', 'driver_update', 'driver_status']) && $log->field_name !== 'contract')
                                             <div class="mt-1 small d-flex flex-wrap gap-2">
                                                 <span class="text-danger bg-danger bg-opacity-10 px-2 rounded"><i class="fas fa-minus-circle me-1"></i>{{ Str::limit($log->getFormattedOldValue(), 30) }}</span>
                                                 <i class="fas fa-long-arrow-alt-right text-muted"></i>

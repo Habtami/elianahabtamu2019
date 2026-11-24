@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Driver;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -110,6 +112,185 @@ class DriverController extends Controller
         $totalTires = $tireGives->count();
 
         return view('drivers.show', compact('driver', 'tireGives', 'tireReturns', 'activeTires', 'totalTires'));
+    }
+
+    public function history(Driver $driver)
+    {
+        $logs = ActivityLog::where('driver_id', $driver->id)->with('actor')->latest()->get();
+        $hasCreateLog = $logs->contains('activity_type', ActivityLog::TYPE_DRIVER_CREATE);
+        $creator = ! $hasCreateLog && $driver->created_by ? User::find($driver->created_by) : null;
+        $gives = $driver->tireGives()->with(['tire', 'givenBy'])->get();
+        $returns = $driver->tireReturns()->with(['tire', 'returnedBy'])->get();
+        $events = [];
+
+        if ($driver->created_at && ! $hasCreateLog) {
+            $events[] = [
+                'id' => 'driver-'.$driver->id,
+                'type' => 'registered',
+                'date' => $driver->created_at->format('Y-m-d'),
+                'timestamp' => $driver->created_at->format('Y-m-d H:i:s'),
+                'title' => 'Driver registered',
+                'tire' => null,
+                'tire_type' => null,
+                'meta' => [],
+                'user' => $creator?->name,
+                'notes' => null,
+            ];
+        }
+
+        foreach ($logs as $log) {
+            $events[] = $this->driverAuditEvent($log);
+        }
+
+        foreach ($gives as $give) {
+            $events[] = [
+                'id' => 'give-'.$give->id,
+                'type' => 'given',
+                'date' => $give->give_date?->format('Y-m-d') ?? $give->created_at?->format('Y-m-d'),
+                'timestamp' => $give->created_at?->format('Y-m-d H:i:s')
+                    ?? $give->give_date?->format('Y-m-d 00:00:00'),
+                'title' => 'Tire assigned',
+                'tire' => $give->tire?->serial_number ?? 'Unknown tire',
+                'tire_type' => $give->tire?->tire_type,
+                'meta' => [
+                    'KM at issue' => $give->given_kilometer,
+                    'Plate' => $give->plate_number,
+                    'Status' => $give->is_returned ? 'Returned' : 'In use',
+                ],
+                'user' => $give->givenBy?->name,
+                'notes' => $give->notes,
+            ];
+        }
+
+        foreach ($returns as $return) {
+            $events[] = [
+                'id' => 'return-'.$return->id,
+                'type' => 'returned',
+                'date' => $return->return_date?->format('Y-m-d') ?? $return->created_at?->format('Y-m-d'),
+                'timestamp' => $return->created_at?->format('Y-m-d H:i:s')
+                    ?? $return->return_date?->format('Y-m-d 00:00:00'),
+                'title' => 'Tire returned',
+                'tire' => $return->serial_number ?? $return->tire?->serial_number ?? 'Unknown tire',
+                'tire_type' => $return->tire_type ?? $return->tire?->tire_type,
+                'meta' => [
+                    'Current KM' => $return->current_kilometer,
+                    'Distance' => $return->km_difference,
+                    'Plate' => $return->plate_number,
+                ],
+                'user' => $return->returnedBy?->name,
+                'notes' => $return->notes,
+            ];
+        }
+
+        $events = collect($events)
+            ->sortByDesc(fn (array $event) => $event['timestamp'] ?? '')
+            ->values()
+            ->all();
+
+        return response()->json([
+            'driver' => [
+                'name' => $driver->name,
+                'status' => $driver->status ? 'Active' : 'Inactive',
+            ],
+            'summary' => [
+                'changes' => $logs->count(),
+                'assignments' => $gives->count(),
+                'active' => $gives->where('is_returned', false)->count(),
+                'returns' => $returns->count(),
+            ],
+            'history' => $events,
+        ]);
+    }
+
+    private function driverAuditEvent(ActivityLog $log): array
+    {
+        $type = match ($log->activity_type) {
+            ActivityLog::TYPE_DRIVER_CREATE => 'created',
+            ActivityLog::TYPE_DRIVER_STATUS => 'status',
+            ActivityLog::TYPE_DRIVER_DELETE => 'deleted',
+            default => 'updated',
+        };
+
+        $title = match ($log->activity_type) {
+            ActivityLog::TYPE_DRIVER_CREATE => 'Driver registered',
+            ActivityLog::TYPE_DRIVER_STATUS => 'Status changed',
+            ActivityLog::TYPE_DRIVER_DELETE => 'Driver deleted',
+            default => $this->driverFieldLabel($log->field_name).' changed',
+        };
+
+        $meta = [];
+
+        if (in_array($log->activity_type, [ActivityLog::TYPE_DRIVER_CREATE, ActivityLog::TYPE_DRIVER_DELETE], true)) {
+            $value = $log->activity_type === ActivityLog::TYPE_DRIVER_CREATE ? $log->new_value : $log->old_value;
+            $snapshot = json_decode($value ?? '', true);
+
+            if (is_array($snapshot)) {
+                foreach ($snapshot as $field => $snapshotValue) {
+                    $formatted = $this->formatDriverAuditValue((string) $field, $snapshotValue);
+                    if ($formatted !== null) {
+                        $meta[$this->driverFieldLabel((string) $field)] = $formatted;
+                    }
+                }
+            } elseif ($value) {
+                $meta['Details'] = $value;
+            }
+        } else {
+            $meta['Before'] = $this->formatDriverAuditValue($log->field_name, $log->old_value);
+            $meta['After'] = $this->formatDriverAuditValue($log->field_name, $log->new_value);
+        }
+
+        return [
+            'id' => 'activity-'.$log->id,
+            'type' => $type,
+            'date' => $log->created_at?->format('Y-m-d'),
+            'timestamp' => $log->created_at?->format('Y-m-d H:i:s'),
+            'title' => $title,
+            'tire' => null,
+            'tire_type' => null,
+            'meta' => $meta,
+            'user' => $log->edited_by ?: $log->actor?->name,
+            'notes' => $log->reason,
+        ];
+    }
+
+    private function driverFieldLabel(?string $field): string
+    {
+        return match ($field) {
+            'name' => 'Name',
+            'license_number' => 'License number',
+            'phone' => 'Phone',
+            'email' => 'Email',
+            'photo' => 'Photo',
+            'license_expiry' => 'License expiry',
+            'status' => 'Status',
+            'driver' => 'Driver details',
+            default => ucfirst(str_replace('_', ' ', $field ?? 'details')),
+        };
+    }
+
+    private function formatDriverAuditValue(?string $field, $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($field === 'status') {
+            if (in_array($value, ['Active', 'Inactive'], true)) {
+                return $value;
+            }
+
+            return in_array($value, [true, 1, '1', 'true'], true) ? 'Active' : 'Inactive';
+        }
+
+        if ($field === 'license_expiry') {
+            return substr((string) $value, 0, 10);
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'Yes' : 'No';
+        }
+
+        return is_scalar($value) ? (string) $value : null;
     }
 
     public function edit(Driver $driver)

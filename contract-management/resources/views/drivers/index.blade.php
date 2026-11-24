@@ -740,6 +740,132 @@
     .tsr-status-footer { gap: 0.65rem; }
     .tsr-status-footer button:disabled { opacity: 0.65; cursor: wait; }
 
+    /* ---------- history modal ---------- */
+    .tsr-history-modal { max-width: 760px; }
+    .tsr-history-body { padding: 1.25rem 1.4rem; }
+    .tsr-history-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.65rem;
+        margin-bottom: 1.25rem;
+    }
+    .tsr-history-stat {
+        padding: 0.75rem;
+        border: 1px solid var(--tsr-border);
+        border-radius: var(--tsr-radius-sm);
+        background: #f8fafc;
+    }
+    .tsr-history-stat > span {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: var(--tsr-text-muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .tsr-history-stat strong { font-size: 1rem; color: var(--tsr-text-main); }
+    .tsr-history-stat .tsr-status-badge { font-size: 0.72rem; }
+    .tsr-history-content { min-height: 120px; }
+    .tsr-history-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        min-height: 150px;
+        padding: 2rem 1rem;
+        color: var(--tsr-text-muted);
+        text-align: center;
+        font-size: 0.88rem;
+    }
+    .tsr-history-state svg { width: 28px; height: 28px; color: var(--tsr-text-light); }
+    .tsr-history-state.tsr-error { color: var(--tsr-danger); }
+    .tsr-history-state.tsr-error svg { color: var(--tsr-danger); }
+    .tsr-history-list { list-style: none; margin: 0; padding: 0; position: relative; }
+    .tsr-history-list::before {
+        content: "";
+        position: absolute;
+        left: 19px;
+        top: 20px;
+        bottom: 20px;
+        width: 2px;
+        background: var(--tsr-border);
+    }
+    .tsr-history-item { position: relative; display: flex; gap: 0.9rem; padding-bottom: 1rem; }
+    .tsr-history-item:last-child { padding-bottom: 0; }
+    .tsr-history-marker {
+        width: 40px; height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--tsr-border);
+        border-radius: 50%;
+        background: #fff;
+        color: var(--tsr-text-muted);
+        flex: none;
+        z-index: 1;
+    }
+    .tsr-history-marker svg { width: 17px; height: 17px; }
+    .tsr-history-registered .tsr-history-marker,
+    .tsr-history-created .tsr-history-marker { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+    .tsr-history-updated .tsr-history-marker { background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe; }
+    .tsr-history-status .tsr-history-marker { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .tsr-history-deleted .tsr-history-marker { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .tsr-history-given .tsr-history-marker { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .tsr-history-returned .tsr-history-marker { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .tsr-history-card {
+        flex: 1;
+        min-width: 0;
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--tsr-border);
+        border-radius: var(--tsr-radius-sm);
+        background: #fff;
+    }
+    .tsr-history-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .tsr-history-card-header strong { font-size: 0.88rem; color: var(--tsr-text-main); }
+    .tsr-history-card-header time {
+        color: var(--tsr-text-muted);
+        font-size: 0.72rem;
+        white-space: nowrap;
+    }
+    .tsr-history-tire { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.45rem; }
+    .tsr-history-serial {
+        padding: 0.18rem 0.45rem;
+        border-radius: 4px;
+        background: #f1f5f9;
+        color: var(--tsr-text-main);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.76rem;
+        font-weight: 600;
+    }
+    .tsr-history-tire-type { color: var(--tsr-text-muted); font-size: 0.76rem; }
+    .tsr-history-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.65rem; }
+    .tsr-history-meta span {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background: #f8fafc;
+        color: var(--tsr-text-muted);
+        font-size: 0.72rem;
+    }
+    .tsr-history-meta strong { color: var(--tsr-text-main); font-weight: 600; }
+    .tsr-history-user { margin-top: 0.65rem; color: var(--tsr-text-muted); font-size: 0.74rem; }
+    .tsr-history-notes {
+        margin-top: 0.65rem;
+        padding-top: 0.6rem;
+        border-top: 1px solid var(--tsr-border);
+        color: var(--tsr-text-muted);
+        font-size: 0.76rem;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
     @media (max-width: 700px) {
         .tsr-page { padding: 1rem; }
         .tsr-top-nav, .tsr-title-area { align-items: flex-start; }
@@ -751,6 +877,8 @@
         .tsr-modal-overlay { padding: 0.75rem; }
         .tsr-modal { max-height: 92vh; }
         .tsr-status-options { grid-template-columns: 1fr; }
+        .tsr-history-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .tsr-history-card-header { flex-direction: column; gap: 0.25rem; }
         .tsr-modal-table th:nth-child(2), .tsr-modal-table td:nth-child(2),
         .tsr-modal-table th:nth-child(3), .tsr-modal-table td:nth-child(3) { display: none; }
         .tsr-modal-table th, .tsr-modal-table td { padding: 0.65rem 0.9rem; }
@@ -987,6 +1115,13 @@
                             </td>
                             <td>
                                 <div class="tsr-action-cell">
+                                    <button type="button" class="tsr-btn-icon" title="View driver history"
+                                            aria-label="View history for {{ $driver->name }}" aria-haspopup="dialog"
+                                            data-history-action
+                                            data-driver-name="{{ $driver->name }}"
+                                            data-history-url="{{ route('drivers.history', $driver) }}">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+                                    </button>
                                     @if(auth()->user()->canEditDrivers())
                                     <button type="button" class="tsr-btn-icon" title="Change driver status"
                                             aria-label="Change status for {{ $driver->name }}" aria-haspopup="dialog"
@@ -1197,6 +1332,47 @@
     </div>
     @endif
 
+    <div class="tsr-modal-overlay" id="driverHistoryModal" role="dialog" aria-modal="true" aria-labelledby="driverHistoryModalTitle" aria-hidden="true">
+        <div class="tsr-modal tsr-history-modal">
+            <div class="tsr-modal-header">
+                <div>
+                    <h3 id="driverHistoryModalTitle">Driver History</h3>
+                    <p class="tsr-modal-subtitle" id="driverHistorySubtitle">Registration, profile/status changes, and tire assignment/return records.</p>
+                </div>
+                <button type="button" class="tsr-modal-close" id="driverHistoryModalClose" aria-label="Close">✕</button>
+            </div>
+            <div class="tsr-modal-body tsr-history-body">
+                <div class="tsr-history-summary">
+                    <div class="tsr-history-stat">
+                        <span>Status</span>
+                        <strong><span class="tsr-status-badge tsr-status-off" id="driverHistoryStatus">—</span></strong>
+                    </div>
+                    <div class="tsr-history-stat">
+                        <span>Assignments</span>
+                        <strong id="driverHistoryAssignments">—</strong>
+                    </div>
+                    <div class="tsr-history-stat">
+                        <span>Active tires</span>
+                        <strong id="driverHistoryActive">—</strong>
+                    </div>
+                    <div class="tsr-history-stat">
+                        <span>Returns</span>
+                        <strong id="driverHistoryReturns">—</strong>
+                    </div>
+                </div>
+                <div class="tsr-history-content" id="driverHistoryContent" aria-live="polite">
+                    <div class="tsr-history-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                        <span>Loading history...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="tsr-modal-footer">
+                <button type="button" class="tsr-btn-action tsr-btn-white" id="driverHistoryDone">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="tsr-toast" id="tsrToast" role="status" aria-live="polite">Saved</div>
 </div>
 @endsection
@@ -1295,6 +1471,166 @@
                 if (statusSave) {
                     statusSave.disabled = true;
                     statusSave.textContent = 'Saving...';
+                }
+            });
+        }
+
+        const historyModal = document.getElementById('driverHistoryModal');
+        if (historyModal) {
+            const historyBody = historyModal.querySelector('.tsr-modal-body');
+            const historySubtitle = document.getElementById('driverHistorySubtitle');
+            const historyContent = document.getElementById('driverHistoryContent');
+            const historyStatus = document.getElementById('driverHistoryStatus');
+            const historyAssignments = document.getElementById('driverHistoryAssignments');
+            const historyActive = document.getElementById('driverHistoryActive');
+            const historyReturns = document.getElementById('driverHistoryReturns');
+            const historyClose = document.getElementById('driverHistoryModalClose');
+            const historyDone = document.getElementById('driverHistoryDone');
+            const historyIcons = {
+                registered: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+                created: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+                updated: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>',
+                status: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9l3-3"/><path d="m11 7 3 3"/><path d="M4 17h9l-3 3"/><path d="m13 17-3-3"/></svg>',
+                deleted: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>',
+                given: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
+                returned: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 14-4-4 4-4"/><path d="M5 10h9a5 5 0 0 1 0 10h-2"/></svg>'
+            };
+            let historyTrigger = null;
+            let historyRequestId = 0;
+
+            const escapeHistoryHtml = function (value) {
+                return String(value ?? '').replace(/[&<>"']/g, function (character) {
+                    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[character];
+                });
+            };
+
+            const formatHistoryDate = function (value) {
+                if (!value) return '—';
+                const parts = String(value).split('-');
+                if (parts.length === 3) {
+                    const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                    if (!Number.isNaN(date.getTime())) {
+                        return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+                    }
+                }
+                return String(value);
+            };
+
+            const formatHistoryTimestamp = function (value) {
+                if (!value) return '—';
+                const parts = String(value).split(' ');
+                const date = formatHistoryDate(parts[0]);
+                if (!parts[1]) return date;
+
+                const timeParts = parts[1].split(':').map(Number);
+                const time = new Date(2000, 0, 1, timeParts[0], timeParts[1]);
+                if (Number.isNaN(time.getTime())) return date;
+
+                return date + ' · ' + time.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
+            };
+
+            const formatHistoryValue = function (value) {
+                if (value === null || value === undefined || value === '') return null;
+                return typeof value === 'number' ? value.toLocaleString() : String(value);
+            };
+
+            const renderHistoryState = function (message, isError) {
+                const icon = isError
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+                historyContent.innerHTML = '<div class="tsr-history-state' + (isError ? ' tsr-error' : '') + '">' + icon +
+                    '<span>' + escapeHistoryHtml(message) + '</span></div>';
+            };
+
+            const renderHistoryEvent = function (item) {
+                const type = Object.prototype.hasOwnProperty.call(historyIcons, item.type) ? item.type : 'registered';
+                const meta = Object.entries(item.meta || {}).map(function ([label, value]) {
+                    const formatted = formatHistoryValue(value);
+                    return formatted === null ? '' : '<span>' + escapeHistoryHtml(label) + ': <strong>' + escapeHistoryHtml(formatted) + '</strong></span>';
+                }).join('');
+                const tire = item.tire
+                    ? '<div class="tsr-history-tire"><span class="tsr-history-serial">' + escapeHistoryHtml(item.tire) + '</span>' +
+                      (item.tire_type ? '<span class="tsr-history-tire-type">' + escapeHistoryHtml(item.tire_type) + '</span>' : '') + '</div>'
+                    : '';
+                const user = item.user
+                    ? '<div class="tsr-history-user">Recorded by ' + escapeHistoryHtml(item.user) + '</div>'
+                    : '';
+                const notes = item.notes
+                    ? '<div class="tsr-history-notes">' + escapeHistoryHtml(item.notes) + '</div>'
+                    : '';
+
+                return '<li class="tsr-history-item tsr-history-' + type + '">' +
+                    '<span class="tsr-history-marker">' + historyIcons[type] + '</span>' +
+                    '<article class="tsr-history-card">' +
+                        '<div class="tsr-history-card-header"><strong>' + escapeHistoryHtml(item.title) + '</strong>' +
+                        '<time datetime="' + escapeHistoryHtml(item.timestamp || item.date || '') + '">' + formatHistoryTimestamp(item.timestamp || item.date) + '</time></div>' +
+                        tire + (meta ? '<div class="tsr-history-meta">' + meta + '</div>' : '') + user + notes +
+                    '</article>' +
+                '</li>';
+            };
+
+            const loadDriverHistory = async function (trigger) {
+                const requestId = ++historyRequestId;
+                historySubtitle.textContent = trigger.dataset.driverName + ' · profile/status changes and tire records';
+                historyStatus.textContent = '—';
+                historyStatus.className = 'tsr-status-badge tsr-status-off';
+                historyAssignments.textContent = '—';
+                historyActive.textContent = '—';
+                historyReturns.textContent = '—';
+                renderHistoryState('Loading history...', false);
+
+                try {
+                    const response = await fetch(trigger.dataset.historyUrl, {headers: {'Accept': 'application/json'}});
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const data = await response.json();
+                    if (requestId !== historyRequestId) return;
+
+                    historyStatus.textContent = data.driver?.status || '—';
+                    historyStatus.className = 'tsr-status-badge ' + (data.driver?.status === 'Active' ? 'tsr-status-on' : 'tsr-status-off');
+                    historyAssignments.textContent = data.summary?.assignments ?? '—';
+                    historyActive.textContent = data.summary?.active ?? '—';
+                    historyReturns.textContent = data.summary?.returns ?? '—';
+
+                    const events = Array.isArray(data.history) ? data.history : [];
+                    historyContent.innerHTML = events.length
+                        ? '<ol class="tsr-history-list">' + events.map(renderHistoryEvent).join('') + '</ol>'
+                        : '';
+                    if (!events.length) renderHistoryState('No history records found.', false);
+                } catch (error) {
+                    if (requestId !== historyRequestId) return;
+                    renderHistoryState('Unable to load history. Close and try again.', true);
+                }
+            };
+
+            const openHistoryModal = function (trigger) {
+                historyTrigger = trigger;
+                historyModal.classList.add('tsr-open');
+                historyModal.setAttribute('aria-hidden', 'false');
+                historyBody.scrollTop = 0;
+                document.body.style.overflow = 'hidden';
+                historyClose.focus();
+                loadDriverHistory(trigger);
+            };
+
+            const closeHistoryModal = function () {
+                historyRequestId++;
+                historyModal.classList.remove('tsr-open');
+                historyModal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (historyTrigger) historyTrigger.focus();
+            };
+
+            document.querySelectorAll('[data-history-action]').forEach(function (button) {
+                button.addEventListener('click', function () { openHistoryModal(button); });
+            });
+            historyClose.addEventListener('click', closeHistoryModal);
+            historyDone.addEventListener('click', closeHistoryModal);
+            historyModal.addEventListener('click', function (event) {
+                if (event.target === historyModal) closeHistoryModal();
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && historyModal.classList.contains('tsr-open')) {
+                    closeHistoryModal();
                 }
             });
         }

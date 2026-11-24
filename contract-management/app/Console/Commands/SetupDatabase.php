@@ -11,21 +11,23 @@ use Illuminate\Support\Facades\Schema;
 class SetupDatabase extends Command
 {
     protected $signature = 'setup:database';
+
     protected $description = 'Setup the complete database structure for Contract Management System';
 
     public function handle()
     {
         $this->info('=== Contract Management System Database Setup ===');
 
-        if (!$this->confirm('This will modify your database structure. Continue?')) {
+        if (! $this->confirm('This will modify your database structure. Continue?')) {
             $this->info('Setup cancelled.');
+
             return;
         }
 
         $this->setupDatabase();
         $this->createDefaultUsers();
-        
-        $this->info(PHP_EOL . '✅ Database setup completed successfully!');
+
+        $this->info(PHP_EOL.'✅ Database setup completed successfully!');
         $this->info('You can now login with:');
         $this->info('Email: admin@epss.gov.et');
         $this->info('Password: admin123');
@@ -33,7 +35,7 @@ class SetupDatabase extends Command
 
     private function setupDatabase()
     {
-        $this->info(PHP_EOL . 'Setting up database structure...');
+        $this->info(PHP_EOL.'Setting up database structure...');
 
         DB::transaction(function () {
             // Disable foreign key checks
@@ -58,7 +60,7 @@ class SetupDatabase extends Command
         $this->info('Updating users table...');
 
         // Add role column if not exists
-        if (!Schema::hasColumn('users', 'role')) {
+        if (! Schema::hasColumn('users', 'role')) {
             DB::statement("
                 ALTER TABLE users 
                 ADD COLUMN role ENUM('admin', 'general_service', 'cmd', 'finance', 'gs_manager', 'cmd_manager') 
@@ -69,7 +71,7 @@ class SetupDatabase extends Command
         }
 
         // Add department column if not exists
-        if (!Schema::hasColumn('users', 'department')) {
+        if (! Schema::hasColumn('users', 'department')) {
             DB::statement("
                 ALTER TABLE users 
                 ADD COLUMN department ENUM('cmd', 'general_service', 'finance') 
@@ -80,12 +82,12 @@ class SetupDatabase extends Command
         }
 
         // Add status column if not exists
-        if (!Schema::hasColumn('users', 'status')) {
-            DB::statement("
+        if (! Schema::hasColumn('users', 'status')) {
+            DB::statement('
                 ALTER TABLE users 
                 ADD COLUMN status BOOLEAN NOT NULL DEFAULT true
                 AFTER department
-            ");
+            ');
             $this->info('✓ Added status column');
         }
     }
@@ -94,7 +96,7 @@ class SetupDatabase extends Command
     {
         $this->info('Creating contracts table...');
 
-        if (!Schema::hasTable('contracts')) {
+        if (! Schema::hasTable('contracts')) {
             DB::statement("
                 CREATE TABLE contracts (
                     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -130,20 +132,28 @@ class SetupDatabase extends Command
     {
         $this->info('Creating activity_logs table...');
 
-        if (!Schema::hasTable('activity_logs')) {
+        if (! Schema::hasTable('activity_logs')) {
             DB::statement("
                 CREATE TABLE activity_logs (
                     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    contract_id INT UNSIGNED NOT NULL,
+                    user_id INT UNSIGNED NULL,
+                    activity_type VARCHAR(255) NOT NULL DEFAULT 'contract_update',
+                    severity ENUM('info', 'warning', 'danger') NOT NULL DEFAULT 'info',
+                    contract_id INT UNSIGNED NULL,
+                    driver_id INT UNSIGNED NULL,
                     field_name VARCHAR(255) NOT NULL,
                     old_value TEXT,
                     new_value TEXT,
+                    ip_address VARCHAR(45) NULL,
+                    user_agent TEXT NULL,
                     edited_by VARCHAR(255) NOT NULL,
                     reason TEXT,
                     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
                     FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
-                    INDEX idx_contract_id (contract_id)
+                    INDEX idx_contract_id (contract_id),
+                    INDEX idx_driver_id (driver_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
             $this->info('✓ Created activity_logs table');
@@ -154,7 +164,7 @@ class SetupDatabase extends Command
 
     private function createDefaultUsers()
     {
-        $this->info(PHP_EOL . 'Creating default users...');
+        $this->info(PHP_EOL.'Creating default users...');
 
         $users = [
             [
@@ -215,7 +225,7 @@ class SetupDatabase extends Command
 
         foreach ($users as $userData) {
             $existingUser = User::where('email', $userData['email'])->first();
-            
+
             if ($existingUser) {
                 // Update existing user
                 $existingUser->update([
