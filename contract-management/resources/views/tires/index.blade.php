@@ -1379,14 +1379,43 @@
                     <!-- Driver Name -->
                     <div class="mb-4">
                         <label for="give_driver" class="form-label required">Driver Name</label>
-                        <div class="autocomplete-container">
-                            <input type="text" id="give_driver" name="driver_name" value="{{ old('driver_name') }}" class="form-input" placeholder="Start typing driver name..." autocomplete="off" required>
-                            <input type="hidden" id="give_driver_id" name="driver_id">
-                            <div id="give-driver-results" class="autocomplete-results"></div>
-                        </div>
+                        <select id="give_driver" name="driver_id" class="form-input" required>
+                            <option value="">Select Driver</option>
+                            @foreach(($driversList ?? collect()) as $driver)
+                                <option value="{{ $driver->id }}"
+                                        data-name="{{ $driver->name }}"
+                                        @selected((string) old('driver_id') === (string) $driver->id)>
+                                    {{ $driver->name }}{{ $driver->phone ? ' — ' . $driver->phone : '' }}
+                                </option>
+                            @endforeach
+                            @if(auth()->user()->canPerformTireOperations() || auth()->user()->canEditDrivers())
+                                <option value="__new__">➕ Register new driver…</option>
+                            @endif
+                        </select>
+                        <input type="hidden" id="give_driver_name" name="driver_name" value="{{ old('driver_name') }}">
                         @error('driver_id')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                        @error('driver_name')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+
+                        <div id="give-new-driver" class="mt-3 hidden">
+                            <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-3">
+                                <p class="text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user-plus mr-1"></i> Register New Driver
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <input type="text" id="new_driver_name" class="form-input" placeholder="Full name *" autocomplete="off">
+                                    <input type="text" id="new_driver_phone" class="form-input" placeholder="Phone" autocomplete="off">
+                                    <input type="text" id="new_driver_license" class="form-input" placeholder="License number" autocomplete="off">
+                                </div>
+                                <div id="new-driver-error" class="text-sm text-red-500 mt-2" style="display: none;"></div>
+                                <button type="button" id="new-driver-save" class="btn btn-primary mt-2">
+                                    <i class="fas fa-user-plus mr-1"></i> Register &amp; Select
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Plate Number -->
@@ -1859,52 +1888,101 @@
             const closeGiveBtn = giveModal.querySelector('.tire-modal-close');
             if (closeGiveBtn) closeGiveBtn.addEventListener('click', closeGiveModal);
 
-            // Driver autocomplete in give modal
-            const driverInput = giveModal.querySelector('#give_driver');
-            const driverIdInput = giveModal.querySelector('#give_driver_id');
-            const driverResults = giveModal.querySelector('#give-driver-results');
-            let driverTimeout;
+            // Driver dropdown + inline registration
+            const driverSelect = giveModal.querySelector('#give_driver');
+            const driverNameHidden = giveModal.querySelector('#give_driver_name');
+            const newDriverPanel = giveModal.querySelector('#give-new-driver');
+            const newDriverName = giveModal.querySelector('#new_driver_name');
+            const newDriverPhone = giveModal.querySelector('#new_driver_phone');
+            const newDriverLicense = giveModal.querySelector('#new_driver_license');
+            const newDriverError = giveModal.querySelector('#new-driver-error');
+            const newDriverSave = giveModal.querySelector('#new-driver-save');
 
-            if (driverInput && driverResults) {
-                driverInput.addEventListener('input', function() {
-                    const q = this.value.trim();
-                    clearTimeout(driverTimeout);
-                    if (q.length < 2) { driverResults.style.display = 'none'; return; }
-                    driverTimeout = setTimeout(() => {
-                        fetch('/api/drivers/search?q=' + encodeURIComponent(q), {
-                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            function selectedDriverName() {
+                if (!driverSelect || !driverSelect.value || driverSelect.value === '__new__') return '';
+                const opt = driverSelect.options[driverSelect.selectedIndex];
+                return opt ? (opt.dataset.name || opt.textContent.trim()) : '';
+            }
+
+            function syncDriverSelection() {
+                const isNew = driverSelect && driverSelect.value === '__new__';
+                if (driverNameHidden) driverNameHidden.value = isNew ? '' : selectedDriverName();
+                if (newDriverPanel) newDriverPanel.classList.toggle('hidden', !isNew);
+                if (isNew && newDriverName) newDriverName.focus();
+            }
+
+            if (driverSelect) {
+                driverSelect.addEventListener('change', syncDriverSelection);
+                syncDriverSelection();
+            }
+
+            function showNewDriverError(message) {
+                if (!newDriverError) return;
+                newDriverError.textContent = message || '';
+                newDriverError.style.display = message ? 'block' : 'none';
+            }
+
+            function addDriverOption(driver) {
+                if (!driverSelect) return;
+                const value = String(driver.id);
+                let option = Array.from(driverSelect.options).find(o => o.value === value);
+                if (!option) {
+                    option = document.createElement('option');
+                    option.value = value;
+                    const newOption = driverSelect.querySelector('option[value="__new__"]');
+                    driverSelect.insertBefore(option, newOption || null);
+                }
+                option.dataset.name = driver.name;
+                option.textContent = driver.name + (driver.phone ? ' — ' + driver.phone : '');
+                driverSelect.value = value;
+                syncDriverSelection();
+            }
+
+            if (newDriverSave) {
+                newDriverSave.addEventListener('click', function () {
+                    const name = ((newDriverName && newDriverName.value) || '').trim();
+                    showNewDriverError('');
+                    if (!name) {
+                        showNewDriverError('Driver name is required.');
+                        if (newDriverName) newDriverName.focus();
+                        return;
+                    }
+
+                    newDriverSave.disabled = true;
+                    const originalHtml = newDriverSave.innerHTML;
+                    newDriverSave.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Registering...';
+
+                    fetch('{{ route('drivers.quick-store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            phone: ((newDriverPhone && newDriverPhone.value) || '').trim() || null,
+                            license_number: ((newDriverLicense && newDriverLicense.value) || '').trim() || null
                         })
-                        .then(r => r.json())
-                        .then(data => {
-                            driverResults.innerHTML = '';
-                            const drivers = Array.isArray(data) ? data : (data.data || []);
-                            drivers.forEach(d => {
-                                const item = document.createElement('div');
-                                item.className = 'autocomplete-item';
-                                item.innerHTML = '<div class="font-medium">' + escapeHtml(d.name) + '</div>';
-                                item.onclick = () => {
-                                    driverInput.value = d.name;
-                                    driverIdInput.value = d.id;
-                                    driverResults.style.display = 'none';
-                                };
-                                driverResults.appendChild(item);
-                            });
-                            // Add new driver option
-                            const newItem = document.createElement('div');
-                            newItem.className = 'autocomplete-item';
-                            newItem.innerHTML = '<div class="font-medium text-green-600">Add new: "' + escapeHtml(driverInput.value) + '"</div>';
-                            newItem.onclick = () => {
-                                driverIdInput.value = '';
-                                driverResults.style.display = 'none';
-                            };
-                            driverResults.appendChild(newItem);
-                            driverResults.style.display = 'block';
-                        });
-                    }, 300);
-                });
-
-                driverInput.addEventListener('blur', () => {
-                    setTimeout(() => { driverResults.style.display = 'none'; }, 200);
+                    })
+                    .then(async (res) => {
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            const first = data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Could not register the driver.');
+                            showNewDriverError(first);
+                            return;
+                        }
+                        addDriverOption(data);
+                        if (newDriverName) newDriverName.value = '';
+                        if (newDriverPhone) newDriverPhone.value = '';
+                        if (newDriverLicense) newDriverLicense.value = '';
+                    })
+                    .catch(() => showNewDriverError('Could not register the driver. Please try again.'))
+                    .finally(() => {
+                        newDriverSave.disabled = false;
+                        newDriverSave.innerHTML = originalHtml;
+                    });
                 });
             }
 
@@ -1979,7 +2057,7 @@
 
                      // Client-side validation
                      let hasError = false;
-                     const requiredFields = ['tire_serial', 'tire_type', 'driver_name', 'plate_number', 'give_date', 'given_kilometer', 'photo'];
+                     const requiredFields = ['tire_serial', 'tire_type', 'plate_number', 'give_date', 'given_kilometer', 'photo'];
                      requiredFields.forEach(field => {
                          const input = giveForm.querySelector('[name="' + field + '"]');
                          if (input) {
@@ -1990,6 +2068,16 @@
                              }
                          }
                      });
+
+                     if (driverSelect) {
+                         if (!driverSelect.value) {
+                             showFieldError(driverSelect, 'Please select a driver.');
+                             hasError = true;
+                         } else if (driverSelect.value === '__new__') {
+                             showFieldError(driverSelect, 'Register the new driver first, then select them.');
+                             hasError = true;
+                         }
+                     }
 
                      // Check serial uniqueness
                      if (serialWarningEl && serialWarningEl.style.display === 'block') {

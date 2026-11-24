@@ -148,6 +148,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     // Driver Management Routes
     Route::resource('drivers', DriverController::class);
     Route::post('/drivers/{driver}/toggle-status', [DriverController::class, 'toggleStatus'])->name('drivers.toggleStatus');
+    Route::post('/drivers/quick', [DriverController::class, 'quickStore'])->name('drivers.quick-store');
 
     // Battery Given and Return Routes
     Route::get('/batteries', [BatteryController::class, 'index'])->name('batteries.index');

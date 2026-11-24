@@ -65,10 +65,11 @@ class TireController extends Controller
         })->count();
         $activeDriversCount = Driver::active()->count();
         $tiresOutCount = $givenOutTires;
+        $driversList = Driver::active()->orderBy('name')->get(['id', 'name', 'phone']);
 
         return view('tires.index', compact(
             'tires', 'tireTypes', 'totalTires', 'activeTires', 'inactiveTires', 'givenOutTires',
-            'returnedTires', 'activeDriversCount', 'tiresOutCount'
+            'returnedTires', 'activeDriversCount', 'tiresOutCount', 'driversList'
         ));
     }
 

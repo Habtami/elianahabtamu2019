@@ -70,7 +70,7 @@ class TireGiveController extends Controller
             $driver = Driver::firstOrCreate(
                 ['name' => $validated['driver_name']],
                 [
-                    'is_active' => true,
+                    'status' => true,
                     'created_by' => $user->id,
                 ]
             );

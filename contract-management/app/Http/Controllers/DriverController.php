@@ -185,6 +185,39 @@ class DriverController extends Controller
         return back()->with('success', 'Driver status updated successfully.');
     }
 
+    public function quickStore(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->canPerformTireOperations() && !$user->canEditDrivers()) {
+            return response()->json(['message' => 'You are not authorized to register drivers.'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'license_number' => 'nullable|string|max:255',
+        ]);
+
+        $name = trim($validated['name']);
+        $driver = Driver::whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
+
+        if (!$driver) {
+            $driver = Driver::create([
+                'name' => $name,
+                'phone' => $validated['phone'] ?? null,
+                'license_number' => $validated['license_number'] ?? null,
+                'status' => true,
+                'created_by' => $user->id,
+            ]);
+        }
+
+        return response()->json([
+            'id' => $driver->id,
+            'name' => $driver->name,
+            'phone' => $driver->phone,
+        ]);
+    }
+
     public function searchDrivers(Request $request)
     {
         $query = $request->get('q', '');
