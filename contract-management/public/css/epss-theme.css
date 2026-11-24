@@ -194,6 +194,7 @@ a:hover {
 .kpi-card.green  { border-left-color: #059669; }
 .kpi-card.yellow { border-left-color: #d97706; }
 .kpi-card.red    { border-left-color: #dc2626; }
+.kpi-card.purple { border-left-color: #7c3aed; }
 
 .kpi-title {
   font-size: 0.85rem;
@@ -229,6 +230,7 @@ a:hover {
 .kpi-card.green  .kpi-icon { color: #059669; }
 .kpi-card.yellow .kpi-icon { color: #d97706; }
 .kpi-card.red    .kpi-icon { color: #dc2626; }
+.kpi-card.purple .kpi-icon { color: #7c3aed; }
 
 .stat-card-icon {
   width: 46px;

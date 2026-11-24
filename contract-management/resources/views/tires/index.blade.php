@@ -50,66 +50,6 @@
         letter-spacing: 0.04em;
     }
 
-    /* ---------- STAT CARDS ---------- */
-    .stat-card {
-        background: #fff;
-        border-radius: 1rem;
-        padding: 1.25rem 1.4rem;
-        border: 1px solid #EDF2F7;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 3px;
-        border-radius: 1rem 1rem 0 0;
-    }
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.12);
-        border-color: transparent;
-    }
-    .stat-card.blue::before   { background: linear-gradient(90deg, #1C75BC, #3B82F6); }
-    .stat-card.amber::before  { background: linear-gradient(90deg, #F59E0B, #F97316); }
-    .stat-card.purple::before { background: linear-gradient(90deg, #8B5CF6, #A855F7); }
-    .stat-card.green::before  { background: linear-gradient(90deg, #10B981, #059669); }
-
-    .stat-icon {
-        width: 46px; height: 46px;
-        border-radius: 0.8rem;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.1rem;
-        flex-shrink: 0;
-    }
-    .stat-icon.blue   { background: #E8F4FD; color: #1C75BC; }
-    .stat-icon.amber  { background: #FEF3C7; color: #D97706; }
-    .stat-icon.purple { background: #F3E8FF; color: #7C3AED; }
-    .stat-icon.green  { background: #D1FAE5; color: #059669; }
-
-    .stat-label {
-        font-size: 0.72rem;
-        color: #64748B;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
-    .stat-value {
-        font-size: 1.7rem;
-        font-weight: 800;
-        color: #1E293B;
-        line-height: 1.15;
-        letter-spacing: -0.02em;
-    }
-    .stat-meta {
-        font-size: 0.75rem;
-        color: #94A3B8;
-        margin-top: 0.25rem;
-    }
-    .stat-meta strong { color: #64748B; font-weight: 600; }
-
     /* ---------- ACTION BUTTONS ---------- */
     .action-btn {
         display: inline-flex;
@@ -1110,48 +1050,40 @@
         {{-- ========== STAT CARDS ========== --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
 
-            <div class="stat-card blue">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="stat-label">Total Tires</div>
-                        <div class="stat-value">{{ $totalTires }}</div>
-                        <div class="stat-meta"><strong>{{ $activeTires }}</strong> active</div>
-                    </div>
-                    <div class="stat-icon blue"><i class="fas fa-circle-notch" aria-hidden="true"></i></div>
+            <div class="kpi-card blue">
+                <div>
+                    <p class="kpi-title">Total Tires</p>
+                    <p class="kpi-value">{{ $totalTires }}</p>
+                    <p class="kpi-subtitle">{{ $activeTires }} active</p>
                 </div>
+                <div class="kpi-icon"><i class="fas fa-circle-notch" aria-hidden="true"></i></div>
             </div>
 
-            <div class="stat-card amber">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="stat-label">In Use</div>
-                        <div class="stat-value">{{ $givenOutTires }}</div>
-                        <div class="stat-meta">Currently given out</div>
-                    </div>
-                    <div class="stat-icon amber"><i class="fas fa-hand-holding" aria-hidden="true"></i></div>
+            <div class="kpi-card yellow">
+                <div>
+                    <p class="kpi-title">In Use</p>
+                    <p class="kpi-value">{{ $givenOutTires }}</p>
+                    <p class="kpi-subtitle">Currently given out</p>
                 </div>
+                <div class="kpi-icon"><i class="fas fa-hand-holding" aria-hidden="true"></i></div>
             </div>
 
-            <div class="stat-card green">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="stat-label">Returned</div>
-                        <div class="stat-value">{{ $returnedTires }}</div>
-                        <div class="stat-meta">Previously returned</div>
-                    </div>
-                    <div class="stat-icon green"><i class="fas fa-undo-alt" aria-hidden="true"></i></div>
+            <div class="kpi-card green">
+                <div>
+                    <p class="kpi-title">Returned</p>
+                    <p class="kpi-value">{{ $returnedTires }}</p>
+                    <p class="kpi-subtitle">Previously returned</p>
                 </div>
+                <div class="kpi-icon"><i class="fas fa-undo-alt" aria-hidden="true"></i></div>
             </div>
 
-            <div class="stat-card purple">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="stat-label">Active Drivers</div>
-                        <div class="stat-value">{{ $activeDriversCount ?? 0 }}</div>
-                        <div class="stat-meta"><strong>{{ $tiresOutCount ?? 0 }}</strong> tires out</div>
-                    </div>
-                    <div class="stat-icon purple"><i class="fas fa-user-friends" aria-hidden="true"></i></div>
+            <div class="kpi-card purple">
+                <div>
+                    <p class="kpi-title">Active Drivers</p>
+                    <p class="kpi-value">{{ $activeDriversCount ?? 0 }}</p>
+                    <p class="kpi-subtitle">{{ $tiresOutCount ?? 0 }} tires out</p>
                 </div>
+                <div class="kpi-icon"><i class="fas fa-user-friends" aria-hidden="true"></i></div>
             </div>
         </div>
 
