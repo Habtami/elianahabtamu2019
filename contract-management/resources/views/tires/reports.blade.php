@@ -809,7 +809,7 @@
             <table class="data-table" id="givesTable">
                 <thead>
                     <tr>
-                        <th scope="col">ተ.ቁ</th>
+                        <th scope="col">No</th>
                         <th scope="col">Date</th>
                         <th scope="col">Tire Type</th>
                         <th scope="col">Serial Number</th>
@@ -908,7 +908,7 @@
             <table class="data-table" id="returnsTable">
                 <thead>
                     <tr>
-                        <th scope="col">ተ.ቁ</th>
+                        <th scope="col">No</th>
                         <th scope="col">Date</th>
                         <th scope="col">Tire Type</th>
                         <th scope="col">Serial Number</th>
