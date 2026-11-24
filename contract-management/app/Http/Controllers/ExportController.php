@@ -33,9 +33,7 @@ class ExportController extends Controller
 
     public function drivers(Request $request)
     {
-        $query = Driver::withCount(['tireGives as active_tires_count' => function ($q) {
-            $q->where('is_returned', false);
-        }]);
+        $query = Driver::query();
 
         if ($request->filled('search')) {
             $search = $request->input('search');

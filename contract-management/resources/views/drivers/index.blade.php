@@ -152,6 +152,29 @@
     .tsr-kpi-content .tsr-sub { font-size: 0.78rem; color: var(--tsr-text-light); }
     .tsr-kpi-icon { opacity: 0.2; width: 30px; height: 30px; flex: none; }
     .tsr-kpi-icon svg { width: 100%; height: 100%; }
+    .tsr-kpi-card.tsr-clickable {
+        cursor: pointer;
+        text-align: left;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .tsr-kpi-card.tsr-clickable:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgb(15 23 42 / 0.08);
+        border-color: #cbd5e1;
+    }
+    .tsr-kpi-card.tsr-clickable:focus-visible {
+        outline: 2px solid var(--tsr-primary);
+        outline-offset: 2px;
+    }
+    .tsr-kpi-hint {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.35rem;
+        font-size: 0.7rem;
+        color: var(--tsr-text-light);
+    }
+    .tsr-kpi-card.tsr-clickable:hover .tsr-kpi-hint { color: var(--tsr-primary); }
 
     /* ---------- filter card ---------- */
     .tsr-filter-card {
@@ -510,6 +533,104 @@
     }
     .tsr-toast.tsr-show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ---------- KPI modal ---------- */
+    .tsr-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        z-index: 1200;
+    }
+    .tsr-modal-overlay.tsr-open { display: flex; }
+    .tsr-modal {
+        background: #fff;
+        border-radius: var(--tsr-radius-md);
+        width: 100%;
+        max-width: 840px;
+        max-height: 86vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.35);
+        overflow: hidden;
+    }
+    .tsr-modal-header {
+        padding: 1.1rem 1.4rem;
+        border-bottom: 1px solid var(--tsr-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .tsr-modal-header h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tsr-modal-close {
+        width: 34px; height: 34px;
+        border-radius: 8px;
+        border: 1px solid var(--tsr-border);
+        background: #fff;
+        color: var(--tsr-text-muted);
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .tsr-modal-close:hover { background: #f1f5f9; color: var(--tsr-text-main); }
+    .tsr-modal-body { overflow: auto; }
+    .tsr-modal-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .tsr-modal-table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8fafc;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--tsr-text-muted);
+        font-weight: 600;
+        border-bottom: 1px solid var(--tsr-border);
+        white-space: nowrap;
+    }
+    .tsr-modal-table td {
+        padding: 0.7rem 1.2rem;
+        border-bottom: 1px solid var(--tsr-border);
+        font-size: 0.85rem;
+        color: var(--tsr-text-main);
+        vertical-align: middle;
+    }
+    .tsr-modal-table tbody tr:last-child td { border-bottom: none; }
+    .tsr-modal-table tbody tr:hover { background: #f8fafc; }
+    .tsr-modal-table tbody tr.tsr-hidden { display: none; }
+    .tsr-modal-empty {
+        display: none;
+        padding: 2.5rem 1rem;
+        text-align: center;
+        color: var(--tsr-text-muted);
+        font-size: 0.92rem;
+    }
+    .tsr-modal-empty.tsr-show { display: block; }
+    .tsr-modal-footer {
+        padding: 0.9rem 1.4rem;
+        border-top: 1px solid var(--tsr-border);
+        background: #f8fafc;
+        display: flex;
+        justify-content: flex-end;
+    }
+
     @media (max-width: 700px) {
         .tsr-page { padding: 1rem; }
         .tsr-top-nav, .tsr-title-area { align-items: flex-start; }
@@ -518,6 +639,11 @@
         .tsr-search-box { min-width: 100%; }
         .tsr-data-table { min-width: 980px; }
         .tsr-table-footer { flex-direction: column; align-items: flex-start; }
+        .tsr-modal-overlay { padding: 0.75rem; }
+        .tsr-modal { max-height: 92vh; }
+        .tsr-modal-table th:nth-child(2), .tsr-modal-table td:nth-child(2),
+        .tsr-modal-table th:nth-child(3), .tsr-modal-table td:nth-child(3) { display: none; }
+        .tsr-modal-table th, .tsr-modal-table td { padding: 0.65rem 0.9rem; }
     }
 </style>
 @endsection
@@ -573,43 +699,58 @@
 
         {{-- KPI cards --}}
         <div class="tsr-kpi-grid">
-            <div class="tsr-kpi-card tsr-blue">
+            <div class="tsr-kpi-card tsr-blue tsr-clickable" data-scope="all" data-label="Total Drivers"
+                 data-count="{{ $totalDrivers }}" role="button" tabindex="0" aria-haspopup="dialog"
+                 aria-label="View all {{ $totalDrivers }} drivers">
                 <div class="tsr-kpi-content">
                     <h4>Total Drivers</h4>
                     <div class="tsr-value">{{ $totalDrivers }}</div>
                     <div class="tsr-sub">On record</div>
+                    <div class="tsr-kpi-hint">View list →</div>
                 </div>
                 <div class="tsr-kpi-icon" style="color:#3b82f6;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-green">
+            <div class="tsr-kpi-card tsr-green tsr-clickable" data-scope="active" data-label="Active Drivers"
+                 data-count="{{ $activeDrivers }}" role="button" tabindex="0" aria-haspopup="dialog"
+                 aria-label="View {{ $activeDrivers }} active drivers">
                 <div class="tsr-kpi-content">
                     <h4>Active</h4>
                     <div class="tsr-value">{{ $activeDrivers }}</div>
                     <div class="tsr-sub">Available for issue</div>
+                    <div class="tsr-kpi-hint">View list →</div>
                 </div>
                 <div class="tsr-kpi-icon" style="color:#10b981;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-slate">
+            <div class="tsr-kpi-card tsr-slate tsr-clickable" data-scope="inactive" data-label="Inactive Drivers"
+                 data-count="{{ $inactiveDrivers }}" role="button" tabindex="0" aria-haspopup="dialog"
+                 aria-label="View {{ $inactiveDrivers }} inactive drivers">
                 <div class="tsr-kpi-content">
                     <h4>Inactive</h4>
                     <div class="tsr-value">{{ $inactiveDrivers }}</div>
                     <div class="tsr-sub">Not in service</div>
+                    <div class="tsr-kpi-hint">View list →</div>
                 </div>
                 <div class="tsr-kpi-icon" style="color:#94a3b8;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-orange">
+            <div class="tsr-kpi-card tsr-orange tsr-clickable" data-scope="expiring" data-label="License Expiring"
+                 data-count="{{ $licenseExpiring }}" role="button" tabindex="0" aria-haspopup="dialog"
+                 aria-label="View {{ $licenseExpiring }} drivers with licenses expiring within 30 days">
                 <div class="tsr-kpi-content">
                     <h4>License Expiring</h4>
                     <div class="tsr-value">{{ $licenseExpiring }}</div>
                     <div class="tsr-sub">Within 30 days</div>
+                    <div class="tsr-kpi-hint">View list →</div>
                 </div>
                 <div class="tsr-kpi-icon" style="color:#f59e0b;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-red">
+            <div class="tsr-kpi-card tsr-red tsr-clickable" data-scope="expired" data-label="License Expired"
+                 data-count="{{ $licenseExpired }}" role="button" tabindex="0" aria-haspopup="dialog"
+                 aria-label="View {{ $licenseExpired }} drivers with expired licenses">
                 <div class="tsr-kpi-content">
                     <h4>License Expired</h4>
                     <div class="tsr-value">{{ $licenseExpired }}</div>
                     <div class="tsr-sub">Needs renewal</div>
+                    <div class="tsr-kpi-hint">View list →</div>
                 </div>
                 <div class="tsr-kpi-icon" style="color:#ef4444;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg></div>
             </div>
@@ -793,6 +934,93 @@
 
     </div>
 
+    {{-- KPI detail modal --}}
+    <div class="tsr-modal-overlay" id="kpiModal" role="dialog" aria-modal="true" aria-labelledby="kpiModalTitle">
+        <div class="tsr-modal">
+            <div class="tsr-modal-header">
+                <h3 id="kpiModalTitle">
+                    <span id="kpiModalLabel">Drivers</span>
+                    <span class="tsr-count-badge" id="kpiModalCount">{{ $totalDrivers }}</span>
+                </h3>
+                <button type="button" class="tsr-modal-close" id="kpiModalClose" aria-label="Close">✕</button>
+            </div>
+            <div class="tsr-modal-body">
+                <table class="tsr-modal-table">
+                    <thead>
+                        <tr>
+                            <th>DRIVER</th>
+                            <th>LICENSE</th>
+                            <th>PHONE</th>
+                            <th>LICENSE EXPIRY</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kpiModalBody">
+                        @foreach($modalDrivers as $driver)
+                        @php
+                            $expiryDate = $driver->license_expiry;
+                            $today = now()->startOfDay();
+                            $scopes = ['all', $driver->status ? 'active' : 'inactive'];
+                            if ($expiryDate) {
+                                if ($expiryDate->lt($today)) {
+                                    $scopes[] = 'expired';
+                                } elseif ($expiryDate->lte($today->copy()->addDays(30))) {
+                                    $scopes[] = 'expiring';
+                                }
+                            }
+                            $modalInitials = collect(preg_split('/\s+/', trim($driver->name)))
+                                ->filter()
+                                ->take(2)
+                                ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
+                                ->implode('');
+                        @endphp
+                        <tr data-scopes="{{ implode(' ', $scopes) }}">
+                            <td>
+                                <div class="tsr-driver-cell">
+                                    <span class="tsr-avatar">{{ $modalInitials }}</span>
+                                    <div>
+                                        <div class="tsr-driver-name">{{ $driver->name }}</div>
+                                        @if($driver->email)
+                                            <div class="tsr-driver-sub">{{ $driver->email }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if($driver->license_number)
+                                    <span class="tsr-code-badge">{{ $driver->license_number }}</span>
+                                @else
+                                    <span class="tsr-missing">Not recorded</span>
+                                @endif
+                            </td>
+                            <td>{{ $driver->phone ?? '—' }}</td>
+                            <td>
+                                @if($expiryDate)
+                                    <div class="tsr-date-main">{{ $expiryDate->format('M d, Y') }}</div>
+                                    @if(in_array('expired', $scopes, true))
+                                        <span class="tsr-days-pill tsr-overdue">Expired</span>
+                                    @elseif(in_array('expiring', $scopes, true))
+                                        <span class="tsr-days-pill tsr-warning">Expiring</span>
+                                    @endif
+                                @else
+                                    <span class="tsr-missing">Not recorded</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="tsr-status-btn {{ $driver->status ? 'tsr-status-on' : 'tsr-status-off' }}">{{ $driver->status ? 'Active' : 'Inactive' }}</span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="tsr-modal-empty" id="kpiModalEmpty">No drivers in this group.</div>
+            </div>
+            <div class="tsr-modal-footer">
+                <button type="button" class="tsr-btn-action tsr-btn-white" id="kpiModalDone">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="tsr-toast" id="tsrToast" role="status" aria-live="polite">Saved</div>
 </div>
 @endsection
@@ -837,6 +1065,62 @@
                 });
                 if (visibleCount) {
                     visibleCount.textContent = visible;
+                }
+            });
+        }
+
+        const kpiModal = document.getElementById('kpiModal');
+        if (kpiModal) {
+            const modalLabel = document.getElementById('kpiModalLabel');
+            const modalCount = document.getElementById('kpiModalCount');
+            const modalBody = document.getElementById('kpiModalBody');
+            const modalEmpty = document.getElementById('kpiModalEmpty');
+            const modalClose = document.getElementById('kpiModalClose');
+            const modalDone = document.getElementById('kpiModalDone');
+            const modalRows = modalBody ? Array.from(modalBody.querySelectorAll('tr')) : [];
+            let lastCard = null;
+
+            const openModal = function (card) {
+                const scope = card.dataset.scope;
+                let visible = 0;
+                modalRows.forEach(function (row) {
+                    const show = (row.dataset.scopes || '').split(' ').indexOf(scope) !== -1;
+                    row.classList.toggle('tsr-hidden', !show);
+                    if (show) visible++;
+                });
+                if (modalLabel) modalLabel.textContent = card.dataset.label || 'Drivers';
+                if (modalCount) modalCount.textContent = visible;
+                if (modalEmpty) modalEmpty.classList.toggle('tsr-show', visible === 0);
+                lastCard = card;
+                kpiModal.classList.add('tsr-open');
+                document.body.style.overflow = 'hidden';
+                if (modalClose) modalClose.focus();
+            };
+
+            const closeModal = function () {
+                kpiModal.classList.remove('tsr-open');
+                document.body.style.overflow = '';
+                if (lastCard) lastCard.focus();
+            };
+
+            document.querySelectorAll('.tsr-kpi-card[data-scope]').forEach(function (card) {
+                card.addEventListener('click', function () { openModal(card); });
+                card.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openModal(card);
+                    }
+                });
+            });
+
+            if (modalClose) modalClose.addEventListener('click', closeModal);
+            if (modalDone) modalDone.addEventListener('click', closeModal);
+            kpiModal.addEventListener('click', function (e) {
+                if (e.target === kpiModal) closeModal();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && kpiModal.classList.contains('tsr-open')) {
+                    closeModal();
                 }
             });
         }

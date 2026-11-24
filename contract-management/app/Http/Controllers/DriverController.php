@@ -39,11 +39,9 @@ class DriverController extends Controller
             }
         }
 
-        $drivers = $query->withCount(['tireGives as active_tires_count' => function ($q) {
-            $q->where('is_returned', false);
-        }])
-            ->latest()
-            ->paginate(10);
+        $drivers = $query->latest()->paginate(10);
+
+        $modalDrivers = Driver::orderBy('name')->get();
 
         $totalDrivers = Driver::count();
         $activeDrivers = Driver::where('status', true)->count();
@@ -57,7 +55,7 @@ class DriverController extends Controller
             ->count();
 
         return view('drivers.index', compact(
-            'drivers', 'totalDrivers', 'activeDrivers', 'inactiveDrivers',
+            'drivers', 'modalDrivers', 'totalDrivers', 'activeDrivers', 'inactiveDrivers',
             'licenseExpiring', 'licenseExpired'
         ));
     }
