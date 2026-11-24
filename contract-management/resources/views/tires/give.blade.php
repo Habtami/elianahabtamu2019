@@ -250,6 +250,34 @@
     .tsr-autocomplete-item .tsr-ac-sub { font-size: 0.75rem; color: var(--tsr-text-muted); margin-top: 0.1rem; }
     .tsr-autocomplete-item.tsr-ac-new .tsr-ac-main { color: var(--tsr-success); }
 
+    /* ---------- inline sub-panel ---------- */
+    .tsr-subpanel {
+        margin-top: 0.75rem;
+        border: 1px dashed #cbd5e1;
+        border-radius: var(--tsr-radius-sm);
+        background: #f8fafc;
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .tsr-subpanel-title { font-size: 0.8rem; font-weight: 700; color: var(--tsr-text-main); }
+    .tsr-subpanel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .tsr-mini-btn {
+        align-self: flex-start;
+        border: 0;
+        border-radius: var(--tsr-radius-sm);
+        background: var(--tsr-primary);
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.45rem 0.9rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .tsr-mini-btn:hover { background: #0369a1; }
+    .tsr-mini-btn:disabled { opacity: 0.6; cursor: default; }
+
     /* ---------- upload ---------- */
     .tsr-upload {
         display: flex;
@@ -483,21 +511,39 @@
                     <div class="tsr-form-body">
 
                         <div class="tsr-field">
-                            <label for="driver_name" class="tsr-label-row">Driver <span class="tsr-required">*</span></label>
-                            <div class="tsr-autocomplete">
-                                <input type="text" id="driver_name" name="driver_name" value="{{ old('driver_name') }}"
-                                       class="tsr-input @error('driver_name') tsr-invalid @enderror"
-                                       placeholder="Start typing a driver name..." autocomplete="off" required>
-                                <input type="hidden" id="driver_id" name="driver_id" value="{{ old('driver_id') }}">
-                                <div id="driver-autocomplete-results" class="tsr-autocomplete-results" role="listbox"></div>
-                            </div>
-                            <p class="tsr-help">Pick an existing driver or type a new name to register one.</p>
-                            @error('driver_name')
-                                <p class="tsr-error">{{ $message }}</p>
-                            @enderror
+                            <label for="driver_id" class="tsr-label-row">Driver <span class="tsr-required">*</span></label>
+                            <select id="driver_id" name="driver_id" class="tsr-input @error('driver_id') tsr-invalid @enderror" required>
+                                <option value="">Select Driver</option>
+                                @foreach($drivers->sortBy('name') as $driver)
+                                    <option value="{{ $driver->id }}"
+                                            data-name="{{ $driver->name }}"
+                                            @selected((string) old('driver_id') === (string) $driver->id)>
+                                        {{ $driver->name }}{{ $driver->phone ? ' — ' . $driver->phone : '' }}
+                                    </option>
+                                @endforeach
+                                @if(auth()->user()->canPerformTireOperations() || auth()->user()->canEditDrivers())
+                                    <option value="__new__">+ Register new driver…</option>
+                                @endif
+                            </select>
+                            <input type="hidden" id="driver_name" name="driver_name" value="{{ old('driver_name') }}">
+                            <p class="tsr-help">Choose a driver from the driver register or register a new one.</p>
                             @error('driver_id')
                                 <p class="tsr-error">{{ $message }}</p>
                             @enderror
+                            @error('driver_name')
+                                <p class="tsr-error">{{ $message }}</p>
+                            @enderror
+
+                            <div id="driver-new-panel" class="tsr-subpanel" hidden>
+                                <p class="tsr-subpanel-title">Register New Driver</p>
+                                <input type="text" id="new_driver_name" class="tsr-input" placeholder="Full name *" autocomplete="off">
+                                <div class="tsr-subpanel-grid">
+                                    <input type="text" id="new_driver_phone" class="tsr-input" placeholder="Phone" autocomplete="off">
+                                    <input type="text" id="new_driver_license" class="tsr-input" placeholder="License number" autocomplete="off">
+                                </div>
+                                <p class="tsr-error" id="new-driver-error" hidden></p>
+                                <button type="button" id="new-driver-save" class="tsr-mini-btn">Register &amp; Select</button>
+                            </div>
                         </div>
 
                         <div class="tsr-field">
@@ -630,7 +676,7 @@
                             </span>
                             <div>
                                 <h4>Driver Selection</h4>
-                                <p>Select a driver from the list, or type a new name and it will be registered automatically.</p>
+                                <p>Select a driver from the driver register, or choose “+ Register new driver…” to add one.</p>
                             </div>
                         </div>
                         <div class="tsr-guide-item">
@@ -680,9 +726,14 @@
 @section('scripts')
 <script>
 (function () {
-    const driverInput = document.getElementById('driver_name');
-    const driverIdInput = document.getElementById('driver_id');
-    const driverResults = document.getElementById('driver-autocomplete-results');
+    const driverSelect = document.getElementById('driver_id');
+    const driverNameHidden = document.getElementById('driver_name');
+    const driverPanel = document.getElementById('driver-new-panel');
+    const newDriverName = document.getElementById('new_driver_name');
+    const newDriverPhone = document.getElementById('new_driver_phone');
+    const newDriverLicense = document.getElementById('new_driver_license');
+    const newDriverError = document.getElementById('new-driver-error');
+    const newDriverSave = document.getElementById('new-driver-save');
     const plateInput = document.getElementById('plate_number');
     const plateResults = document.getElementById('plate-autocomplete-results');
     const photoInput = document.getElementById('photo');
@@ -692,8 +743,69 @@
     const lightbox = document.getElementById('tireLightbox');
     const lightboxImage = document.getElementById('tireLightboxImage');
 
-    let driverTimeout;
     let plateTimeout;
+
+    function syncDriverName() {
+        const option = driverSelect.options[driverSelect.selectedIndex];
+        driverNameHidden.value = option && option.value !== '' && option.value !== '__new__'
+            ? (option.dataset.name || '')
+            : '';
+    }
+
+    driverSelect.addEventListener('change', function () {
+        driverPanel.hidden = driverSelect.value !== '__new__';
+        syncDriverName();
+    });
+    syncDriverName();
+
+    newDriverSave.addEventListener('click', function () {
+        const name = newDriverName.value.trim();
+        newDriverError.hidden = true;
+        if (!name) {
+            newDriverError.textContent = "Enter the driver's full name.";
+            newDriverError.hidden = false;
+            return;
+        }
+        newDriverSave.disabled = true;
+        fetch('{{ route('drivers.quick-store') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                name: name,
+                phone: newDriverPhone.value.trim(),
+                license_number: newDriverLicense.value.trim()
+            })
+        })
+            .then(function (response) {
+                return response.json().then(function (data) { return { ok: response.ok, data: data }; });
+            })
+            .then(function (result) {
+                if (!result.ok) {
+                    throw new Error(result.data.message || 'Could not register the driver.');
+                }
+                const option = new Option(
+                    result.data.name + (result.data.phone ? ' — ' + result.data.phone : ''),
+                    result.data.id
+                );
+                option.dataset.name = result.data.name;
+                driverSelect.add(option, driverSelect.querySelector('option[value="__new__"]'));
+                driverSelect.value = String(result.data.id);
+                driverPanel.hidden = true;
+                newDriverName.value = '';
+                newDriverPhone.value = '';
+                newDriverLicense.value = '';
+                syncDriverName();
+            })
+            .catch(function (error) {
+                newDriverError.textContent = error.message;
+                newDriverError.hidden = false;
+            })
+            .finally(function () { newDriverSave.disabled = false; });
+    });
 
     function buildItem(main, sub, onPick, isNew) {
         const item = document.createElement('div');
@@ -727,38 +839,6 @@
         return item;
     }
 
-    driverInput.addEventListener('input', function () {
-        driverIdInput.value = '';
-        const q = driverInput.value.trim();
-        clearTimeout(driverTimeout);
-        driverResults.classList.remove('tsr-open');
-        if (q.length < 2) return;
-        driverTimeout = setTimeout(function () {
-            fetch('/api/drivers/search?q=' + encodeURIComponent(q), {
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-            })
-                .then(function (response) { return response.json(); })
-                .then(renderDrivers)
-                .catch(function () { driverResults.classList.remove('tsr-open'); });
-        }, 300);
-    });
-
-    function renderDrivers(drivers) {
-        driverResults.innerHTML = '';
-        drivers.forEach(function (driver) {
-            driverResults.appendChild(buildItem(driver.name, driver.license_number || '', function () {
-                driverInput.value = driver.name;
-                driverIdInput.value = driver.id;
-                driverResults.classList.remove('tsr-open');
-            }));
-        });
-        driverResults.appendChild(buildItem('Add new: "' + driverInput.value.trim() + '"', 'Creates a new driver record', function () {
-            driverIdInput.value = '';
-            driverResults.classList.remove('tsr-open');
-        }, true));
-        driverResults.classList.add('tsr-open');
-    }
-
     plateInput.addEventListener('input', function () {
         const q = plateInput.value.trim();
         clearTimeout(plateTimeout);
@@ -790,9 +870,6 @@
     }
 
     document.addEventListener('click', function (event) {
-        if (!driverResults.contains(event.target) && event.target !== driverInput) {
-            driverResults.classList.remove('tsr-open');
-        }
         if (!plateResults.contains(event.target) && event.target !== plateInput) {
             plateResults.classList.remove('tsr-open');
         }
