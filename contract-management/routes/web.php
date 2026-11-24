@@ -130,6 +130,8 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Tire Return List (must come before tires/{tire} wildcard)
     Route::get('/tires/return', [TireController::class, 'returnList'])->name('tires.return.list');
+    Route::get('/tires/return/export/excel', [TireController::class, 'exportReturnExcel'])->name('tires.return.excel');
+    Route::get('/tires/return/export/pdf', [TireController::class, 'exportReturnPdf'])->name('tires.return.pdf');
 
     // Tire History (must come before tires/{tire} wildcard)
     Route::get('/tires/{tire}/history', [TireController::class, 'history'])->name('tires.history');

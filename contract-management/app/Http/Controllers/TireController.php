@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TireReturnsExport;
+use App\Models\ExportLog;
 use App\Models\Tire;
 use App\Models\TireGive;
 use App\Models\TireReturn;
 use App\Models\TireType;
 use App\Models\Driver;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -409,6 +412,18 @@ class TireController extends Controller
         ]);
     }
 
+    private const RETURN_SORT_COLUMNS = [
+        'roll' => 'tire_gives.id',
+        'serial_number' => 'tires.serial_number',
+        'tire_specification' => 'tires.tire_type',
+        'given_to' => 'drivers.name',
+        'plate' => 'tire_gives.plate_number',
+        'given_by' => 'given_by_users.name',
+        'given_date' => 'tire_gives.give_date',
+        'km_at_issue' => 'tire_gives.given_kilometer',
+        'days_out' => 'tire_gives.give_date',
+    ];
+
     public function returnList(Request $request)
     {
         $user = auth()->user();
@@ -417,24 +432,127 @@ class TireController extends Controller
                 ->with('error', 'You are not authorized to return tires.');
         }
 
-        $query = TireGive::where('is_returned', false)
-            ->with(['tire', 'driver']);
+        [$sort, $direction] = $this->resolveReturnSort($request);
 
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('tire', function ($tq) use ($search) {
-                    $tq->where('serial_number', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('driver', function ($dq) use ($search) {
-                    $dq->where('name', 'like', '%' . $search . '%');
-                });
+        $tireReturns = $this->returnListQuery($request)
+            ->orderBy(self::RETURN_SORT_COLUMNS[$sort], $direction)
+            ->paginate(10)
+            ->withQueryString();
+
+        // Summary counts stay independent of search/filter so the cards never jump around
+        $outstanding = TireGive::where('is_returned', false)->get(['driver_id', 'give_date']);
+        $tiresOut = $outstanding->count();
+        $driversOut = $outstanding->pluck('driver_id')->filter()->unique()->count();
+        $overdueCount = $outstanding->filter(
+            fn (TireGive $give) => $give->give_date && $give->give_date->diffInDays(now()) > 30
+        )->count();
+        $averageDays = $tiresOut > 0
+            ? (int) round($outstanding->avg(
+                fn (TireGive $give) => $give->give_date ? $give->give_date->diffInDays(now()) : 0
+            ))
+            : 0;
+        $recentCount = max($tiresOut - $overdueCount, 0);
+
+        return view('tires.return-list', compact(
+            'tireReturns', 'sort', 'direction',
+            'tiresOut', 'driversOut', 'overdueCount', 'averageDays', 'recentCount'
+        ));
+    }
+
+    public function exportReturnExcel(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->canPerformTireOperations()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to export tire returns.');
+        }
+
+        [$sort, $direction] = $this->resolveReturnSort($request);
+        $gives = $this->returnListQuery($request)
+            ->orderBy(self::RETURN_SORT_COLUMNS[$sort], $direction)
+            ->get();
+
+        ExportLog::create([
+            'user_id' => $user->id,
+            'export_type' => ExportLog::EXPORT_TYPE_TIRES,
+            'format' => ExportLog::FORMAT_EXCEL,
+            'records_count' => $gives->count(),
+        ]);
+
+        return (new TireReturnsExport($gives))->download(
+            'tire_returns_' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
+
+    public function exportReturnPdf(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->canPerformTireOperations()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to export tire returns.');
+        }
+
+        [$sort, $direction] = $this->resolveReturnSort($request);
+        $gives = $this->returnListQuery($request)
+            ->orderBy(self::RETURN_SORT_COLUMNS[$sort], $direction)
+            ->get();
+
+        ExportLog::create([
+            'user_id' => $user->id,
+            'export_type' => ExportLog::EXPORT_TYPE_TIRES,
+            'format' => ExportLog::FORMAT_PDF,
+            'records_count' => $gives->count(),
+        ]);
+
+        return Pdf::loadView('tires.return-pdf', [
+            'gives' => $gives,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'landscape')
+            ->download('tire_returns_' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    private function resolveReturnSort(Request $request): array
+    {
+        $sort = array_key_exists((string) $request->query('sort'), self::RETURN_SORT_COLUMNS)
+            ? $request->query('sort')
+            : 'roll';
+
+        $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
+
+        return [$sort, $direction];
+    }
+
+    private function returnListQuery(Request $request)
+    {
+        $query = TireGive::query()
+            ->leftJoin('tires', 'tires.id', '=', 'tire_gives.tire_id')
+            ->leftJoin('drivers', 'drivers.id', '=', 'tire_gives.driver_id')
+            ->leftJoin('users as given_by_users', 'given_by_users.id', '=', 'tire_gives.given_by')
+            ->where('tire_gives.is_returned', false)
+            ->select('tire_gives.*')
+            ->with(['tire', 'driver', 'givenBy']);
+
+        if ($request->filled('search')) {
+            $term = '%' . $request->search . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('tires.serial_number', 'like', $term)
+                    ->orWhere('drivers.name', 'like', $term)
+                    ->orWhere('given_by_users.name', 'like', $term)
+                    ->orWhere('tires.tire_type', 'like', $term)
+                    ->orWhere('tire_gives.plate_number', 'like', $term)
+                    ->orWhere('tires.plate_number', 'like', $term);
             });
         }
 
-        $gives = $query->orderBy('give_date', 'desc')->get();
+        $age = $request->query('age');
+        if (in_array($age, ['recent', 'overdue'], true)) {
+            $cutoff = now()->subDays(30)->toDateString();
+            $age === 'overdue'
+                ? $query->where('tire_gives.give_date', '<', $cutoff)
+                : $query->where('tire_gives.give_date', '>=', $cutoff);
+        }
 
-        return view('tires.return-list', compact('gives'));
+        return $query;
     }
 
     public function audit(Request $request)
