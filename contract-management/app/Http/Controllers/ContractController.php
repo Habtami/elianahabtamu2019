@@ -399,13 +399,13 @@ class ContractController extends Controller
             'department' => ['required', 'string', Rule::in(array_keys(User::getContractDepartments()))],
             'contract_type' => ['required', 'string', Rule::in(Contract::getContractTypes())],
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'alert_days' => 'required|integer|min:0',
             'performance_bond_type' => ['nullable', Rule::in(Contract::getPerformanceBondTypes())],
             'issued_by' => 'nullable|string|max:255',
             'currency_type' => ['nullable', Rule::in(Contract::getCurrencyTypes())],
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
-            'performance_guarantee_end_date' => 'nullable|date|after:start_date',
+            'performance_guarantee_end_date' => 'nullable|date|after_or_equal:start_date',
             'alert_days_before_guarantee_end' => [
                 'nullable',
                 'integer',
@@ -414,7 +414,8 @@ class ContractController extends Controller
                 new GuaranteeAlertDays($request->performance_guarantee_end_date),
             ],
         ], [
-            'end_date.after' => 'Invalid date sequence. Please enter a date after the previous date.',
+            'end_date.after_or_equal' => 'የመጨረሻው ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።',
+            'performance_guarantee_end_date.after_or_equal' => 'የዋስትና ማብቂያ ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።',
         ]);
         
         // Check if user can create contract for selected department
@@ -544,7 +545,7 @@ class ContractController extends Controller
             'department' => ['required', 'string', Rule::in(array_keys(User::getDepartments()))],
             'supplier_name' => 'nullable|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'alert_days' => [
                 'required',
                 'integer',
@@ -565,7 +566,7 @@ class ContractController extends Controller
             'contract_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'currency_type' => ['nullable', 'string', Rule::in(Contract::getCurrencyTypes())],
-            'performance_guarantee_end_date' => 'nullable|date|after:start_date',
+            'performance_guarantee_end_date' => 'nullable|date|after_or_equal:start_date',
             'alert_days_before_guarantee_end' => [
                 'nullable',
                 'integer',
@@ -574,7 +575,8 @@ class ContractController extends Controller
                 new GuaranteeAlertDays($request->performance_guarantee_end_date),
             ],
         ], [
-            'end_date.after' => 'Invalid date sequence. Please enter a date after the previous date.',
+            'end_date.after_or_equal' => 'የመጨረሻው ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።',
+            'performance_guarantee_end_date.after_or_equal' => 'የዋስትና ማብቂያ ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።',
         ]);
         
         // Check if user can update contract for selected department

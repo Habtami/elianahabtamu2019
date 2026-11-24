@@ -139,6 +139,7 @@
                                        value="{{ old('start_date', $contract->start_date->format('Y-m-d')) }}"
                                        class="form-input"
                                        required>
+                                <div class="invalid-feedback d-block" id="start_date_error"></div>
                                 @error('start_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -153,11 +154,11 @@
                                        value="{{ old('end_date', $contract->end_date->format('Y-m-d')) }}"
                                        class="form-input"
                                        required>
+                                <div class="invalid-feedback d-block" id="end_date_error"></div>
                                 <p class="text-sm text-gray-500 mt-1">Use the "Extend Contract End Date" feature to track extensions properly</p>
                                 @error('end_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
-                                <p id="endDateSequenceError" class="text-red-500 text-sm mt-1 hidden"></p>
                             </div>
                         </div>
 
@@ -230,6 +231,7 @@
                                        name="performance_guarantee_end_date"
                                        value="{{ old('performance_guarantee_end_date', $contract->performance_guarantee_end_date?->format('Y-m-d')) }}"
                                        class="form-input">
+                                <div class="invalid-feedback d-block" id="performance_guarantee_end_date_error"></div>
                                 <p class="text-sm text-gray-500 mt-1">Use the "Extend Performance Guarantee" feature to track extensions properly</p>
                                 @error('performance_guarantee_end_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>

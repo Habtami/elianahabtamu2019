@@ -148,6 +148,16 @@
             <!-- Main Form -->
             <div class="lg:col-span-2">
                 <div class="form-card p-6">
+                    @if ($errors->any())
+                        <div class="alert alert-danger mb-6" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('contracts.store') }}" id="contractForm">
                         @csrf
                         
@@ -251,6 +261,7 @@
                                        value="{{ old('start_date') }}"
                                        class="form-input"
                                        required>
+                                <div class="invalid-feedback d-block" id="start_date_error"></div>
                                 @error('start_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -265,10 +276,10 @@
                                        value="{{ old('end_date') }}"
                                        class="form-input"
                                        required>
+                                <div class="invalid-feedback d-block" id="end_date_error"></div>
                                 @error('end_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
-                                <p id="endDateSequenceError" class="text-red-500 text-sm mt-1 hidden"></p>
                             </div>
                         </div>
 
@@ -339,6 +350,7 @@
                                        name="performance_guarantee_end_date" 
                                        value="{{ old('performance_guarantee_end_date') }}"
                                        class="form-input">
+                                <div class="invalid-feedback d-block" id="performance_guarantee_end_date_error"></div>
                                 @error('performance_guarantee_end_date')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -745,13 +757,6 @@
                 const startDate = new Date(startDateInput.value);
                 const endDate = new Date(endDateInput.value);
 
-                if (endDate <= startDate) {
-                    e.preventDefault();
-                    alert('End date must be after start date.');
-                    endDateInput.focus();
-                    return false;
-                }
-
                 // Check for any inline errors after validation
                 const alertDaysError = document.getElementById('alert_days_error').style.display === 'block';
 
@@ -792,12 +797,6 @@
                 if ((pgAmount || pgEndDate || pgAlertDays) && (!pgAmount || !pgEndDate)) {
                     e.preventDefault();
                     alert('If you provide performance guarantee details, both amount and end date are required.');
-                    return false;
-                }
-
-                if (pgEndDate && new Date(pgEndDate) <= startDate) {
-                    e.preventDefault();
-                    alert('Performance guarantee end date must be after contract start date.');
                     return false;
                 }
 
