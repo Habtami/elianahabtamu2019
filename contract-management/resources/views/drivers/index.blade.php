@@ -89,6 +89,7 @@
         border-radius: var(--tsr-radius-sm);
         font-size: 0.85rem;
         font-weight: 600;
+        font-family: inherit;
         cursor: pointer;
         border: 1px solid transparent;
         transition: all 0.15s ease;
@@ -427,16 +428,16 @@
         border-radius: 50%;
         background: currentColor;
     }
-    .tsr-status-btn {
+    .tsr-status-badge {
+        display: inline-flex;
+        align-items: center;
         border: 1px solid transparent;
         border-radius: 999px;
         padding: 0.25rem 0.7rem;
         font-size: 0.78rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: filter 0.2s;
+        white-space: nowrap;
     }
-    .tsr-status-btn:hover { filter: brightness(0.95); }
     .tsr-status-on { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
     .tsr-status-off { background: #f1f5f9; color: var(--tsr-text-muted); border-color: var(--tsr-border); }
     .tsr-tire-count { font-weight: 600; }
@@ -631,6 +632,114 @@
         justify-content: flex-end;
     }
 
+    /* ---------- status modal ---------- */
+    .tsr-status-modal { max-width: 500px; }
+    .tsr-modal-subtitle {
+        margin-top: 0.2rem;
+        color: var(--tsr-text-muted);
+        font-size: 0.82rem;
+        font-weight: 400;
+    }
+    .tsr-status-body { padding: 1.4rem; }
+    .tsr-status-driver {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--tsr-border);
+        border-radius: var(--tsr-radius-sm);
+        background: #f8fafc;
+    }
+    .tsr-status-driver-icon {
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--tsr-primary-light);
+        color: var(--tsr-primary);
+        flex: none;
+    }
+    .tsr-status-driver-icon svg { width: 18px; height: 18px; }
+    .tsr-status-driver-info { min-width: 0; flex: 1; }
+    .tsr-status-driver-info strong {
+        display: block;
+        font-size: 0.92rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .tsr-status-driver-info small { color: var(--tsr-text-muted); font-size: 0.75rem; }
+    .tsr-status-fieldset { border: 0; padding: 0; margin: 1.3rem 0 0; }
+    .tsr-status-fieldset legend {
+        padding: 0;
+        margin-bottom: 0.65rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--tsr-text-main);
+    }
+    .tsr-status-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+    .tsr-status-option { position: relative; display: block; cursor: pointer; }
+    .tsr-status-option input {
+        position: absolute;
+        width: 1px; height: 1px;
+        opacity: 0;
+        overflow: hidden;
+    }
+    .tsr-status-option-card {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-height: 72px;
+        padding: 0.85rem;
+        border: 1px solid var(--tsr-border);
+        border-radius: var(--tsr-radius-sm);
+        background: #fff;
+        transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .tsr-status-option:hover .tsr-status-option-card { border-color: #cbd5e1; background: #f8fafc; }
+    .tsr-status-option input:focus-visible + .tsr-status-option-card {
+        outline: 2px solid var(--tsr-primary);
+        outline-offset: 2px;
+    }
+    .tsr-status-option input:checked + .tsr-option-active {
+        border-color: #6ee7b7;
+        background: #ecfdf5;
+        box-shadow: 0 0 0 1px #6ee7b7;
+    }
+    .tsr-status-option input:checked + .tsr-option-inactive {
+        border-color: #94a3b8;
+        background: #f1f5f9;
+        box-shadow: 0 0 0 1px #94a3b8;
+    }
+    .tsr-option-indicator {
+        width: 16px; height: 16px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 50%;
+        background: #fff;
+        flex: none;
+    }
+    .tsr-status-option input:checked + .tsr-option-active .tsr-option-indicator { border: 4.5px solid #047857; }
+    .tsr-status-option input:checked + .tsr-option-inactive .tsr-option-indicator { border: 4.5px solid #64748b; }
+    .tsr-option-copy { min-width: 0; }
+    .tsr-option-copy strong { display: block; font-size: 0.85rem; }
+    .tsr-option-copy small { display: block; margin-top: 0.15rem; color: var(--tsr-text-muted); font-size: 0.7rem; line-height: 1.35; }
+    .tsr-status-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border-radius: var(--tsr-radius-sm);
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.76rem;
+        line-height: 1.45;
+    }
+    .tsr-status-note svg { width: 15px; height: 15px; flex: none; margin-top: 0.1rem; }
+    .tsr-status-footer { gap: 0.65rem; }
+    .tsr-status-footer button:disabled { opacity: 0.65; cursor: wait; }
+
     @media (max-width: 700px) {
         .tsr-page { padding: 1rem; }
         .tsr-top-nav, .tsr-title-area { align-items: flex-start; }
@@ -641,6 +750,7 @@
         .tsr-table-footer { flex-direction: column; align-items: flex-start; }
         .tsr-modal-overlay { padding: 0.75rem; }
         .tsr-modal { max-height: 92vh; }
+        .tsr-status-options { grid-template-columns: 1fr; }
         .tsr-modal-table th:nth-child(2), .tsr-modal-table td:nth-child(2),
         .tsr-modal-table th:nth-child(3), .tsr-modal-table td:nth-child(3) { display: none; }
         .tsr-modal-table th, .tsr-modal-table td { padding: 0.65rem 0.9rem; }
@@ -864,13 +974,9 @@
                                 @endif
                             </td>
                             <td>
-                                <form method="POST" action="{{ route('drivers.toggleStatus', $driver) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" class="tsr-status-btn {{ $driver->status ? 'tsr-status-on' : 'tsr-status-off' }}"
-                                            title="Toggle driver status">
-                                        {{ $driver->status ? 'Active' : 'Inactive' }}
-                                    </button>
-                                </form>
+                                <span class="tsr-status-badge {{ $driver->status ? 'tsr-status-on' : 'tsr-status-off' }}">
+                                    {{ $driver->status ? 'Active' : 'Inactive' }}
+                                </span>
                             </td>
                             <td>
                                 @if($driver->active_tires_count > 0)
@@ -881,6 +987,16 @@
                             </td>
                             <td>
                                 <div class="tsr-action-cell">
+                                    @if(auth()->user()->canEditDrivers())
+                                    <button type="button" class="tsr-btn-icon" title="Change driver status"
+                                            aria-label="Change status for {{ $driver->name }}" aria-haspopup="dialog"
+                                            data-status-action
+                                            data-driver-name="{{ $driver->name }}"
+                                            data-current-status="{{ $driver->status ? 'active' : 'inactive' }}"
+                                            data-status-url="{{ route('drivers.status', $driver) }}">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-9l3-3"/><path d="m11 7 3 3"/><path d="M4 17h9l-3 3"/><path d="m13 17-3-3"/></svg>
+                                    </button>
+                                    @endif
                                     <a href="{{ route('drivers.show', $driver) }}" class="tsr-btn-icon" title="View driver" aria-label="View {{ $driver->name }}">
                                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </a>
@@ -1007,7 +1123,7 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="tsr-status-btn {{ $driver->status ? 'tsr-status-on' : 'tsr-status-off' }}">{{ $driver->status ? 'Active' : 'Inactive' }}</span>
+                                <span class="tsr-status-badge {{ $driver->status ? 'tsr-status-on' : 'tsr-status-off' }}">{{ $driver->status ? 'Active' : 'Inactive' }}</span>
                             </td>
                         </tr>
                         @endforeach
@@ -1020,6 +1136,66 @@
             </div>
         </div>
     </div>
+
+    @if(auth()->user()->canEditDrivers())
+    <div class="tsr-modal-overlay" id="driverStatusModal" role="dialog" aria-modal="true" aria-labelledby="driverStatusModalTitle" aria-hidden="true">
+        <form class="tsr-modal tsr-status-modal" id="driverStatusForm" method="POST" action="">
+            @csrf
+            @method('PATCH')
+            <div class="tsr-modal-header">
+                <div>
+                    <h3 id="driverStatusModalTitle">Change Driver Status</h3>
+                    <p class="tsr-modal-subtitle">Set whether this driver is available for new tire issues.</p>
+                </div>
+                <button type="button" class="tsr-modal-close" id="driverStatusModalClose" aria-label="Close">✕</button>
+            </div>
+            <div class="tsr-modal-body tsr-status-body">
+                <div class="tsr-status-driver">
+                    <span class="tsr-status-driver-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </span>
+                    <div class="tsr-status-driver-info">
+                        <strong id="driverStatusName"></strong>
+                        <small>Current status: <span id="driverStatusCurrent"></span></small>
+                    </div>
+                </div>
+                <fieldset class="tsr-status-fieldset">
+                    <legend>New status</legend>
+                    <div class="tsr-status-options">
+                        <label class="tsr-status-option">
+                            <input type="radio" name="status" value="1" required>
+                            <span class="tsr-status-option-card tsr-option-active">
+                                <span class="tsr-option-indicator" aria-hidden="true"></span>
+                                <span class="tsr-option-copy">
+                                    <strong>Active</strong>
+                                    <small>Available for new tire issues</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="tsr-status-option">
+                            <input type="radio" name="status" value="0" required>
+                            <span class="tsr-status-option-card tsr-option-inactive">
+                                <span class="tsr-option-indicator" aria-hidden="true"></span>
+                                <span class="tsr-option-copy">
+                                    <strong>Inactive</strong>
+                                    <small>Not available for new issues</small>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+                <div class="tsr-status-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span>Existing tire assignments and history are kept when a driver is made inactive.</span>
+                </div>
+            </div>
+            <div class="tsr-modal-footer tsr-status-footer">
+                <button type="button" class="tsr-btn-action tsr-btn-white" id="driverStatusCancel">Cancel</button>
+                <button type="submit" class="tsr-btn-action tsr-btn-blue" id="driverStatusSave">Save Status</button>
+            </div>
+        </form>
+    </div>
+    @endif
 
     <div class="tsr-toast" id="tsrToast" role="status" aria-live="polite">Saved</div>
 </div>
@@ -1065,6 +1241,60 @@
                 });
                 if (visibleCount) {
                     visibleCount.textContent = visible;
+                }
+            });
+        }
+
+        const statusModal = document.getElementById('driverStatusModal');
+        if (statusModal) {
+            const statusForm = document.getElementById('driverStatusForm');
+            const statusName = document.getElementById('driverStatusName');
+            const statusCurrent = document.getElementById('driverStatusCurrent');
+            const statusClose = document.getElementById('driverStatusModalClose');
+            const statusCancel = document.getElementById('driverStatusCancel');
+            const statusSave = document.getElementById('driverStatusSave');
+            const statusActive = statusForm.querySelector('input[name="status"][value="1"]');
+            const statusInactive = statusForm.querySelector('input[name="status"][value="0"]');
+            let statusTrigger = null;
+
+            const openStatusModal = function (trigger) {
+                const isActive = trigger.dataset.currentStatus === 'active';
+                statusForm.action = trigger.dataset.statusUrl;
+                statusName.textContent = trigger.dataset.driverName;
+                statusCurrent.textContent = isActive ? 'Active' : 'Inactive';
+                statusActive.checked = isActive;
+                statusInactive.checked = !isActive;
+                statusTrigger = trigger;
+                statusModal.classList.add('tsr-open');
+                statusModal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                (isActive ? statusActive : statusInactive).focus();
+            };
+
+            const closeStatusModal = function () {
+                statusModal.classList.remove('tsr-open');
+                statusModal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (statusTrigger) statusTrigger.focus();
+            };
+
+            document.querySelectorAll('[data-status-action]').forEach(function (button) {
+                button.addEventListener('click', function () { openStatusModal(button); });
+            });
+            if (statusClose) statusClose.addEventListener('click', closeStatusModal);
+            if (statusCancel) statusCancel.addEventListener('click', closeStatusModal);
+            statusModal.addEventListener('click', function (e) {
+                if (e.target === statusModal) closeStatusModal();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && statusModal.classList.contains('tsr-open')) {
+                    closeStatusModal();
+                }
+            });
+            statusForm.addEventListener('submit', function () {
+                if (statusSave) {
+                    statusSave.disabled = true;
+                    statusSave.textContent = 'Saving...';
                 }
             });
         }

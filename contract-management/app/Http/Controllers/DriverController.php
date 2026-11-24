@@ -174,7 +174,7 @@ class DriverController extends Controller
             ->with('success', 'Driver deleted successfully.');
     }
 
-    public function toggleStatus(Driver $driver)
+    public function updateStatus(Request $request, Driver $driver)
     {
         $user = auth()->user();
         if (! $user->canEditDrivers()) {
@@ -182,7 +182,11 @@ class DriverController extends Controller
                 ->with('error', 'You are not authorized to update driver status.');
         }
 
-        $driver->update(['status' => ! $driver->status]);
+        $validated = $request->validate([
+            'status' => 'required|boolean',
+        ]);
+
+        $driver->update(['status' => $validated['status']]);
 
         return back()->with('success', 'Driver status updated successfully.');
     }
