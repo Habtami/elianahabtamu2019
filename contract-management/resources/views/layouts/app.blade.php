@@ -911,7 +911,7 @@
                         <option value="theme-purple">ጥቁር ወይንጠጅ</option>
                         <option value="theme-red">ጥቁር ቀይ</option>
                         <option value="theme-gray">ጥቁር ግራጫ</option>
-                        <option value="theme-light">ነጭ</option>
+                        <option value="theme-light" selected>ነጭ</option>
                     </select>
                 </div>
             </div>
@@ -1173,7 +1173,18 @@
 
             // Theme selector
             const themeSelect = document.getElementById('theme-selector');
-            const savedTheme = localStorage.getItem('selectedTheme') || 'theme-blue';
+            const defaultTheme = 'theme-light';
+            let savedTheme = localStorage.getItem('selectedTheme');
+
+            if (!savedTheme) {
+                savedTheme = defaultTheme;
+            } else if (savedTheme === 'theme-blue' && !localStorage.getItem('themeDefaultMigrated')) {
+                // theme-blue used to be the implicit default; move those users to the new one.
+                savedTheme = defaultTheme;
+                localStorage.setItem('selectedTheme', savedTheme);
+            }
+
+            localStorage.setItem('themeDefaultMigrated', '1');
 
             document.body.classList.add(savedTheme);
             if (themeSelect) themeSelect.value = savedTheme;
