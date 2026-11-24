@@ -101,6 +101,9 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Tire Tracking Routes
     Route::get('/tires', [TireController::class, 'index'])->name('tires.index');
+    Route::get('/tires/summary/{scope}', [TireController::class, 'summary'])
+        ->whereIn('scope', ['total-tires', 'in-use', 'returned', 'active-drivers'])
+        ->name('tires.summary');
     Route::resource('tires/types', TireTypeController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])->names([
         'index' => 'tires.types.index',
         'create' => 'tires.types.create',

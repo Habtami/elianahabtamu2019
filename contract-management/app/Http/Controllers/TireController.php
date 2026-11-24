@@ -63,10 +63,103 @@ class TireController extends Controller
         })->whereDoesntHave('tireGives', function ($q) {
             $q->where('is_returned', false);
         })->count();
+        $activeDriversCount = Driver::active()->count();
+        $tiresOutCount = $givenOutTires;
 
         return view('tires.index', compact(
-            'tires', 'tireTypes', 'totalTires', 'activeTires', 'inactiveTires', 'givenOutTires', 'returnedTires'
+            'tires', 'tireTypes', 'totalTires', 'activeTires', 'inactiveTires', 'givenOutTires',
+            'returnedTires', 'activeDriversCount', 'tiresOutCount'
         ));
+    }
+
+    public function summary(Request $request, string $scope)
+    {
+        $user = auth()->user();
+
+        if (!$user->canAccessTireTracking()) {
+            return response()->json(['message' => 'You are not authorized to view tire details.'], 403);
+        }
+
+        switch ($scope) {
+            case 'total-tires':
+                $title = 'Total Tires';
+                $items = Tire::with('tireGives.driver')->orderByDesc('id')->limit(100)->get()
+                    ->map(fn (Tire $tire) => $this->tireSummaryItem($tire));
+                break;
+
+            case 'in-use':
+                $title = 'In Use';
+                $items = Tire::with('tireGives.driver')
+                    ->whereHas('tireGives', fn ($q) => $q->where('is_returned', false))
+                    ->orderByDesc('id')->limit(100)->get()
+                    ->map(fn (Tire $tire) => $this->tireSummaryItem($tire, 'in_use'));
+                break;
+
+            case 'returned':
+                $title = 'Returned';
+                $items = Tire::with('tireGives.driver')
+                    ->whereHas('tireGives', fn ($q) => $q->where('is_returned', true))
+                    ->whereDoesntHave('tireGives', fn ($q) => $q->where('is_returned', false))
+                    ->orderByDesc('id')->limit(100)->get()
+                    ->map(fn (Tire $tire) => $this->tireSummaryItem($tire, 'returned'));
+                break;
+
+            case 'active-drivers':
+                $title = 'Active Drivers';
+                $items = Driver::active()->orderBy('name')->limit(100)->get()
+                    ->map(function (Driver $driver) {
+                        $out = $driver->tireGives()->where('is_returned', false)->count();
+
+                        return [
+                            'title' => $driver->name,
+                            'subtitle' => $driver->license_number ? 'License ' . $driver->license_number : '—',
+                            'meta' => $out . ' tire(s) out',
+                            'badge' => 'Active',
+                            'tone' => 'green',
+                            'url' => route('drivers.show', $driver->id),
+                        ];
+                    });
+                break;
+
+            default:
+                return response()->json(['message' => 'Unknown summary scope.'], 404);
+        }
+
+        return response()->json([
+            'title' => $title,
+            'count' => $items->count(),
+            'items' => $items->values(),
+        ]);
+    }
+
+    private function tireSummaryItem(Tire $tire, ?string $state = null): array
+    {
+        $activeGive = $tire->tireGives->firstWhere('is_returned', false);
+        $state = $state ?: ($activeGive
+            ? 'in_use'
+            : ($tire->tireGives->contains('is_returned', true) ? 'returned' : 'available'));
+
+        $meta = [];
+
+        if ($state === 'in_use' && $activeGive) {
+            $meta[] = $activeGive->driver->name ?? 'No driver';
+            if ($activeGive->give_date) {
+                $meta[] = 'Given ' . $activeGive->give_date->format('M d, Y');
+            }
+        }
+
+        if ($tire->plate_number) {
+            $meta[] = 'Plate ' . $tire->plate_number;
+        }
+
+        return [
+            'title' => $tire->serial_number,
+            'subtitle' => $tire->tire_type,
+            'meta' => $meta ? implode(' · ', $meta) : null,
+            'badge' => ['in_use' => 'In Use', 'returned' => 'Returned', 'available' => 'Available'][$state],
+            'tone' => ['in_use' => 'amber', 'returned' => 'green', 'available' => 'blue'][$state],
+            'url' => route('tires.show', $tire),
+        ];
     }
 
     public function create()

@@ -1050,7 +1050,9 @@
         {{-- ========== STAT CARDS ========== --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
 
-            <div class="kpi-card blue">
+            <div class="kpi-card blue" role="button" tabindex="0" style="cursor:pointer"
+                 onclick="openStatModal('total-tires', 'Total Tires')"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                 <div>
                     <p class="kpi-title">Total Tires</p>
                     <p class="kpi-value">{{ $totalTires }}</p>
@@ -1059,7 +1061,9 @@
                 <div class="kpi-icon"><i class="fas fa-circle-notch" aria-hidden="true"></i></div>
             </div>
 
-            <div class="kpi-card yellow">
+            <div class="kpi-card yellow" role="button" tabindex="0" style="cursor:pointer"
+                 onclick="openStatModal('in-use', 'In Use')"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                 <div>
                     <p class="kpi-title">In Use</p>
                     <p class="kpi-value">{{ $givenOutTires }}</p>
@@ -1068,7 +1072,9 @@
                 <div class="kpi-icon"><i class="fas fa-hand-holding" aria-hidden="true"></i></div>
             </div>
 
-            <div class="kpi-card green">
+            <div class="kpi-card green" role="button" tabindex="0" style="cursor:pointer"
+                 onclick="openStatModal('returned', 'Returned')"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                 <div>
                     <p class="kpi-title">Returned</p>
                     <p class="kpi-value">{{ $returnedTires }}</p>
@@ -1077,11 +1083,13 @@
                 <div class="kpi-icon"><i class="fas fa-undo-alt" aria-hidden="true"></i></div>
             </div>
 
-            <div class="kpi-card purple">
+            <div class="kpi-card purple" role="button" tabindex="0" style="cursor:pointer"
+                 onclick="openStatModal('active-drivers', 'Active Drivers')"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                 <div>
                     <p class="kpi-title">Active Drivers</p>
-                    <p class="kpi-value">{{ $activeDriversCount ?? 0 }}</p>
-                    <p class="kpi-subtitle">{{ $tiresOutCount ?? 0 }} tires out</p>
+                    <p class="kpi-value">{{ $activeDriversCount }}</p>
+                    <p class="kpi-subtitle">{{ $tiresOutCount }} tires out</p>
                 </div>
                 <div class="kpi-icon"><i class="fas fa-user-friends" aria-hidden="true"></i></div>
             </div>
@@ -1437,6 +1445,33 @@
     <img id="photo-lightbox-img" src="" alt="Full Photo" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg">
     <button type="button" id="photo-lightbox-close" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300"
             aria-label="Close photo">&times;</button>
+</div>
+
+<!-- Stat detail modal -->
+<div id="statModal" class="hidden fixed inset-0 z-50 overflow-y-auto" style="z-index: 1200" role="dialog" aria-modal="true" aria-labelledby="statModalTitle">
+    <div class="absolute inset-0 bg-black/50" onclick="closeStatModal()"></div>
+    <div class="relative mx-auto mt-10 mb-10 w-full max-w-2xl px-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-xl">
+            <div class="flex items-start justify-between px-5 py-4 border-b border-gray-200">
+                <div>
+                    <h3 id="statModalTitle" class="text-lg font-semibold text-gray-800"></h3>
+                    <p id="statModalMeta" class="text-sm text-gray-500 mt-0.5"></p>
+                </div>
+                <button type="button" onclick="closeStatModal()" aria-label="Close"
+                        class="text-gray-400 hover:text-gray-600 text-2xl leading-none p-2 -m-2">&times;</button>
+            </div>
+            <div class="p-5">
+                <div id="statModalLoading" class="text-center py-10 text-gray-500">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading...
+                </div>
+                <div id="statModalEmpty" class="hidden text-center py-10">
+                    <i class="fas fa-inbox text-3xl text-gray-300"></i>
+                    <p class="mt-3 text-gray-600">No records found.</p>
+                </div>
+                <div id="statModalList" class="hidden divide-y divide-gray-100"></div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -2396,10 +2431,109 @@
         if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
     });
 
+    /* ============================================================
+       STAT CARD DETAIL MODAL
+       ============================================================ */
+    let statRequestSeq = 0;
+
+    const statTones = {
+        green: 'bg-green-100 text-green-800',
+        amber: 'bg-amber-100 text-amber-800',
+        red: 'bg-red-100 text-red-800',
+        blue: 'bg-blue-100 text-blue-800',
+        gray: 'bg-gray-100 text-gray-700',
+    };
+
+    function openStatModal(scope, title) {
+        const modal = document.getElementById('statModal');
+        if (!modal) return;
+
+        document.getElementById('statModalTitle').textContent = title;
+        document.getElementById('statModalMeta').textContent = '';
+        document.getElementById('statModalList').innerHTML = '';
+        document.getElementById('statModalList').classList.add('hidden');
+        document.getElementById('statModalEmpty').classList.add('hidden');
+        document.getElementById('statModalLoading').classList.remove('hidden');
+
+        modal.classList.remove('hidden');
+        loadStatSummary(scope);
+    }
+
+    function closeStatModal() {
+        const modal = document.getElementById('statModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function loadStatSummary(scope) {
+        const seq = ++statRequestSeq;
+
+        try {
+            const response = await fetch('{{ url('/tires/summary') }}/' + encodeURIComponent(scope), {
+                headers: { 'Accept': 'application/json' },
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) throw new Error(data.message || 'Unable to load details.');
+            if (seq !== statRequestSeq) return;
+
+            renderStatSummary(data);
+        } catch (error) {
+            if (seq !== statRequestSeq) return;
+            document.getElementById('statModalLoading').classList.add('hidden');
+            const empty = document.getElementById('statModalEmpty');
+            empty.querySelector('p').textContent = error.message;
+            empty.classList.remove('hidden');
+        }
+    }
+
+    function renderStatSummary(data) {
+        document.getElementById('statModalLoading').classList.add('hidden');
+        document.getElementById('statModalMeta').textContent = (data.count ?? 0) + ' record(s)';
+
+        const empty = document.getElementById('statModalEmpty');
+        const list = document.getElementById('statModalList');
+        const items = Array.isArray(data.items) ? data.items : [];
+
+        if (!items.length) {
+            empty.classList.remove('hidden');
+            return;
+        }
+
+        list.innerHTML = items.map(function (item, index) {
+            const title = item.url
+                ? '<a href="' + escapeHtml(item.url) + '" class="font-medium text-[#1C75BC] hover:underline">' + escapeHtml(item.title) + '</a>'
+                : '<span class="font-medium text-gray-800">' + escapeHtml(item.title) + '</span>';
+
+            const badge = item.badge
+                ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ' +
+                    (statTones[item.tone] || statTones.gray) + '">' + escapeHtml(item.badge) + '</span>'
+                : '';
+
+            return '<div class="flex items-start gap-3 py-2.5">' +
+                '<div class="w-6 shrink-0 pt-0.5 text-right text-xs font-semibold text-gray-400">' + (index + 1) + '</div>' +
+                '<div class="min-w-0 flex-1">' + title +
+                (item.subtitle ? '<div class="text-sm text-gray-600 truncate">' + escapeHtml(item.subtitle) + '</div>' : '') +
+                (item.meta ? '<div class="text-xs text-gray-500 mt-0.5">' + escapeHtml(item.meta) + '</div>' : '') +
+                '</div>' +
+                (badge ? '<div class="shrink-0">' + badge + '</div>' : '') +
+                '</div>';
+        }).join('');
+
+        list.classList.remove('hidden');
+    }
+
+    window.openStatModal = openStatModal;
+    window.closeStatModal = closeStatModal;
+
     /* Global Escape handler */
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
 
+        const statModal = document.getElementById('statModal');
+        if (statModal && !statModal.classList.contains('hidden')) {
+            closeStatModal();
+            return;
+        }
         const lightbox = document.getElementById('photo-lightbox');
         if (lightbox && !lightbox.classList.contains('hidden')) {
             closeLightbox();
