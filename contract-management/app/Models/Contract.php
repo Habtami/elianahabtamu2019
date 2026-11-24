@@ -28,7 +28,8 @@ class Contract extends Model
         'performance_guarantee_amount',
         'currency_type',
         'performance_guarantee_end_date',
-        'performance_guarantee_alert_days',
+        'alert_days_before_guarantee_end',
+        'guarantee_alert_sent_at',
         'created_by',
         'status',
         'extended_count'
@@ -40,7 +41,8 @@ class Contract extends Model
 
         'performance_guarantee_end_date' => 'date',
         'alert_days' => 'integer',
-        'performance_guarantee_alert_days' => 'integer',
+        'alert_days_before_guarantee_end' => 'integer',
+        'guarantee_alert_sent_at' => 'datetime',
         'performance_guarantee_amount' => 'decimal:2',
         'contract_amount' => 'decimal:2',
         'extended_count' => 'integer'
@@ -210,7 +212,7 @@ class Contract extends Model
             return false;
         }
         $daysUntilEnd = $this->getDaysUntilPerformanceGuaranteeEnd();
-        return $daysUntilEnd > 0 && $daysUntilEnd <= $this->performance_guarantee_alert_days;
+        return $daysUntilEnd > 0 && $daysUntilEnd <= $this->alert_days_before_guarantee_end;
     }
 
     // Check if performance guarantee should alert

@@ -8,9 +8,10 @@ use App\Models\CurrencyType;
 use App\Models\Department;
 use App\Models\MaterialGroup;
 use App\Models\PerformanceBondType;
-use App\Models\User;
 use App\Models\Supplier;
+use App\Models\User;
 use App\Models\ActivityLog;
+use App\Rules\GuaranteeAlertDays;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -405,7 +406,13 @@ class ContractController extends Controller
             'currency_type' => ['nullable', Rule::in(Contract::getCurrencyTypes())],
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
-            'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
+            'alert_days_before_guarantee_end' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:365',
+                new GuaranteeAlertDays($request->performance_guarantee_end_date),
+            ],
         ], [
             'end_date.after' => 'Invalid date sequence. Please enter a date after the previous date.',
         ]);
@@ -460,7 +467,7 @@ class ContractController extends Controller
             'currency_type' => $validated['currency_type'] ?? null,
             'performance_guarantee_amount' => $validated['performance_guarantee_amount'] ?? null,
             'performance_guarantee_end_date' => $validated['performance_guarantee_end_date'] ?? null,
-            'performance_guarantee_alert_days' => $validated['performance_guarantee_alert_days'] ?? null,
+            'alert_days_before_guarantee_end' => $validated['alert_days_before_guarantee_end'] ?? null,
             'created_by' => auth()->id(),
             'status' => 'active',
         ]);
@@ -559,7 +566,13 @@ class ContractController extends Controller
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'currency_type' => ['nullable', 'string', Rule::in(Contract::getCurrencyTypes())],
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
-            'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
+            'alert_days_before_guarantee_end' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:365',
+                new GuaranteeAlertDays($request->performance_guarantee_end_date),
+            ],
         ], [
             'end_date.after' => 'Invalid date sequence. Please enter a date after the previous date.',
         ]);
@@ -569,7 +582,11 @@ class ContractController extends Controller
             return back()->with('error', 'You cannot change the department of this contract.');
         }
         
-        $contract->update([
+        $newGuaranteeEndDate = $request->performance_guarantee_end_date ?: null;
+        $guaranteeWindowChanged = (int) $request->alert_days_before_guarantee_end !== (int) $contract->alert_days_before_guarantee_end
+            || $newGuaranteeEndDate !== $contract->performance_guarantee_end_date?->format('Y-m-d');
+
+        $attributes = [
             'name' => $request->name,
             'description' => $request->description,
             'material_group' => $request->material_group,
@@ -584,9 +601,15 @@ class ContractController extends Controller
             'issued_by' => $request->issued_by,
             'performance_guarantee_amount' => $request->performance_guarantee_amount,
             'currency_type' => $request->currency_type,
-            'performance_guarantee_end_date' => $request->performance_guarantee_end_date,
-            'performance_guarantee_alert_days' => $request->performance_guarantee_alert_days,
-        ]);
+            'performance_guarantee_end_date' => $newGuaranteeEndDate,
+            'alert_days_before_guarantee_end' => $request->alert_days_before_guarantee_end,
+        ];
+
+        if ($guaranteeWindowChanged) {
+            $attributes['guarantee_alert_sent_at'] = null;
+        }
+
+        $contract->update($attributes);
         
         $contract->updateStatus();
         

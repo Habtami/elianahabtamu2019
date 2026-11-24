@@ -223,7 +223,12 @@
 
                     <div class="row mb-3">
                         <div class="col-sm-4"><strong>Alert Days:</strong></div>
-                        <div class="col-sm-8">{{ $contract->performance_guarantee_alert_days }} days</div>
+                        <div class="col-sm-8">{{ $contract->alert_days_before_guarantee_end }} {{ __('performance_guarantee.days_unit') }}</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>{{ __('performance_guarantee.alert_sent_label') }}:</strong></div>
+                        <div class="col-sm-8">{{ $contract->guarantee_alert_sent_at?->format('M d, Y H:i') ?? __('performance_guarantee.not_sent') }}</div>
                     </div>
 
                     <div class="row mb-3">

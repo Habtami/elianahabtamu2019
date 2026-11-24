@@ -346,17 +346,17 @@
                             
                             <!-- Alert Days -->
                             <div class="mb-6">
-                                <label for="performance_guarantee_alert_days" class="form-label">Alert Days Before Performance Guarantee End</label>
+                                <label for="alert_days_before_guarantee_end" class="form-label">{{ __('performance_guarantee.alert_days_label') }}</label>
                                 <input type="number" 
-                                       id="performance_guarantee_alert_days" 
-                                       name="performance_guarantee_alert_days" 
-                                       value="{{ old('performance_guarantee_alert_days', 30) }}"
-                                       min="1" 
+                                       id="alert_days_before_guarantee_end" 
+                                       name="alert_days_before_guarantee_end" 
+                                       value="{{ old('alert_days_before_guarantee_end', 30) }}"
+                                       min="0" 
                                        max="365"
                                        class="form-input"
-                                       placeholder="Number of days before performance guarantee end date to trigger alert">
-                                <p class="text-sm text-gray-500 mt-1">Number of days before performance guarantee end date to trigger alert</p>
-                                @error('performance_guarantee_alert_days')
+                                       placeholder="{{ __('performance_guarantee.alert_days_placeholder') }}">
+                                <p class="text-sm text-gray-500 mt-1">{{ __('performance_guarantee.alert_days_help') }}</p>
+                                @error('alert_days_before_guarantee_end')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -780,7 +780,7 @@
                 const pgAmount = document.getElementById('performance_guarantee_amount').value;
                 const currencyType = document.getElementById('currency_type').value;
                 const pgEndDate = document.getElementById('performance_guarantee_end_date').value;
-                const pgAlertDays = document.getElementById('performance_guarantee_alert_days').value;
+                const pgAlertDays = document.getElementById('alert_days_before_guarantee_end').value;
 
                 if (pgAmount && !currencyType) {
                     e.preventDefault();
@@ -857,7 +857,7 @@
         
         // Auto-fill performance guarantee alert days if end date is provided
         const pgEndDateInput = document.getElementById('performance_guarantee_end_date');
-        const pgAlertDaysInput = document.getElementById('performance_guarantee_alert_days');
+        const pgAlertDaysInput = document.getElementById('alert_days_before_guarantee_end');
         
         if (pgEndDateInput && pgAlertDaysInput) {
             pgEndDateInput.addEventListener('change', function() {

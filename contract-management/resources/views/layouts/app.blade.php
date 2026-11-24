@@ -713,7 +713,7 @@
             $alertCount = \App\Models\Contract::forUser($navUser)
                 ->where(function ($query) {
                     $query->whereRaw('DATEDIFF(end_date, CURDATE()) BETWEEN 1 AND alert_days')
-                          ->orWhereRaw('performance_guarantee_end_date IS NOT NULL AND DATEDIFF(performance_guarantee_end_date, CURDATE()) BETWEEN 1 AND performance_guarantee_alert_days');
+                          ->orWhereRaw('performance_guarantee_end_date IS NOT NULL AND DATEDIFF(performance_guarantee_end_date, CURDATE()) BETWEEN 1 AND alert_days_before_guarantee_end');
                 })
                 ->count();
         }

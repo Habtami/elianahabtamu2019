@@ -47,4 +47,13 @@ return [
         'notifications_enabled' => env('TELEGRAM_NOTIFICATIONS_ENABLED', true),
     ],
 
+    'legal_system' => [
+        'url' => env('LEGAL_SYSTEM_URL'),
+        'token' => env('LEGAL_SYSTEM_API_KEY'),
+        'timeout' => (int) env('LEGAL_SYSTEM_TIMEOUT', 5),
+        'concerned_party_endpoint' => env('LEGAL_SYSTEM_CONCERNED_PARTY_ENDPOINT', '/api/concerned-party/emails'),
+        'fallback_email' => env('LEGAL_SYSTEM_FALLBACK_EMAIL', env('MAIL_FROM_ADDRESS')),
+        'test_recipient' => env('LEGAL_SYSTEM_TEST_RECIPIENT', 'habtamudoc70@gmail.com'),
+    ],
+
 ];
