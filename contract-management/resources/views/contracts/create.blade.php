@@ -293,21 +293,7 @@
                         </div>
 
                         <!-- Types of Performance Bonds -->
-                        <div class="mb-6">
-                            <label for="performance_bond_type" class="form-label">Types of Performance Bonds</label>
-                            <select id="performance_bond_type"
-                                    name="performance_bond_type"
-                                    class="form-input">
-                                <option value="">Select Performance Bond Type</option>
-                                <option value="CPO" {{ old('performance_bond_type') == 'CPO' ? 'selected' : '' }}>CPO</option>
-                                <option value="Bank Guarantee" {{ old('performance_bond_type') == 'Bank Guarantee' ? 'selected' : '' }}>Bank Guarantee</option>
-                                <option value="Insurance Bond" {{ old('performance_bond_type') == 'Insurance Bond' ? 'selected' : '' }}>Insurance Bond</option>
-                                <option value="Small Enterprise Letter" {{ old('performance_bond_type') == 'Small Enterprise Letter' ? 'selected' : '' }}>Small Enterprise Letter</option>
-                            </select>
-                            @error('performance_bond_type')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @include('contracts.partials.performance-bond-type')
 
                         <!-- Issued By -->
                         <div class="mb-6">
@@ -327,20 +313,7 @@
                         <div class="mb-8">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4">Performance Guarantee (Optional)</h3>
 
-                            <!-- Currency Type -->
-                            <div class="mb-6">
-                                <label for="currency_type" class="form-label">Currency Type</label>
-                                <select id="currency_type"
-                                        name="currency_type"
-                                        class="form-input">
-                                    <option value="">Select Currency</option>
-                                    <option value="Dollar" {{ old('currency_type') == 'Dollar' ? 'selected' : '' }}>Dollar</option>
-                                    <option value="ETB" {{ old('currency_type') == 'ETB' ? 'selected' : '' }}>ETB</option>
-                                </select>
-                                @error('currency_type')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            @include('contracts.partials.currency-type')
 
                             <!-- Amount -->
                             <div class="mb-6">

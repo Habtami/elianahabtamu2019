@@ -61,6 +61,8 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::post('/contracts/material-groups', [ContractController::class, 'storeMaterialGroup'])->name('contracts.material-groups.store');
     Route::post('/contracts/departments', [ContractController::class, 'storeDepartment'])->name('contracts.departments.store');
     Route::post('/contracts/contract-types', [ContractController::class, 'storeContractType'])->name('contracts.contract-types.store');
+    Route::post('/contracts/currency-types', [ContractController::class, 'storeCurrencyType'])->name('contracts.currency-types.store');
+    Route::post('/contracts/performance-bond-types', [ContractController::class, 'storePerformanceBondType'])->name('contracts.performance-bond-types.store');
     Route::resource('contracts', ContractController::class);
 
     // Contract Alerts

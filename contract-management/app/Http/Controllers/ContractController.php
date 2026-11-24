@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\ContractType;
+use App\Models\CurrencyType;
 use App\Models\Department;
 use App\Models\MaterialGroup;
+use App\Models\PerformanceBondType;
 use App\Models\User;
 use App\Models\Supplier;
 use App\Models\ActivityLog;
@@ -123,8 +125,10 @@ class ContractController extends Controller
 
         $materialGroups = Contract::getMaterialGroups();
         $contractTypes = Contract::getContractTypes();
+        $currencyTypes = Contract::getCurrencyTypes();
+        $performanceBondTypes = Contract::getPerformanceBondTypes();
 
-        return view('contracts.create', compact('departments', 'materialGroups', 'contractTypes'));
+        return view('contracts.create', compact('departments', 'materialGroups', 'contractTypes', 'currencyTypes', 'performanceBondTypes'));
     }
 
     public function storeMaterialGroup(Request $request)
@@ -274,6 +278,106 @@ class ContractController extends Controller
                 : 'That contract type is already registered.',
         ], $contractType->wasRecentlyCreated ? 201 : 200);
     }
+
+    public function storeCurrencyType(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user->canCreateContracts()) {
+            return response()->json(['message' => 'You are not authorized to register currency types.'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:191',
+        ], [
+            'name.required' => 'Enter the currency type name.',
+        ]);
+
+        $name = trim(preg_replace('/\s+/', ' ', $validated['name']));
+        $lookup = mb_strtolower($name);
+
+        foreach (Contract::getCurrencyTypes() as $type) {
+            if (mb_strtolower($type) === $lookup) {
+                return response()->json([
+                    'name' => $type,
+                    'created' => false,
+                    'message' => 'That currency type is already registered.',
+                ]);
+            }
+        }
+
+        $currencyType = CurrencyType::whereRaw('LOWER(name) = ?', [$lookup])->first();
+
+        if ($currencyType) {
+            if (! $currencyType->is_active) {
+                $currencyType->update(['is_active' => true]);
+            }
+        } else {
+            $currencyType = CurrencyType::create([
+                'name' => $name,
+                'is_active' => true,
+                'sort_order' => ((int) CurrencyType::max('sort_order')) + 1,
+            ]);
+        }
+
+        return response()->json([
+            'name' => $currencyType->name,
+            'created' => $currencyType->wasRecentlyCreated,
+            'message' => $currencyType->wasRecentlyCreated
+                ? 'Currency type registered.'
+                : 'That currency type is already registered.',
+        ], $currencyType->wasRecentlyCreated ? 201 : 200);
+    }
+
+    public function storePerformanceBondType(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user->canCreateContracts()) {
+            return response()->json(['message' => 'You are not authorized to register performance bond types.'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:191',
+        ], [
+            'name.required' => 'Enter the performance bond type name.',
+        ]);
+
+        $name = trim(preg_replace('/\s+/', ' ', $validated['name']));
+        $lookup = mb_strtolower($name);
+
+        foreach (Contract::getPerformanceBondTypes() as $type) {
+            if (mb_strtolower($type) === $lookup) {
+                return response()->json([
+                    'name' => $type,
+                    'created' => false,
+                    'message' => 'That performance bond type is already registered.',
+                ]);
+            }
+        }
+
+        $bondType = PerformanceBondType::whereRaw('LOWER(name) = ?', [$lookup])->first();
+
+        if ($bondType) {
+            if (! $bondType->is_active) {
+                $bondType->update(['is_active' => true]);
+            }
+        } else {
+            $bondType = PerformanceBondType::create([
+                'name' => $name,
+                'is_active' => true,
+                'sort_order' => ((int) PerformanceBondType::max('sort_order')) + 1,
+            ]);
+        }
+
+        return response()->json([
+            'name' => $bondType->name,
+            'created' => $bondType->wasRecentlyCreated,
+            'message' => $bondType->wasRecentlyCreated
+                ? 'Performance bond type registered.'
+                : 'That performance bond type is already registered.',
+        ], $bondType->wasRecentlyCreated ? 201 : 200);
+    }
     
     public function store(Request $request)
     {
@@ -296,9 +400,9 @@ class ContractController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'alert_days' => 'required|integer|min:0',
-            'performance_bond_type' => 'nullable|in:CPO,Bank Guarantee,Insurance Bond,Small Enterprise Letter',
+            'performance_bond_type' => ['nullable', Rule::in(Contract::getPerformanceBondTypes())],
             'issued_by' => 'nullable|string|max:255',
-            'currency_type' => 'nullable|in:Dollar,ETB',
+            'currency_type' => ['nullable', Rule::in(Contract::getCurrencyTypes())],
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
             'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
@@ -409,8 +513,10 @@ class ContractController extends Controller
 
         $materialGroups = Contract::getMaterialGroups();
         $contractTypes = Contract::getContractTypes();
+        $currencyTypes = Contract::getCurrencyTypes();
+        $performanceBondTypes = Contract::getPerformanceBondTypes();
 
-        return view('contracts.edit', compact('contract', 'departments', 'materialGroups', 'contractTypes'));
+        return view('contracts.edit', compact('contract', 'departments', 'materialGroups', 'contractTypes', 'currencyTypes', 'performanceBondTypes'));
     }
 
     public function update(Request $request, Contract $contract)
@@ -447,11 +553,11 @@ class ContractController extends Controller
                     }
                 },
             ],
-            'performance_bond_type' => 'nullable|string|in:CPO,Bank Guarantee,Insurance Bond,Small Enterprise Letter',
+            'performance_bond_type' => ['nullable', 'string', Rule::in(Contract::getPerformanceBondTypes())],
             'issued_by' => 'nullable|string|max:255',
             'contract_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
-            'currency_type' => 'nullable|string|in:Dollar,ETB',
+            'currency_type' => ['nullable', 'string', Rule::in(Contract::getCurrencyTypes())],
             'performance_guarantee_end_date' => 'nullable|date|after:start_date',
             'performance_guarantee_alert_days' => 'nullable|integer|min:1|max:365',
         ], [

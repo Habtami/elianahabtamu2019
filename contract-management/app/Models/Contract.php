@@ -110,6 +110,18 @@ class Contract extends Model
         return ContractType::activeNames();
     }
 
+    // Currency types available for contracts
+    public static function getCurrencyTypes()
+    {
+        return CurrencyType::activeNames();
+    }
+
+    // Performance bond types available for contracts
+    public static function getPerformanceBondTypes()
+    {
+        return PerformanceBondType::activeNames();
+    }
+
     // Relationship with supplier
     public function supplier()
     {
