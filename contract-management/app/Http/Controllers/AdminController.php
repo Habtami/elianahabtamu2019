@@ -81,12 +81,61 @@ class AdminController extends Controller
         $roles = User::getRoles();
         $departments = User::getDepartments();
 
+        $userCounts = [
+            'all' => User::count(),
+            'active' => User::where('status', true)->count(),
+            'admins' => User::where('role', User::ROLE_ADMIN)->count(),
+            'inactive' => User::where('status', false)->count(),
+        ];
+
         // Get filter values for view
         $statusFilter = $request->get('status_filter', '');
         $roleFilter = $request->get('role_filter', '');
         $search = $request->get('search', '');
 
-        return view('admin.users.index', compact('users', 'roles', 'departments', 'sortBy', 'sortDirection', 'perPage', 'statusFilter', 'roleFilter', 'search'));
+        return view('admin.users.index', compact('users', 'roles', 'departments', 'sortBy', 'sortDirection', 'perPage', 'statusFilter', 'roleFilter', 'search', 'userCounts'));
+    }
+
+    public function userDetails(Request $request)
+    {
+        if (!auth()->user()->hasPermission('manage_users')) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You do not have permission to manage users.');
+        }
+
+        $validated = $request->validate([
+            'scope' => 'required|in:all,active,admins,inactive',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
+        $query = User::query();
+
+        match ($validated['scope']) {
+            'active' => $query->where('status', true),
+            'admins' => $query->where('role', User::ROLE_ADMIN),
+            'inactive' => $query->where('status', false),
+            default => null,
+        };
+
+        $users = $query->orderBy('name')->paginate(15);
+
+        return response()->json([
+            'scope' => $validated['scope'],
+            'total' => $users->total(),
+            'page' => $users->currentPage(),
+            'last_page' => $users->lastPage(),
+            'first_item' => $users->firstItem(),
+            'last_item' => $users->lastItem(),
+            'users' => $users->map(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->getRoleDisplayName(),
+                'department' => $user->department ? $user->getDepartmentDisplayName() : '—',
+                'status' => $user->status,
+                'edit_url' => route('admin.users.edit', $user),
+            ]),
+        ]);
     }
 
     public function exportUsers(Request $request)

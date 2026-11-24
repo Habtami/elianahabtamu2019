@@ -124,6 +124,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::get('/tires/reports', [TireReportController::class, 'index'])->name('tires.reports');
     Route::get('/tires/reports/export/excel', [TireReportController::class, 'exportCsv'])->name('tires.reports.export.excel');
     Route::get('/tires/reports/export/drivers/excel', [TireReportController::class, 'exportDriversCsv'])->name('tires.reports.export.drivers');
+    Route::get('/tires/reports/export/report', [TireReportController::class, 'exportReportCsv'])->name('tires.reports.export.report');
 
     // Tire Audit Trail (must come before tires/{tire} wildcard)
     Route::get('/tires/audit', [TireController::class, 'audit'])->name('tires.audit');
@@ -243,6 +244,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
             Route::get('/users', [AdminController::class, 'index'])->name('users.index');
             Route::get('/users/create', [AdminController::class, 'create'])->name('users.create');
             Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
+            Route::get('/users/details', [AdminController::class, 'userDetails'])->name('users.details');
             Route::post('/users', [AdminController::class, 'store'])->name('users.store');
             Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('users.edit');
             Route::get('/users/{user}/history', [AdminController::class, 'userHistory'])->name('users.history');
