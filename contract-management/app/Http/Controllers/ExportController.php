@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Exports\DriversExport;
 use App\Exports\TiresExport;
 use App\Helpers\ExcelExport;
-use App\Models\ExportLog;
 use App\Models\Driver;
+use App\Models\ExportLog;
 use App\Models\Tire;
 use App\Models\TireReturn;
 use Illuminate\Http\Request;
@@ -33,16 +33,36 @@ class ExportController extends Controller
 
     public function drivers(Request $request)
     {
-        $query = Driver::query();
-        if ($request->has('search') && $request->filled('search')) {
+        $query = Driver::withCount(['tireGives as active_tires_count' => function ($q) {
+            $q->where('is_returned', false);
+        }]);
+
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('license_number', 'like', "%{$search}%");
+                    ->orWhere('license_number', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $drivers = $query->get();
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('status', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('status', false);
+            } elseif ($request->status === 'license_expiring') {
+                $query->whereNotNull('license_expiry')
+                    ->whereDate('license_expiry', '>', now())
+                    ->whereDate('license_expiry', '<=', now()->addDays(30));
+            } elseif ($request->status === 'license_expired') {
+                $query->whereNotNull('license_expiry')
+                    ->whereDate('license_expiry', '<', now());
+            }
+        }
+
+        $drivers = $query->orderBy('name')->get();
 
         $exportLog = ExportLog::create([
             'user_id' => Auth::id(),

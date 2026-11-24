@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Driver;
-use App\Models\TireGive;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,10 +16,10 @@ class DriverController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('license_number', 'like', '%' . $search . '%')
-                  ->orWhere('phone', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('license_number', 'like', '%'.$search.'%')
+                    ->orWhere('phone', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%');
             });
         }
 
@@ -40,7 +39,11 @@ class DriverController extends Controller
             }
         }
 
-        $drivers = $query->latest()->paginate(5);
+        $drivers = $query->withCount(['tireGives as active_tires_count' => function ($q) {
+            $q->where('is_returned', false);
+        }])
+            ->latest()
+            ->paginate(10);
 
         $totalDrivers = Driver::count();
         $activeDrivers = Driver::where('status', true)->count();
@@ -62,7 +65,7 @@ class DriverController extends Controller
     public function create()
     {
         $user = auth()->user();
-        if (!$user->canEditDrivers()) {
+        if (! $user->canEditDrivers()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to create drivers.');
         }
@@ -73,7 +76,7 @@ class DriverController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        if (!$user->canEditDrivers()) {
+        if (! $user->canEditDrivers()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to create drivers.');
         }
@@ -107,13 +110,14 @@ class DriverController extends Controller
         $tireReturns = $driver->tireReturns()->with(['tire', 'returnedBy', 'tireGive.tire'])->latest()->get();
         $activeTires = $tireGives->where('is_returned', false)->count();
         $totalTires = $tireGives->count();
+
         return view('drivers.show', compact('driver', 'tireGives', 'tireReturns', 'activeTires', 'totalTires'));
     }
 
     public function edit(Driver $driver)
     {
         $user = auth()->user();
-        if (!$user->canEditDrivers()) {
+        if (! $user->canEditDrivers()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to edit drivers.');
         }
@@ -124,7 +128,7 @@ class DriverController extends Controller
     public function update(Request $request, Driver $driver)
     {
         $user = auth()->user();
-        if (!$user->canEditDrivers()) {
+        if (! $user->canEditDrivers()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to edit drivers.');
         }
@@ -157,7 +161,7 @@ class DriverController extends Controller
     public function destroy(Driver $driver)
     {
         $user = auth()->user();
-        if (!$user->canEditDrivers()) {
+        if (! $user->canEditDrivers()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to delete drivers.');
         }
@@ -175,12 +179,12 @@ class DriverController extends Controller
     public function toggleStatus(Driver $driver)
     {
         $user = auth()->user();
-        if (!$user->canEditDrivers()) {
+        if (! $user->canEditDrivers()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to update driver status.');
         }
 
-        $driver->update(['status' => !$driver->status]);
+        $driver->update(['status' => ! $driver->status]);
 
         return back()->with('success', 'Driver status updated successfully.');
     }
@@ -188,7 +192,7 @@ class DriverController extends Controller
     public function quickStore(Request $request)
     {
         $user = auth()->user();
-        if (!$user->canPerformTireOperations() && !$user->canEditDrivers()) {
+        if (! $user->canPerformTireOperations() && ! $user->canEditDrivers()) {
             return response()->json(['message' => 'You are not authorized to register drivers.'], 403);
         }
 
@@ -201,7 +205,7 @@ class DriverController extends Controller
         $name = trim($validated['name']);
         $driver = Driver::whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
 
-        if (!$driver) {
+        if (! $driver) {
             $driver = Driver::create([
                 'name' => $name,
                 'phone' => $validated['phone'] ?? null,
@@ -224,10 +228,11 @@ class DriverController extends Controller
         if (strlen($query) < 2) {
             return response()->json([]);
         }
-        $drivers = Driver::where('name', 'like', '%' . $query . '%')
-            ->orWhere('license_number', 'like', '%' . $query . '%')
+        $drivers = Driver::where('name', 'like', '%'.$query.'%')
+            ->orWhere('license_number', 'like', '%'.$query.'%')
             ->limit(10)
             ->get(['id', 'name', 'license_number', 'phone']);
+
         return response()->json($drivers);
     }
 }

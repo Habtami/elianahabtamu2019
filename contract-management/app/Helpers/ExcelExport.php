@@ -7,7 +7,9 @@ use ZipArchive;
 class ExcelExport
 {
     protected $headers = [];
+
     protected $rows = [];
+
     protected $sheetName = 'Sheet1';
 
     public function __construct(array $headers = [], string $sheetName = 'Sheet1')
@@ -38,11 +40,11 @@ class ExcelExport
         $content = $this->generateXlsx();
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
         header('Cache-Control: max-age=1');
         header('Cache-Control: public');
-        header('Content-Length: ' . strlen($content));
+        header('Content-Length: '.strlen($content));
         echo $content;
         exit;
     }
@@ -50,7 +52,7 @@ class ExcelExport
     protected function generateXlsx(): string
     {
         $tmp = tempnam(sys_get_temp_dir(), 'excel');
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         $zip->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         $zip->addFromString('[Content_Types].xml', $this->getContentTypes());
@@ -92,7 +94,7 @@ class ExcelExport
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <sheets>
-<sheet name="' . $this->sheetName . '" sheetId="1" r:id="rId1"/>
+<sheet name="'.$this->sheetName.'" sheetId="1" r:id="rId1"/>
 </sheets>
 </workbook>';
     }
@@ -108,75 +110,72 @@ class ExcelExport
 
     protected function getSharedStrings(): string
     {
-        $strings = [];
-        $headerCells = $this->convertCellsToStrings([$this->headers]);
-        foreach ($headerCells as $rowStrings) {
-            foreach ($rowStrings as $s) {
-                if ($s !== '' && !in_array($s, $strings)) {
-                    $strings[] = $s;
-                }
-            }
-        }
+        [, $strings] = $this->buildSharedStringIndex();
 
-        foreach ($this->rows as $row) {
-            foreach ($row as $cell) {
-                $str = $this->cellToString($cell);
-                if ($str !== '' && !in_array($str, $strings)) {
-                    $strings[] = $str;
-                }
-            }
-        }
-
-        $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n";
-        $xml .= '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="' . count($strings) . '" uniqueCount="' . count($strings) . '">' . "\n";
+        $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'."\n";
+        $xml .= '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'.count($strings).'" uniqueCount="'.count($strings).'">'."\n";
         foreach ($strings as $str) {
-            $xml .= '<si><t>' . htmlspecialchars($str, ENT_XML1) . '</t></si>';
+            $xml .= '<si><t>'.htmlspecialchars($str, ENT_XML1).'</t></si>';
         }
         $xml .= '</sst>';
 
         return $xml;
     }
 
-    protected function getSheet1(): string
+    /**
+     * Prefixed keys keep numeric strings like "1" and "01" from collapsing
+     * into the same PHP array key, which would corrupt shared-string indices.
+     */
+    protected function buildSharedStringIndex(): array
     {
-        $stringIndex = [];
+        $index = [];
         $strings = [];
 
-        $headerCells = $this->convertCellsToStrings([$this->headers]);
-        foreach ($headerCells as $rowStrings) {
+        $add = function ($s) use (&$index, &$strings) {
+            if ($s === '') {
+                return;
+            }
+            $key = 's:'.$s;
+            if (! isset($index[$key])) {
+                $index[$key] = count($strings);
+                $strings[] = $s;
+            }
+        };
+
+        foreach ($this->convertCellsToStrings([$this->headers]) as $rowStrings) {
             foreach ($rowStrings as $s) {
-                if ($s !== '' && !isset($stringIndex[$s])) {
-                    $stringIndex[$s] = count($strings);
-                    $strings[] = $s;
-                }
+                $add($s);
             }
         }
 
         foreach ($this->rows as $row) {
             foreach ($row as $cell) {
-                $str = $this->cellToString($cell);
-                if ($str !== '' && !isset($stringIndex[$str])) {
-                    $stringIndex[$str] = count($strings);
-                    $strings[] = $str;
-                }
+                $add($this->cellToString($cell));
             }
         }
 
-        $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n";
-        $xml .= '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' . "\n";
+        return [$index, $strings];
+    }
+
+    protected function getSheet1(): string
+    {
+        [$stringIndex] = $this->buildSharedStringIndex();
+
+        $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'."\n";
+        $xml .= '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'."\n";
         $xml .= '<sheetData>';
 
         $rowNum = 1;
         $headerCellsRow = $this->convertCellsToStrings([$this->headers])[0];
-        $xml .= '<row r="' . $rowNum . '">';
+        $xml .= '<row r="'.$rowNum.'">';
         $colNum = 1;
         foreach ($headerCellsRow as $str) {
             $cellRef = $this->getCellReference($colNum, $rowNum);
             if ($str !== '') {
-                $idx = $stringIndex[$str];
-                $xml .= '<c r="' . $cellRef . '" t="s"><v>' . $idx . '</v></c>';
+                $idx = $stringIndex['s:'.$str];
+                $xml .= '<c r="'.$cellRef.'" t="s"><v>'.$idx.'</v></c>';
             } else {
-                $xml .= '<c r="' . $cellRef . '"></c>';
+                $xml .= '<c r="'.$cellRef.'"></c>';
             }
             $colNum++;
         }
@@ -184,16 +183,16 @@ class ExcelExport
         $rowNum++;
 
         foreach ($this->rows as $row) {
-            $xml .= '<row r="' . $rowNum . '">';
+            $xml .= '<row r="'.$rowNum.'">';
             $colNum = 1;
             foreach ($row as $cell) {
                 $cellRef = $this->getCellReference($colNum, $rowNum);
                 $str = $this->cellToString($cell);
                 if ($str !== '') {
-                    $idx = $stringIndex[$str];
-                    $xml .= '<c r="' . $cellRef . '" t="s"><v>' . $idx . '</v></c>';
+                    $idx = $stringIndex['s:'.$str];
+                    $xml .= '<c r="'.$cellRef.'" t="s"><v>'.$idx.'</v></c>';
                 } else {
-                    $xml .= '<c r="' . $cellRef . '"></c>';
+                    $xml .= '<c r="'.$cellRef.'"></c>';
                 }
                 $colNum++;
             }
@@ -213,6 +212,7 @@ class ExcelExport
         foreach ($rows as $row) {
             $result[] = array_map([$this, 'cellToString'], $row);
         }
+
         return $result;
     }
 
@@ -227,6 +227,7 @@ class ExcelExport
         if (is_numeric($value)) {
             return (string) $value;
         }
+
         return (string) $value;
     }
 
@@ -236,9 +237,10 @@ class ExcelExport
         $colIndex = $col;
         while ($colIndex > 0) {
             $remainder = ($colIndex - 1) % 26;
-            $colLetters = chr(65 + $remainder) . $colLetters;
+            $colLetters = chr(65 + $remainder).$colLetters;
             $colIndex = intval(($colIndex - $remainder) / 26);
         }
-        return $colLetters . $row;
+
+        return $colLetters.$row;
     }
 }

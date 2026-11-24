@@ -17,19 +17,20 @@ class DriversExport
     public function download(string $filename = 'drivers_export.xlsx')
     {
         $excel = new ExcelExport(
-            ['ID', 'Name', 'Phone', 'License Number', 'License Expiry', 'Status', 'Created At'],
+            ['ID', 'Name', 'Email', 'License Number', 'Phone', 'License Expiry', 'Status', 'Active Tires'],
             'Drivers'
         );
 
         foreach ($this->drivers as $driver) {
             $excel->addRow([
-                $driver->id,
+                str_pad((string) $driver->id, 2, '0', STR_PAD_LEFT),
                 $driver->name,
-                $driver->phone ?? '',
+                $driver->email ?? '',
                 $driver->license_number ?? '',
+                $driver->phone ?? '',
                 $driver->license_expiry ? $driver->license_expiry->format('Y-m-d') : '',
                 $driver->status ? 'Active' : 'Inactive',
-                $driver->created_at ? $driver->created_at->format('Y-m-d H:i:s') : '',
+                (int) ($driver->active_tires_count ?? 0),
             ]);
         }
 
