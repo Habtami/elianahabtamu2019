@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tire Return Report</title>
+    <title>Outstanding Tires Report</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -30,9 +30,13 @@
             padding: 6px 8px;
             border: 1px solid #e2e8f0;
             color: #334155;
+            vertical-align: top;
         }
         tbody tr:nth-child(even) { background: #f8fafc; }
         .serial { font-weight: bold; color: #0284c7; }
+        .sub { font-size: 9px; color: #64748b; margin-top: 1px; }
+        .days { font-weight: bold; }
+        .days.overdue { color: #dc2626; }
         .footer { margin-top: 18px; font-size: 9px; color: #94a3b8; text-align: right; }
     </style>
 </head>
@@ -40,33 +44,54 @@
     <div class="company">Ethiopian Pharmaceutical Supply Service</div>
     <div class="company-sub">Contract Management System</div>
 
-    <div class="report-title">Tire Return Report</div>
+    <div class="report-title">Outstanding Tires Report</div>
     <div class="meta">Generated: {{ $generatedAt->format('M d, Y H:i') }} &nbsp;|&nbsp; Records: {{ $gives->count() }}</div>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 8%;">Roll No.</th>
-                <th style="width: 18%;">Serial Number</th>
-                <th style="width: 20%;">Tire Specification</th>
-                <th style="width: 22%;">Given To</th>
-                <th style="width: 15%;">Date</th>
-                <th style="width: 17%;">Given By</th>
+                <th style="width: 7%;">Roll No.</th>
+                <th style="width: 16%;">Tire</th>
+                <th style="width: 19%;">Driver</th>
+                <th style="width: 11%;">Plate</th>
+                <th style="width: 14%;">Issued By</th>
+                <th style="width: 16%;">Give Date</th>
+                <th style="width: 9%;">KM at Issue</th>
+                <th style="width: 8%;">Days Out</th>
             </tr>
         </thead>
         <tbody>
             @forelse($gives as $give)
+                @php
+                    $daysOut = $give->give_date ? (int) $give->give_date->diffInDays(now()) : 0;
+                    $plate = $give->plate_number ?: ($give->tire->plate_number ?? null);
+                @endphp
                 <tr>
                     <td>{{ str_pad((string) $give->id, 2, '0', STR_PAD_LEFT) }}</td>
-                    <td class="serial">{{ $give->tire->serial_number ?? '—' }}</td>
-                    <td>{{ $give->tire->tire_type ?? '—' }}</td>
-                    <td>{{ $give->driver->name ?? 'Unknown driver' }}</td>
-                    <td>{{ $give->give_date?->format('M d, Y') ?? '—' }}</td>
+                    <td>
+                        <div class="serial">{{ $give->tire->serial_number ?? '—' }}</div>
+                        <div class="sub">{{ $give->tire->tire_type ?? 'Unknown type' }}</div>
+                    </td>
+                    <td>
+                        <div>{{ $give->driver->name ?? 'Unknown driver' }}</div>
+                        @if($give->driver?->phone)
+                            <div class="sub">{{ $give->driver->phone }}</div>
+                        @endif
+                    </td>
+                    <td>{{ $plate ?: 'Not recorded' }}</td>
                     <td>{{ $give->givenBy->name ?? '—' }}</td>
+                    <td>
+                        <div>{{ $give->give_date ? $give->give_date->format('M d, Y') : '—' }}</div>
+                        @if($give->give_date)
+                            <div class="sub">{{ $give->give_date->format('l') }}</div>
+                        @endif
+                    </td>
+                    <td>{{ $give->given_kilometer ? number_format($give->given_kilometer) . ' km' : '—' }}</td>
+                    <td><span class="days {{ $daysOut > 30 ? 'overdue' : '' }}">{{ $daysOut }} {{ $daysOut === 1 ? 'day' : 'days' }}</span></td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 14px; color: #64748b;">No tire returns found.</td>
+                    <td colspan="8" style="text-align: center; padding: 14px; color: #64748b;">No outstanding tires found.</td>
                 </tr>
             @endforelse
         </tbody>
