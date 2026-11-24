@@ -566,7 +566,7 @@ class ContractController extends Controller
             'contract_amount' => 'nullable|numeric|min:0',
             'performance_guarantee_amount' => 'nullable|numeric|min:0',
             'currency_type' => ['nullable', 'string', Rule::in(Contract::getCurrencyTypes())],
-            'performance_guarantee_end_date' => 'nullable|date|after_or_equal:start_date',
+            'performance_guarantee_end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:end_date',
             'alert_days_before_guarantee_end' => [
                 'nullable',
                 'integer',
@@ -577,6 +577,7 @@ class ContractController extends Controller
         ], [
             'end_date.after_or_equal' => 'የመጨረሻው ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።',
             'performance_guarantee_end_date.after_or_equal' => 'የዋስትና ማብቂያ ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።',
+            'performance_guarantee_end_date.before_or_equal' => 'የዋስትና ማብቂያ ቀን ከውል ማብቂያ ቀን በኋላ መሆን የለበትም።',
         ]);
         
         // Check if user can update contract for selected department

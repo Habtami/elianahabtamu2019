@@ -152,6 +152,7 @@
                                        id="end_date"
                                        name="end_date"
                                        value="{{ old('end_date', $contract->end_date->format('Y-m-d')) }}"
+                                       min="{{ old('start_date', $contract->start_date->format('Y-m-d')) }}"
                                        class="form-input"
                                        required>
                                 <div class="invalid-feedback d-block" id="end_date_error"></div>
@@ -230,6 +231,8 @@
                                        id="performance_guarantee_end_date"
                                        name="performance_guarantee_end_date"
                                        value="{{ old('performance_guarantee_end_date', $contract->performance_guarantee_end_date?->format('Y-m-d')) }}"
+                                       min="{{ old('start_date', $contract->start_date->format('Y-m-d')) }}"
+                                       max="{{ old('end_date', $contract->end_date->format('Y-m-d')) }}"
                                        class="form-input">
                                 <div class="invalid-feedback d-block" id="performance_guarantee_end_date_error"></div>
                                 <p class="text-sm text-gray-500 mt-1">Use the "Extend Performance Guarantee" feature to track extensions properly</p>
@@ -368,6 +371,51 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const pgEndDateInput = document.getElementById('performance_guarantee_end_date');
+
+        function validateDates() {
+            if (startDateInput && endDateInput) {
+                if (startDateInput.value && endDateInput.value && startDateInput.value > endDateInput.value) {
+                    endDateInput.setCustomValidity('የመጨረሻው ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።');
+                } else {
+                    endDateInput.setCustomValidity('');
+                }
+            }
+            if (startDateInput && pgEndDateInput) {
+                if (startDateInput.value && pgEndDateInput.value && startDateInput.value > pgEndDateInput.value) {
+                    pgEndDateInput.setCustomValidity('የዋስትና ማብቂያ ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።');
+                } else if (endDateInput && endDateInput.value && pgEndDateInput.value && pgEndDateInput.value > endDateInput.value) {
+                    pgEndDateInput.setCustomValidity('የዋስትና ማብቂያ ቀን ከውል ማብቂያ ቀን በኋላ መሆን የለበትም።');
+                } else {
+                    pgEndDateInput.setCustomValidity('');
+                }
+            }
+        }
+
+        function syncDateBounds() {
+            if (startDateInput && endDateInput && startDateInput.value) {
+                endDateInput.min = startDateInput.value;
+                if (pgEndDateInput) pgEndDateInput.min = startDateInput.value;
+            }
+            if (endDateInput && pgEndDateInput && endDateInput.value) {
+                pgEndDateInput.max = endDateInput.value;
+            }
+        }
+
+        if (startDateInput) startDateInput.addEventListener('change', function () {
+            syncDateBounds();
+            validateDates();
+        });
+        if (endDateInput) endDateInput.addEventListener('change', function () {
+            syncDateBounds();
+            validateDates();
+        });
+        if (pgEndDateInput) pgEndDateInput.addEventListener('change', validateDates);
+        syncDateBounds();
+        validateDates();
+
         // Function to validate Alert Days when dates change or user inputs value
         function validateAlertDays() {
             let startDate = new Date(document.getElementById("start_date").value);
@@ -422,9 +470,9 @@
             const startDate = new Date(document.getElementById('start_date').value);
             const endDate = new Date(document.getElementById('end_date').value);
 
-            if (endDate <= startDate) {
+            if (endDate < startDate) {
                 e.preventDefault();
-                alert('End date must be after start date.');
+                alert('የመጨረሻው ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።');
                 document.getElementById('end_date').focus();
                 return false;
             }
@@ -472,9 +520,15 @@
                 return false;
             }
 
-            if (pgEndDate && new Date(pgEndDate) <= startDate) {
+            if (pgEndDate && new Date(pgEndDate) < startDate) {
                 e.preventDefault();
-                alert('Performance guarantee end date must be after contract start date.');
+                alert('የዋስትና ማብቂያ ቀን ከመጀመሪያው ቀን በፊት መሆን የለበትም።');
+                return false;
+            }
+
+            if (pgEndDate && endDate && new Date(pgEndDate) > endDate) {
+                e.preventDefault();
+                alert('የዋስትና ማብቂያ ቀን ከውል ማብቂያ ቀን በኋላ መሆን የለበትም።');
                 return false;
             }
 
