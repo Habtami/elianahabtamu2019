@@ -2,442 +2,883 @@
 
 @section('title', 'Tire Details — ' . $tire->serial_number)
 @section('page-title', 'Tire Details')
+@section('hide-global-search', true)
 
-@push('styles')
+@section('styles')
 <style>
-    :root {
-        --epss-blue: #1C75BC;
-        --epss-blue-dark: #1664a0;
-        --success: #10B981;
-        --warning: #F59E0B;
-        --danger: #EF4444;
+    .tsr-page {
+        --tsr-bg: #f1f5f9;
+        --tsr-surface: #ffffff;
+        --tsr-text-main: #0f172a;
+        --tsr-text-muted: #64748b;
+        --tsr-text-light: #94a3b8;
+        --tsr-primary: #0284c7;
+        --tsr-primary-light: #e0f2fe;
+        --tsr-success: #10b981;
+        --tsr-success-hover: #059669;
+        --tsr-danger: #ef4444;
+        --tsr-danger-bg: #fef2f2;
+        --tsr-warning: #f59e0b;
+        --tsr-warning-bg: #fffbeb;
+        --tsr-border: #e2e8f0;
+        --tsr-radius-sm: 8px;
+        --tsr-radius-md: 12px;
+        --tsr-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+        --tsr-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+        background-color: var(--tsr-bg);
+        font-family: var(--tsr-font-sans);
+        color: var(--tsr-text-main);
+        padding: 2rem 1.5rem;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+    }
+    .tsr-page *,
+    .tsr-page *::before,
+    .tsr-page *::after { box-sizing: border-box; }
+    .tsr-page h1, .tsr-page h3, .tsr-page h4, .tsr-page p { margin: 0; }
+
+    .tsr-dashboard {
+        width: 100%;
+        max-width: 1350px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
     }
 
-    /* ---------- Cards ---------- */
-    .info-card {
-        background: #fff;
-        border: 1px solid #E5E7EB;
-        border-radius: .75rem;
-        box-shadow: 0 1px 2px 0 rgba(0,0,0,.04);
-        transition: box-shadow .25s ease;
-    }
-    .info-card:hover { box-shadow: 0 4px 14px -4px rgba(0,0,0,.08); }
-
-    .status-badge {
-        font-size: .72rem;
-        padding: .28rem .8rem;
-        border-radius: 9999px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: .35rem;
-        white-space: nowrap;
-    }
-
-    /* ---------- Spec list ---------- */
-    .spec-row {
+    /* ---------- header ---------- */
+    .tsr-top-nav {
         display: flex;
         justify-content: space-between;
-        gap: .75rem;
-        padding: .55rem 0;
-        border-bottom: 1px dashed #F1F5F9;
-        font-size: .875rem;
+        align-items: flex-end;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    .spec-row:last-child { border-bottom: 0; }
-    .spec-label { color: #6B7280; flex-shrink: 0; }
-    .spec-value {
-        color: #1F2937;
+    .tsr-title-area h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .tsr-title-area p { color: var(--tsr-text-muted); font-size: 0.95rem; }
+    .tsr-title-area p .tsr-serial { color: var(--tsr-primary); font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tsr-user-info {
+        text-align: right;
+        font-size: 0.9rem;
+        color: var(--tsr-text-muted);
+        line-height: 1.6;
+    }
+    .tsr-user-info strong { color: var(--tsr-text-main); }
+    .tsr-user-badge {
+        display: inline-block;
+        margin-top: 0.25rem;
+        background: var(--tsr-primary-light);
+        color: var(--tsr-primary);
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .tsr-action-bar {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+    .tsr-btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.55rem 1rem;
+        border-radius: var(--tsr-radius-sm);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .tsr-btn-blue { background: var(--tsr-primary); color: #fff; }
+    .tsr-btn-blue:hover { background: #0369a1; color: #fff; }
+    .tsr-btn-green { background: var(--tsr-success); color: #fff; }
+    .tsr-btn-green:hover { background: var(--tsr-success-hover); color: #fff; }
+    .tsr-btn-white {
+        background: #fff;
+        color: var(--tsr-text-main);
+        border-color: var(--tsr-border);
+        box-shadow: var(--tsr-shadow-sm);
+    }
+    .tsr-btn-white:hover { background: #f8fafc; border-color: #cbd5e1; color: var(--tsr-text-main); }
+    .tsr-btn-disabled { opacity: 0.55; cursor: not-allowed; }
+    .tsr-btn-action svg {
+        width: 16px; height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* ---------- KPI cards ---------- */
+    .tsr-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+    .tsr-kpi-card {
+        background: var(--tsr-surface);
+        border-radius: var(--tsr-radius-md);
+        padding: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--tsr-shadow-sm);
+        border: 1px solid var(--tsr-border);
+        border-left: 4px solid var(--tsr-border);
+        overflow: hidden;
+    }
+    .tsr-kpi-card.tsr-blue { border-left-color: #3b82f6; }
+    .tsr-kpi-card.tsr-purple { border-left-color: #8b5cf6; }
+    .tsr-kpi-card.tsr-red { border-left-color: var(--tsr-danger); }
+    .tsr-kpi-card.tsr-orange { border-left-color: var(--tsr-warning); }
+    .tsr-kpi-card.tsr-green { border-left-color: var(--tsr-success); }
+
+    .tsr-kpi-content { min-width: 0; }
+    .tsr-kpi-content h4 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--tsr-text-muted);
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+    .tsr-kpi-content .tsr-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0.2rem 0;
+        line-height: 1.1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .tsr-kpi-content .tsr-value.tsr-value-text { font-size: 1.25rem; }
+    .tsr-kpi-content .tsr-sub {
+        font-size: 0.8rem;
+        color: var(--tsr-text-light);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .tsr-kpi-icon { opacity: 0.2; width: 32px; height: 32px; flex: none; }
+    .tsr-kpi-icon svg { width: 100%; height: 100%; }
+
+    /* ---------- layout grid ---------- */
+    .tsr-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        min-width: 0;
+    }
+    @media (min-width: 1024px) {
+        .tsr-detail-grid { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); }
+    }
+    .tsr-detail-grid > * { min-width: 0; }
+
+    /* ---------- cards ---------- */
+    .tsr-card {
+        background: var(--tsr-surface);
+        border-radius: var(--tsr-radius-md);
+        box-shadow: var(--tsr-shadow-sm);
+        border: 1px solid var(--tsr-border);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .tsr-card-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--tsr-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .tsr-card-header h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tsr-count-badge {
+        background: var(--tsr-primary-light);
+        color: var(--tsr-primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+    }
+    .tsr-card-body { padding: 1.5rem; flex: 1; }
+    .tsr-card-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--tsr-border);
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    /* ---------- status pills ---------- */
+    .tsr-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .tsr-status-pill::before {
+        content: "";
+        display: inline-block;
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+    .tsr-status-pill.tsr-in-use { background: var(--tsr-warning-bg); color: #b45309; }
+    .tsr-status-pill.tsr-available { background: #ecfdf5; color: #047857; }
+    .tsr-status-pill.tsr-inactive { background: #f1f5f9; color: var(--tsr-text-muted); }
+    .tsr-status-pill.tsr-returned { background: #ecfdf5; color: #047857; }
+    .tsr-status-pill.tsr-pending { background: var(--tsr-warning-bg); color: #b45309; }
+
+    /* ---------- photo ---------- */
+    .tsr-photo {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        border-radius: var(--tsr-radius-sm);
+        border: 1px solid var(--tsr-border);
+        background: #f8fafc;
+        cursor: zoom-in;
+        transition: filter 0.2s;
+    }
+    .tsr-photo:hover { filter: brightness(0.96); }
+    .tsr-photo-empty {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        border-radius: var(--tsr-radius-sm);
+        border: 1px dashed #cbd5e1;
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: var(--tsr-text-light);
+        font-size: 0.8rem;
+    }
+    .tsr-photo-empty svg {
+        width: 36px; height: 36px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* ---------- spec rows ---------- */
+    .tsr-spec-list { margin-top: 1.1rem; display: flex; flex-direction: column; }
+    .tsr-spec-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.75rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px dashed var(--tsr-border);
+        font-size: 0.875rem;
+    }
+    .tsr-spec-row:last-child { border-bottom: 0; }
+    .tsr-spec-label { color: var(--tsr-text-muted); flex-shrink: 0; }
+    .tsr-spec-value {
+        color: var(--tsr-text-main);
         font-weight: 600;
         text-align: right;
         min-width: 0;
         overflow-wrap: anywhere;
     }
 
-    /* ---------- Timeline ---------- */
-    .timeline { position: relative; padding-left: 2.25rem; }
-    .timeline::before {
-        content: '';
+    /* ---------- timeline ---------- */
+    .tsr-timeline { position: relative; padding-left: 2rem; }
+    .tsr-timeline::before {
+        content: "";
         position: absolute;
-        left: .65rem;
-        top: .4rem;
-        bottom: .4rem;
+        left: 0.6rem;
+        top: 0.5rem;
+        bottom: 0.5rem;
         width: 2px;
-        background: linear-gradient(#DBEAFE, #D1FAE5);
+        background: linear-gradient(#bae6fd, #a7f3d0);
         border-radius: 2px;
     }
-    .timeline-entry { position: relative; margin-bottom: 1rem; }
-    .timeline-entry::before {
-        content: '';
+    .tsr-timeline-entry { position: relative; margin-bottom: 1rem; }
+    .tsr-timeline-entry:last-child { margin-bottom: 0; }
+    .tsr-timeline-entry::before {
+        content: "";
         position: absolute;
-        left: -1.72rem;
-        top: 1.15rem;
-        width: 12px;
-        height: 12px;
+        left: -1.68rem;
+        top: 1.2rem;
+        width: 12px; height: 12px;
         border-radius: 50%;
         border: 2px solid #fff;
-        background: var(--epss-blue);
-        box-shadow: 0 0 0 2px rgba(28,117,188,.25);
+        background: var(--tsr-primary);
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
     }
-    .timeline-entry.is-return::before {
-        background: var(--success);
-        box-shadow: 0 0 0 2px rgba(16,185,129,.25);
+    .tsr-timeline-entry.tsr-is-return::before {
+        background: var(--tsr-success);
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
-    .timeline-entry.is-pending::before {
-        background: var(--warning);
-        box-shadow: 0 0 0 2px rgba(245,158,11,.25);
+    .tsr-timeline-entry.tsr-is-pending::before {
+        background: var(--tsr-warning);
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22);
     }
 
-    .history-card {
-        border: 1px solid #E5E7EB;
-        border-radius: .75rem;
+    .tsr-history-card {
+        border: 1px solid var(--tsr-border);
+        border-radius: var(--tsr-radius-sm);
         padding: 1rem;
         background: #fff;
-        transition: border-color .2s ease, transform .2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .history-card:hover { border-color: #CBD5E1; transform: translateY(-1px); }
-
-    /* ---------- Action buttons ---------- */
-    .btn {
+    .tsr-history-card:hover { border-color: #cbd5e1; box-shadow: var(--tsr-shadow-sm); }
+    .tsr-history-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 0.85rem;
+    }
+    .tsr-history-title { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+    .tsr-history-icon {
+        width: 34px; height: 34px;
+        border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: .5rem;
-        padding: .65rem 1rem;
-        border-radius: .65rem;
-        font-weight: 600;
-        font-size: .875rem;
-        transition: all .2s ease;
-        box-shadow: 0 1px 2px rgba(0,0,0,.05);
-        white-space: nowrap;
+        flex: none;
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px -4px rgba(0,0,0,.15); }
-    .btn-primary { background: var(--epss-blue); color: #fff; }
-    .btn-primary:hover { background: var(--epss-blue-dark); color: #fff; }
-    .btn-ghost { background: #F3F4F6; color: #1F2937; }
-    .btn-ghost:hover { background: #E5E7EB; }
-
-    /* ---------- Layout safety when sidebar opens ---------- */
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        min-width: 0;
+    .tsr-history-icon svg {
+        width: 17px; height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
     }
-    @media (min-width: 1024px) {
-        .detail-grid {
-            grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
-        }
+    .tsr-history-icon.tsr-give { background: var(--tsr-primary-light); color: var(--tsr-primary); }
+    .tsr-history-icon.tsr-return { background: #ecfdf5; color: #059669; }
+    .tsr-history-title h4 { font-size: 0.95rem; font-weight: 700; }
+    .tsr-history-title p { font-size: 0.82rem; color: var(--tsr-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tsr-history-title p strong { color: var(--tsr-text-main); font-weight: 600; }
+    .tsr-history-date { font-size: 0.78rem; color: var(--tsr-text-light); white-space: nowrap; flex: none; }
+
+    .tsr-history-meta {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
     }
-    .detail-grid > * { min-width: 0; }   /* prevents overflow pushing layout wide */
+    .tsr-meta-grid { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .tsr-meta-label { display: block; font-size: 0.72rem; color: var(--tsr-text-muted); margin-bottom: 0.15rem; }
+    .tsr-meta-value { font-size: 0.9rem; font-weight: 600; }
+    .tsr-meta-value.tsr-positive { color: #047857; }
+    .tsr-meta-value.tsr-negative { color: var(--tsr-danger); }
 
-    /* Prevent the whole page from getting a horizontal scrollbar
-       when the sidebar expands on medium screens */
-    .page-container { overflow-x: clip; }
-
-    /* Photo blocks keep aspect ratio and never overflow */
-    .media-thumb {
-        width: 100%;
-        aspect-ratio: 16 / 9;
+    .tsr-photo-thumb {
+        width: 40px; height: 40px;
         object-fit: cover;
-        border-radius: .65rem;
-        background: #F3F4F6;
+        border-radius: 6px;
+        border: 1px solid var(--tsr-border);
+        cursor: zoom-in;
+        transition: opacity 0.2s;
     }
-    .media-thumb-placeholder {
+    .tsr-photo-thumb:hover { opacity: 0.85; }
+    .tsr-photo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--tsr-primary);
+        text-decoration: none;
+        cursor: zoom-in;
+    }
+
+    .tsr-btn-return {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--tsr-success);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+    .tsr-btn-return:hover { background: var(--tsr-success-hover); color: #fff; }
+    .tsr-btn-return svg {
+        width: 14px; height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .tsr-btn-block {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
         width: 100%;
-        aspect-ratio: 16 / 9;
-        border-radius: .65rem;
-        background: #F9FAFB;
+        padding: 0.6rem 1rem;
+        border-radius: var(--tsr-radius-sm);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .tsr-btn-block svg {
+        width: 15px; height: 15px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    .tsr-btn-block.tsr-primary { background: var(--tsr-primary); color: #fff; }
+    .tsr-btn-block.tsr-primary:hover { background: #0369a1; color: #fff; }
+    .tsr-btn-block.tsr-success { background: var(--tsr-success); color: #fff; }
+    .tsr-btn-block.tsr-success:hover { background: var(--tsr-success-hover); color: #fff; }
+    .tsr-btn-block.tsr-ghost { background: #fff; color: var(--tsr-text-main); border-color: var(--tsr-border); box-shadow: var(--tsr-shadow-sm); }
+    .tsr-btn-block.tsr-ghost:hover { background: #f8fafc; border-color: #cbd5e1; color: var(--tsr-text-main); }
+    .tsr-btn-block[disabled], .tsr-btn-block.tsr-disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    /* ---------- empty ---------- */
+    .tsr-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--tsr-text-muted);
+        font-size: 0.95rem;
+    }
+    .tsr-empty-icon {
+        width: 56px; height: 56px;
+        margin: 0 auto 0.75rem;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: var(--tsr-text-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #9CA3AF;
+    }
+    .tsr-empty-icon svg {
+        width: 28px; height: 28px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* ---------- lightbox ---------- */
+    .tsr-lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.82);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 2rem;
+    }
+    .tsr-lightbox.tsr-open { display: flex; }
+    .tsr-lightbox img {
+        max-width: 88vw;
+        max-height: 85vh;
+        object-fit: contain;
+        border-radius: 10px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        background: #fff;
+    }
+    .tsr-lightbox-close {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.5rem;
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 1.4rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .tsr-lightbox-close:hover { background: rgba(255, 255, 255, 0.28); }
+
+    @media (max-width: 700px) {
+        .tsr-page { padding: 1rem; }
+        .tsr-top-nav, .tsr-title-area { align-items: flex-start; }
+        .tsr-user-info { text-align: left; }
+        .tsr-card-body { padding: 1.25rem; }
+        .tsr-card-header, .tsr-card-footer { padding-left: 1.25rem; padding-right: 1.25rem; }
     }
 </style>
-@endpush
+@endsection
 
 @section('content')
-<div class="page-container py-6 lg:py-8">
-    <div class="container mx-auto px-4">
+@php
+    $openGive = $tireGives->firstWhere('is_returned', false);
+    $daysOut = $openGive && $openGive->give_date ? (int) $openGive->give_date->diffInDays(now()) : null;
+    $historyCount = $tireGives->count() + $tireReturns->count();
+    $statusLabel = $tire->isGivenOut() ? 'In Use' : ($tire->is_active ? 'Available' : 'Inactive');
+    $statusClass = $tire->isGivenOut() ? 'tsr-in-use' : ($tire->is_active ? 'tsr-available' : 'tsr-inactive');
+@endphp
 
-        {{-- ============ Header ============ --}}
-        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="min-w-0">
-                <h1 class="text-2xl lg:text-3xl font-bold text-gray-800 truncate">Tire Details</h1>
-                <p class="text-gray-600 mt-1 font-mono text-sm truncate">{{ $tire->serial_number }}</p>
+<div class="tsr-page">
+    <div class="tsr-dashboard">
+
+        {{-- header --}}
+        <div class="tsr-top-nav">
+            <div class="tsr-title-area">
+                <h1>Tire Details</h1>
+                <p>Serial <span class="tsr-serial">{{ $tire->serial_number }}</span> · {{ $tire->tire_type ?: 'Unknown type' }}</p>
             </div>
-            <a href="{{ route('tires.index') }}"
-               class="btn btn-ghost self-start sm:self-auto">
-                <i class="fas fa-arrow-left"></i> Back to Tires
+            <div class="tsr-user-info">
+                Welcome back, <strong>{{ auth()->user()->name }}</strong>
+                <br>
+                <span class="tsr-user-badge">{{ auth()->user()->role }}</span>
+            </div>
+        </div>
+
+        {{-- action bar --}}
+        <div class="tsr-action-bar">
+            @if($openGive && auth()->user()->canPerformTireOperations())
+                <a href="{{ route('tires.return', $openGive) }}" class="tsr-btn-action tsr-btn-green">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Return Tire
+                </a>
+            @elseif(auth()->user()->canPerformTireOperations() && !$tire->isGivenOut())
+                <a href="{{ route('tires.give', ['tire_id' => $tire->id]) }}" class="tsr-btn-action tsr-btn-blue">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Give to Driver
+                </a>
+            @endif
+            <a href="{{ route('tires.return.list') }}" class="tsr-btn-action tsr-btn-white">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg> Outstanding Tires
+            </a>
+            <a href="{{ route('tires.index') }}" class="tsr-btn-action tsr-btn-white">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> Tire Inventory
             </a>
         </div>
 
-        {{-- ============ Body grid ============ --}}
-        <div class="detail-grid">
+        {{-- KPI cards --}}
+        <div class="tsr-kpi-grid">
+            <div class="tsr-kpi-card {{ $tire->isGivenOut() ? 'tsr-orange' : ($tire->is_active ? 'tsr-green' : 'tsr-blue') }}">
+                <div class="tsr-kpi-content">
+                    <h4>Status</h4>
+                    <div class="tsr-value tsr-value-text">{{ $statusLabel }}</div>
+                    <div class="tsr-sub">{{ $tire->isGivenOut() ? 'Currently issued to a driver' : ($tire->is_active ? 'Ready for issue' : 'Not in service') }}</div>
+                </div>
+                <div class="tsr-kpi-icon" style="color:{{ $tire->isGivenOut() ? '#f59e0b' : ($tire->is_active ? '#10b981' : '#3b82f6') }};"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></div>
+            </div>
+            <div class="tsr-kpi-card tsr-purple">
+                <div class="tsr-kpi-content">
+                    <h4>Current Driver</h4>
+                    <div class="tsr-value tsr-value-text">{{ $openGive?->driver?->name ?? '—' }}</div>
+                    <div class="tsr-sub">{{ $openGive ? ($openGive->driver?->phone ?: 'No phone recorded') : 'No tire issued' }}</div>
+                </div>
+                <div class="tsr-kpi-icon" style="color:#8b5cf6;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+            </div>
+            <div class="tsr-kpi-card {{ $daysOut !== null && $daysOut > 30 ? 'tsr-red' : 'tsr-orange' }}">
+                <div class="tsr-kpi-content">
+                    <h4>Days Out</h4>
+                    <div class="tsr-value">{{ $daysOut ?? '—' }}</div>
+                    <div class="tsr-sub">{{ $daysOut === null ? 'Not issued right now' : ($daysOut > 30 ? 'Out more than 30 days' : 'Within the 30-day window') }}</div>
+                </div>
+                <div class="tsr-kpi-icon" style="color:{{ $daysOut !== null && $daysOut > 30 ? '#ef4444' : '#f59e0b' }};"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            </div>
+            <div class="tsr-kpi-card tsr-orange">
+                <div class="tsr-kpi-content">
+                    <h4>Initial KM</h4>
+                    <div class="tsr-value">{{ number_format($tire->initial_kilometer ?? 0) }}</div>
+                    <div class="tsr-sub">Registered {{ $tire->created_at?->format('M d, Y') ?? '—' }}</div>
+                </div>
+                <div class="tsr-kpi-icon" style="color:#f59e0b;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm1-13h-2v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            </div>
+        </div>
 
-                 {{-- ---------- Left: Tire summary ---------- --}}
-             <div class="info-card p-5">
-                 @if($tire->photo)
-                     <div class="relative group" data-tire-photo>
-                         <img src="{{ asset('storage/' . $tire->photo) }}"
-                              alt="Tire Photo"
-                              class="media-thumb mb-4 group-hover:brightness-105 transition-all cursor-pointer">
-                         <div class="photo-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                              data-photo-overlay>
-                             <img src="{{ asset('storage/' . $tire->photo) }}"
-                                  alt="Tire Photo Full"
-                                  class="max-w-[80vw] max-h-[80vh] object-contain rounded-lg">
-                             <button type="button" data-photo-close
-                                     class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300">&times;</button>
-                         </div>
-                     </div>
-                 @else
-                     <div class="media-thumb-placeholder mb-4">
-                         <i class="fas fa-tire text-4xl"></i>
-                     </div>
-                 @endif
+        {{-- detail grid --}}
+        <div class="tsr-detail-grid">
 
-                 <div class="flex items-start justify-between gap-2 mb-3">
-                     <h3 class="text-lg font-bold text-gray-800 break-all leading-snug">
-                         {{ $tire->serial_number }}
+            {{-- summary --}}
+            <div class="tsr-card">
+                <div class="tsr-card-header">
+                    <h3>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+                        Tire Summary
                     </h3>
-                    @if($tire->isGivenOut())
-                        <span class="status-badge bg-yellow-100 text-yellow-800">
-                            <i class="fas fa-circle text-[6px]"></i> In Use
-                        </span>
-                    @elseif($tire->is_active)
-                        <span class="status-badge bg-green-100 text-green-800">
-                            <i class="fas fa-circle text-[6px]"></i> Available
-                        </span>
+                    <span class="tsr-status-pill {{ $statusClass }}">{{ $statusLabel }}</span>
+                </div>
+                <div class="tsr-card-body">
+                    @if($tire->photo)
+                        <img src="{{ asset('storage/' . $tire->photo) }}" alt="Tire {{ $tire->serial_number }}" class="tsr-photo" data-lightbox="{{ asset('storage/' . $tire->photo) }}">
                     @else
-                        <span class="status-badge bg-gray-100 text-gray-800">
-                            <i class="fas fa-circle text-[6px]"></i> Inactive
-                        </span>
+                        <div class="tsr-photo-empty">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                            No photo on file
+                        </div>
                     @endif
-                </div>
 
-                <div class="mt-2">
-                    <div class="spec-row">
-                        <span class="spec-label">Tire Type</span>
-                        <span class="spec-value">{{ $tire->tire_type }}</span>
-                    </div>
-                    <div class="spec-row">
-                        <span class="spec-label">Plate Number</span>
-                        <span class="spec-value">{{ $tire->plate_number ?? 'N/A' }}</span>
-                    </div>
-                    <div class="spec-row">
-                        <span class="spec-label">Initial KM</span>
-                        <span class="spec-value">{{ number_format($tire->initial_kilometer) }}</span>
-                    </div>
-                    <div class="spec-row">
-                        <span class="spec-label">Registered</span>
-                        <span class="spec-value">{{ $tire->created_at->format('M d, Y') }}</span>
+                    <div class="tsr-spec-list">
+                        <div class="tsr-spec-row">
+                            <span class="tsr-spec-label">Serial Number</span>
+                            <span class="tsr-spec-value" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">{{ $tire->serial_number }}</span>
+                        </div>
+                        <div class="tsr-spec-row">
+                            <span class="tsr-spec-label">Tire Type</span>
+                            <span class="tsr-spec-value">{{ $tire->tire_type ?: 'N/A' }}</span>
+                        </div>
+                        <div class="tsr-spec-row">
+                            <span class="tsr-spec-label">Plate Number</span>
+                            <span class="tsr-spec-value">{{ $tire->plate_number ?: 'Not recorded' }}</span>
+                        </div>
+                        <div class="tsr-spec-row">
+                            <span class="tsr-spec-label">Initial KM</span>
+                            <span class="tsr-spec-value">{{ number_format($tire->initial_kilometer ?? 0) }} km</span>
+                        </div>
+                        <div class="tsr-spec-row">
+                            <span class="tsr-spec-label">Registered</span>
+                            <span class="tsr-spec-value">{{ $tire->created_at?->format('M d, Y') ?? '—' }}</span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="mt-5 space-y-2">
-                    @if(auth()->user()->canPerformTireOperations() && !$tire->isGivenOut())
-                        <a href="{{ route('tires.give', ['tire_id' => $tire->id]) }}"
-                           class="btn btn-primary w-full">
-                            <i class="fas fa-hand-holding"></i> Give to Driver
+                <div class="tsr-card-footer">
+                    @if($openGive && auth()->user()->canPerformTireOperations())
+                        <a href="{{ route('tires.return', $openGive) }}" class="tsr-btn-block tsr-success">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Return Tire
+                        </a>
+                    @elseif(auth()->user()->canPerformTireOperations() && !$tire->isGivenOut())
+                        <a href="{{ route('tires.give', ['tire_id' => $tire->id]) }}" class="tsr-btn-block tsr-primary">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Give to Driver
                         </a>
                     @endif
                     @if(auth()->user()->canManageTires() && !$tire->hasBeenReturned())
-                        <a href="{{ route('tires.edit', $tire) }}"
-                           class="btn btn-ghost w-full">
-                            <i class="fas fa-edit"></i> Edit Tire
+                        <a href="{{ route('tires.edit', $tire) }}" class="tsr-btn-block tsr-ghost">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg> Edit Tire
                         </a>
                     @elseif(auth()->user()->canManageTires() && $tire->hasBeenReturned())
-                        <button type="button"
-                           class="btn btn-ghost w-full"
-                           title="This tire has been returned and cannot be edited"
-                           aria-label="Tire already returned - cannot edit"
-                           style="cursor: not-allowed; opacity: 0.5;">
-                            <i class="fas fa-edit"></i> Edit Tire (Returned)
+                        <button type="button" class="tsr-btn-block tsr-ghost tsr-disabled" disabled
+                                title="This tire has been returned and cannot be edited">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg> Edit Tire (Returned)
                         </button>
                     @endif
                 </div>
             </div>
 
-            {{-- ---------- Right: History ---------- --}}
-            <div class="info-card p-5 lg:p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">Give &amp; Return History</h3>
-                    <span class="text-xs text-gray-500">
-                        {{ $tireGives->count() + $tireReturns->count() }} records
-                    </span>
+            {{-- history --}}
+            <div class="tsr-card">
+                <div class="tsr-card-header">
+                    <h3>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Give &amp; Return History
+                        <span class="tsr-count-badge">{{ $historyCount }}</span>
+                    </h3>
                 </div>
-
-                @if($tireGives->count() === 0 && $tireReturns->count() === 0)
-                    {{-- Empty state --}}
-                    <div class="text-center py-12">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 text-gray-300 mb-3">
-                            <i class="fas fa-tire text-3xl"></i>
+                <div class="tsr-card-body">
+                    @if($historyCount === 0)
+                        <div class="tsr-empty">
+                            <div class="tsr-empty-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                            </div>
+                            No give or return operations recorded for this tire.
                         </div>
-                        <p class="text-gray-500">No give/return operations recorded for this tire.</p>
-                    </div>
-                @else
-                    <div class="timeline">
+                    @else
+                        <div class="tsr-timeline">
 
-                        {{-- ----- Gives ----- --}}
-                        @foreach($tireGives as $give)
-                            <div class="timeline-entry {{ $give->is_returned ? '' : 'is-pending' }}">
-                                <div class="history-card">
-                                    <div class="flex items-start justify-between gap-3 mb-3">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <div class="bg-blue-100 p-2 rounded-lg shrink-0">
-                                                <i class="fas fa-hand-holding text-blue-600"></i>
+                            {{-- gives --}}
+                            @foreach($tireGives as $give)
+                                <div class="tsr-timeline-entry {{ $give->is_returned ? '' : 'tsr-is-pending' }}">
+                                    <div class="tsr-history-card">
+                                        <div class="tsr-history-top">
+                                            <div class="tsr-history-title">
+                                                <span class="tsr-history-icon tsr-give">
+                                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                                                </span>
+                                                <div style="min-width:0;">
+                                                    <h4>Tire Given</h4>
+                                                    <p>To: <strong>{{ $give->driver->name ?? 'N/A' }}</strong></p>
+                                                </div>
                                             </div>
-                                            <div class="min-w-0">
-                                                <h4 class="font-semibold text-gray-800">Tire Given</h4>
-                                                <p class="text-sm text-gray-500 truncate">
-                                                    To: <span class="font-medium text-gray-700">{{ $give->driver->name ?? 'N/A' }}</span>
-                                                </p>
-                                            </div>
+                                            <span class="tsr-history-date">{{ $give->give_date?->format('M d, Y') ?? '—' }}</span>
                                         </div>
-                                        <span class="text-xs text-gray-500 shrink-0">
-                                            {{ $give->give_date->format('M d, Y') }}
-                                        </span>
-                                    </div>
 
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-                                        <div>
-                                            <span class="text-gray-500 block text-xs">KM at Give</span>
-                                            <span class="font-semibold">{{ number_format($give->given_kilometer) }}</span>
-                                        </div>
-                                         @if($give->photo)
-                                             <div class="col-span-2 sm:col-span-1 flex items-center">
-                                                 <div class="relative group cursor-pointer">
-                                                     <img src="{{ asset('storage/' . $give->photo) }}"
-                                                          alt="Give Photo"
-                                                          class="w-10 h-10 object-cover rounded border-2 border-gray-200 group-hover:opacity-90">
-                                                     <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                         <img src="{{ asset('storage/' . $give->photo) }}"
-                                                              alt="Give Photo Full"
-                                                              class="max-w-[80vw] max-h-[80vh] object-contain rounded-lg">
-                                                     </div>
-                                                 </div>
-                                                 <span class="ml-2 text-[#1C75BC] text-sm">View Photo</span>
-                                             </div>
-                                         @endif
-                                        <div class="flex items-center justify-end col-span-2 sm:col-span-1">
-                                            @if(!$give->is_returned)
-                                                @if(auth()->user()->canPerformTireOperations())
-                                                    <a href="{{ route('tires.return', $give) }}"
-                                                       class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                                        <i class="fas fa-undo-alt mr-1"></i> Return Now
-                                                    </a>
-                                                @else
-                                                    <span class="status-badge bg-yellow-100 text-yellow-800">Pending Return</span>
+                                        <div class="tsr-history-meta">
+                                            <div class="tsr-meta-grid">
+                                                <div>
+                                                    <span class="tsr-meta-label">KM at Give</span>
+                                                    <span class="tsr-meta-value">{{ number_format($give->given_kilometer ?? 0) }}</span>
+                                                </div>
+                                                @if($give->give_date)
+                                                    <div>
+                                                        <span class="tsr-meta-label">Day</span>
+                                                        <span class="tsr-meta-value">{{ $give->give_date->format('l') }}</span>
+                                                    </div>
                                                 @endif
-                                            @else
-                                                <span class="status-badge bg-green-100 text-green-800">Returned</span>
-                                            @endif
+                                                @if($give->plate_number)
+                                                    <div>
+                                                        <span class="tsr-meta-label">Plate</span>
+                                                        <span class="tsr-meta-value">{{ $give->plate_number }}</span>
+                                                    </div>
+                                                @endif
+                                                @if($give->photo)
+                                                    <div>
+                                                        <span class="tsr-meta-label">Photo</span>
+                                                        <span class="tsr-photo-link" data-lightbox="{{ asset('storage/' . $give->photo) }}" role="button" tabindex="0">
+                                                            <img src="{{ asset('storage/' . $give->photo) }}" alt="Give photo" class="tsr-photo-thumb">
+                                                            View
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div>
+                                                @if(!$give->is_returned)
+                                                    @if(auth()->user()->canPerformTireOperations())
+                                                        <a href="{{ route('tires.return', $give) }}" class="tsr-btn-return">
+                                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Return Now
+                                                        </a>
+                                                    @else
+                                                        <span class="tsr-status-pill tsr-pending">Pending Return</span>
+                                                    @endif
+                                                @else
+                                                    <span class="tsr-status-pill tsr-returned">Returned</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
 
-                        {{-- ----- Returns ----- --}}
-                        @foreach($tireReturns as $ret)
-                            <div class="timeline-entry is-return">
-                                <div class="history-card">
-                                    <div class="flex items-start justify-between gap-3 mb-3">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <div class="bg-green-100 p-2 rounded-lg shrink-0">
-                                                <i class="fas fa-undo-alt text-green-600"></i>
+                            {{-- returns --}}
+                            @foreach($tireReturns as $ret)
+                                <div class="tsr-timeline-entry tsr-is-return">
+                                    <div class="tsr-history-card">
+                                        <div class="tsr-history-top">
+                                            <div class="tsr-history-title">
+                                                <span class="tsr-history-icon tsr-return">
+                                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                                </span>
+                                                <div style="min-width:0;">
+                                                    <h4>Tire Returned</h4>
+                                                    <p>By: <strong>{{ $ret->returnedBy->name ?? 'N/A' }}</strong></p>
+                                                </div>
                                             </div>
-                                            <div class="min-w-0">
-                                                <h4 class="font-semibold text-gray-800">Tire Returned</h4>
-                                                <p class="text-sm text-gray-500 truncate">
-                                                    By: <span class="font-medium text-gray-700">{{ $ret->returnedBy->name ?? 'N/A' }}</span>
-                                                </p>
+                                            <span class="tsr-history-date">{{ $ret->return_date?->format('M d, Y') ?? '—' }}</span>
+                                        </div>
+
+                                        <div class="tsr-history-meta">
+                                            <div class="tsr-meta-grid">
+                                                <div>
+                                                    <span class="tsr-meta-label">Current KM</span>
+                                                    <span class="tsr-meta-value tsr-positive">{{ number_format($ret->current_kilometer ?? 0) }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="tsr-meta-label">Registered KM</span>
+                                                    <span class="tsr-meta-value">{{ number_format($ret->registered_kilometer ?? 0) }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="tsr-meta-label">KM Difference</span>
+                                                    <span class="tsr-meta-value {{ ($ret->km_difference ?? 0) >= 0 ? 'tsr-positive' : 'tsr-negative' }}">
+                                                        {{ ($ret->km_difference ?? 0) > 0 ? '+' : '' }}{{ number_format($ret->km_difference ?? 0) }}
+                                                    </span>
+                                                </div>
+                                                @if($ret->photo)
+                                                    <div>
+                                                        <span class="tsr-meta-label">Photo</span>
+                                                        <span class="tsr-photo-link" data-lightbox="{{ asset('storage/' . $ret->photo) }}" role="button" tabindex="0">
+                                                            <img src="{{ asset('storage/' . $ret->photo) }}" alt="Return photo" class="tsr-photo-thumb">
+                                                            View
+                                                        </span>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
-                                        <span class="text-xs text-gray-500 shrink-0">
-                                            {{ $ret->return_date->format('M d, Y') }}
-                                        </span>
                                     </div>
-
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-                                        <div>
-                                            <span class="text-gray-500 block text-xs">Current KM</span>
-                                            <span class="font-semibold text-green-600">{{ number_format($ret->current_kilometer) }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-500 block text-xs">Registered KM</span>
-                                            <span class="font-semibold">{{ number_format($ret->registered_kilometer) }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-500 block text-xs">KM Difference</span>
-                                            <span class="font-semibold {{ $ret->km_difference >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $ret->km_difference >= 0 ? '+' : '' }}{{ number_format($ret->km_difference) }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                     @if($ret->photo)
-                                         <div class="mt-3">
-                                             <div class="relative group cursor-pointer inline-block">
-                                                 <img src="{{ asset('storage/' . $ret->photo) }}"
-                                                      alt="Return Photo"
-                                                      class="w-10 h-10 object-cover rounded border-2 border-gray-200 group-hover:opacity-90">
-                                                 <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                     <img src="{{ asset('storage/' . $ret->photo) }}"
-                                                          alt="Return Photo Full"
-                                                          class="max-w-[80vw] max-h-[80vh] object-contain rounded-lg">
-                                                 </div>
-                                             </div>
-                                             <span class="ml-2 text-[#1C75BC] text-sm">View Return Photo</span>
-                                         </div>
-                                     @endif
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
 
-                    </div>
-                @endif
+                        </div>
+                    @endif
+                </div>
             </div>
-        </div>
 
-        {{-- ============ Status Summary Bar ============ --}}
-        <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="info-card p-4 text-center">
-                <div class="text-2xl font-bold text-[#1C75BC]">{{ number_format($tire->initial_kilometer) }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider">Initial KM</div>
-            </div>
-            @php
-                $currentGive = $tire->tireGives()->where('is_returned', false)->first();
-            @endphp
-            <div class="info-card p-4 text-center">
-                <div class="text-2xl font-bold {{ $tire->isGivenOut() ? 'text-yellow-600' : ($tire->is_active ? 'text-green-600' : 'text-gray-500') }}">
-                    {{ $tire->isGivenOut() ? 'In Use' : ($tire->is_active ? 'Available' : 'Inactive') }}
-                </div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider">Current Status</div>
-            </div>
-            <div class="info-card p-4 text-center">
-                <div class="text-2xl font-bold text-purple-600">
-                    {{ $tire->isGivenOut() && $currentGive ? ($currentGive->driver->name ?? 'N/A') : 'N/A' }}
-                </div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider">Current Driver</div>
-            </div>
         </div>
 
     </div>
 </div>
 
-@push('scripts')
- <script>
- document.addEventListener('DOMContentLoaded', function() {
-     // Close photo overlay
-     const photoClose = document.querySelector('[data-photo-close]');
-     if (photoClose) {
-         photoClose.addEventListener('click', function() {
-             const overlay = document.querySelector('[data-photo-overlay]');
-             if (overlay) overlay.classList.add('hidden');
-         });
-     }
- });
- </script>
- @endpush
+{{-- lightbox --}}
+<div class="tsr-lightbox" id="tireLightbox" aria-hidden="true">
+    <button type="button" class="tsr-lightbox-close" id="tireLightboxClose" aria-label="Close photo">&times;</button>
+    <img src="" alt="Photo preview" id="tireLightboxImage">
+</div>
+@endsection
+
+@section('scripts')
+<script>
+(function () {
+    const lightbox = document.getElementById('tireLightbox');
+    const lightboxImage = document.getElementById('tireLightboxImage');
+
+    function openLightbox(src) {
+        lightboxImage.src = src;
+        lightbox.classList.add('tsr-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('tsr-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightboxImage.src = '';
+    }
+
+    document.querySelectorAll('[data-lightbox]').forEach(function (el) {
+        el.addEventListener('click', function () { openLightbox(el.dataset.lightbox); });
+        el.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openLightbox(el.dataset.lightbox);
+            }
+        });
+    });
+
+    document.getElementById('tireLightboxClose').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', function (event) {
+        if (event.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && lightbox.classList.contains('tsr-open')) closeLightbox();
+    });
+})();
+</script>
 @endsection
