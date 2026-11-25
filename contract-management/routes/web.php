@@ -207,6 +207,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::get('/purchasing-activities', [PurchasingActivityController::class, 'index'])->name('purchasing-activities.index');
     Route::post('/purchasing-activities', [PurchasingActivityController::class, 'store'])->name('purchasing-activities.store');
     Route::post('/purchasing-activities/material-groups', [PurchasingActivityController::class, 'storeMaterialGroup'])->name('purchasing-activities.material-groups.store');
+    Route::post('/purchasing-activities/procurement-types', [PurchasingActivityController::class, 'storeProcurementType'])->name('purchasing-activities.procurement-types.store');
     Route::post('/purchasing-activities/units', [PurchasingActivityController::class, 'storeUnit'])->name('purchasing-activities.units.store');
     Route::patch('/purchasing-activities/{purchasingActivity}/complete', [PurchasingActivityController::class, 'complete'])->name('purchasing-activities.complete');
 

@@ -51,10 +51,23 @@ class PurchasingActivity extends Model
 
     public static function getProcurementTypes()
     {
-        return [
+        $types = [
             self::PROCUREMENT_PURCHASE => 'Purchase',
             self::PROCUREMENT_TENDER => 'Tender',
         ];
+
+        $known = array_map('mb_strtolower', array_merge(array_keys($types), array_values($types)));
+
+        foreach (ProcurementType::activeNames() as $name) {
+            if (in_array(mb_strtolower($name), $known, true)) {
+                continue;
+            }
+
+            $types[$name] = $name;
+            $known[] = mb_strtolower($name);
+        }
+
+        return $types;
     }
 
     public function completer()
