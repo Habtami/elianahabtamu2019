@@ -250,16 +250,37 @@
     }
     .tsr-modal-table tbody tr:hover { background: #f8fafc; }
     .tsr-modal-table td.tsr-modal-danger { color: var(--tsr-danger); font-weight: 700; }
+    .tsr-modal-table th.tsr-modal-roll,
+    .tsr-modal-table td.tsr-modal-roll {
+        width: 3.5rem;
+        color: var(--tsr-text-muted);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
     .tsr-modal-empty {
         padding: 2.5rem 1.5rem;
         text-align: center;
         color: var(--tsr-text-muted);
         font-size: 0.9rem;
     }
+    .tsr-modal-foot {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.75rem 1.25rem;
+        border-top: 1px solid var(--tsr-border);
+        background: #f8fafc;
+        font-size: 0.85rem;
+        color: var(--tsr-text-muted);
+    }
+    .tsr-modal-foot strong { color: var(--tsr-text-main); font-weight: 600; }
     @media (max-width: 720px) {
         .tsr-modal-overlay { padding: 0.75rem; }
         .tsr-modal-head { padding: 0.85rem 1rem; }
         .tsr-modal-table th, .tsr-modal-table td { padding: 0.55rem 0.65rem; }
+        .tsr-modal-foot { padding: 0.65rem 0.9rem; }
     }
 
     .tsr-kpi-grid.tsr-compact { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.6rem; }
@@ -931,6 +952,10 @@
                 <button type="button" class="tsr-modal-close" id="kpiModalClose" aria-label="Close details">&times;</button>
             </div>
             <div class="tsr-modal-body" id="kpiModalBody"></div>
+            <div class="tsr-modal-foot" id="kpiModalFoot">
+                <span id="kpiModalRange"></span>
+                <div class="tsr-pagination" id="kpiModalPages"></div>
+            </div>
         </div>
     </div>
 
@@ -991,37 +1016,50 @@
         const kpiModalSubtitle = document.getElementById('kpiModalSubtitle');
         const kpiModalBody = document.getElementById('kpiModalBody');
         const kpiModalClose = document.getElementById('kpiModalClose');
+        const kpiModalFoot = document.getElementById('kpiModalFoot');
+        const kpiModalRange = document.getElementById('kpiModalRange');
+        const kpiModalPages = document.getElementById('kpiModalPages');
+        const KPI_PAGE_SIZE = 10;
         let kpiLastFocus = null;
+        let kpiRows = [];
+        let kpiColumns = [];
+        let kpiPage = 1;
+        let kpiTableBody = null;
 
-        function renderKpiTable(data) {
-            kpiModalBody.innerHTML = '';
-            const rows = data.rows || [];
+        function kpiTotalPages() {
+            return Math.max(1, Math.ceil(kpiRows.length / KPI_PAGE_SIZE));
+        }
 
-            if (rows.length === 0) {
-                const empty = document.createElement('div');
-                empty.className = 'tsr-modal-empty';
-                empty.textContent = 'No records to show.';
-                kpiModalBody.appendChild(empty);
-                return;
+        function kpiPageWindow(totalPages) {
+            const pages = [];
+            for (let page = 1; page <= totalPages; page++) {
+                if (page === 1 || page === totalPages || Math.abs(page - kpiPage) <= 1) {
+                    pages.push(page);
+                } else if (pages[pages.length - 1] !== '...') {
+                    pages.push('...');
+                }
             }
+            return pages;
+        }
 
-            const table = document.createElement('table');
-            table.className = 'tsr-modal-table';
+        function paintKpiPage(refocus) {
+            const total = kpiRows.length;
+            const totalPages = kpiTotalPages();
+            kpiPage = Math.min(Math.max(kpiPage, 1), totalPages);
 
-            const thead = document.createElement('thead');
-            const headRow = document.createElement('tr');
-            data.columns.forEach(function (label) {
-                const th = document.createElement('th');
-                th.textContent = label;
-                headRow.appendChild(th);
-            });
-            thead.appendChild(headRow);
-            table.appendChild(thead);
+            const start = (kpiPage - 1) * KPI_PAGE_SIZE;
+            const pageRows = kpiRows.slice(start, start + KPI_PAGE_SIZE);
+            const daysIndex = kpiColumns.indexOf('Days Out');
 
-            const tbody = document.createElement('tbody');
-            const daysIndex = data.columns.indexOf('Days Out');
-            rows.forEach(function (row) {
+            kpiTableBody.innerHTML = '';
+            pageRows.forEach(function (row, offset) {
                 const tr = document.createElement('tr');
+
+                const noCell = document.createElement('td');
+                noCell.className = 'tsr-modal-roll';
+                noCell.textContent = start + offset + 1;
+                tr.appendChild(noCell);
+
                 row.forEach(function (value, index) {
                     const td = document.createElement('td');
                     td.textContent = value;
@@ -1030,11 +1068,68 @@
                     }
                     tr.appendChild(td);
                 });
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
 
-            kpiModalBody.appendChild(table);
+                kpiTableBody.appendChild(tr);
+            });
+
+            if (totalPages <= 1) {
+                kpiModalFoot.style.display = 'none';
+                return;
+            }
+
+            kpiModalFoot.style.display = 'flex';
+            kpiModalRange.innerHTML = 'Showing <strong>' + (start + 1) + '–' + (start + pageRows.length) + '</strong> of <strong>' + total + '</strong>';
+
+            kpiModalPages.innerHTML = '';
+
+            const prev = document.createElement('button');
+            prev.type = 'button';
+            prev.className = 'tsr-page-btn';
+            prev.textContent = '« Prev';
+            prev.disabled = kpiPage <= 1;
+            prev.addEventListener('click', function () { kpiGoToPage(kpiPage - 1, true); });
+            kpiModalPages.appendChild(prev);
+
+            kpiPageWindow(totalPages).forEach(function (item) {
+                if (item === '...') {
+                    const dots = document.createElement('span');
+                    dots.className = 'tsr-page-dots';
+                    dots.textContent = '...';
+                    kpiModalPages.appendChild(dots);
+                    return;
+                }
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'tsr-page-btn' + (item === kpiPage ? ' tsr-active' : '');
+                button.textContent = item;
+                if (item === kpiPage) {
+                    button.setAttribute('aria-current', 'page');
+                }
+                button.addEventListener('click', function () { kpiGoToPage(item, true); });
+                kpiModalPages.appendChild(button);
+            });
+
+            const next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'tsr-page-btn';
+            next.textContent = 'Next »';
+            next.disabled = kpiPage >= totalPages;
+            next.addEventListener('click', function () { kpiGoToPage(kpiPage + 1, true); });
+            kpiModalPages.appendChild(next);
+
+            if (refocus) {
+                const active = kpiModalPages.querySelector('.tsr-active');
+                if (active) {
+                    active.focus();
+                }
+            }
+        }
+
+        function kpiGoToPage(page, refocus) {
+            kpiPage = page;
+            paintKpiPage(refocus);
+            kpiModalBody.scrollTop = 0;
         }
 
         function openKpiModal(key) {
@@ -1045,7 +1140,50 @@
             kpiModalTitle.textContent = data.title;
             const count = (data.rows || []).length;
             kpiModalSubtitle.textContent = data.subtitle + ' · ' + count + (count === 1 ? ' record' : ' records');
-            renderKpiTable(data);
+
+            kpiRows = data.rows || [];
+            kpiColumns = data.columns || [];
+            kpiPage = 1;
+
+            kpiModalBody.innerHTML = '';
+            kpiModalBody.scrollTop = 0;
+            kpiTableBody = null;
+            kpiModalPages.innerHTML = '';
+            kpiModalFoot.style.display = 'none';
+
+            if (kpiRows.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'tsr-modal-empty';
+                empty.textContent = 'No records to show.';
+                kpiModalBody.appendChild(empty);
+            } else {
+                const table = document.createElement('table');
+                table.className = 'tsr-modal-table';
+
+                const thead = document.createElement('thead');
+                const headRow = document.createElement('tr');
+
+                const noHead = document.createElement('th');
+                noHead.className = 'tsr-modal-roll';
+                noHead.textContent = 'No';
+                headRow.appendChild(noHead);
+
+                kpiColumns.forEach(function (label) {
+                    const th = document.createElement('th');
+                    th.textContent = label;
+                    headRow.appendChild(th);
+                });
+
+                thead.appendChild(headRow);
+                table.appendChild(thead);
+
+                kpiTableBody = document.createElement('tbody');
+                table.appendChild(kpiTableBody);
+                kpiModalBody.appendChild(table);
+
+                paintKpiPage(false);
+            }
+
             kpiModal.classList.add('tsr-open');
             document.body.style.overflow = 'hidden';
             kpiModalClose.focus();
