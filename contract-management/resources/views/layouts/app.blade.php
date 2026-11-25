@@ -309,6 +309,9 @@
 
         .sidebar-overlay.show { opacity: 1; visibility: visible; }
 
+        /* Full-screen modals must layer above the fixed sidebar and topbar */
+        .fixed.inset-0.z-50 { z-index: 1700; }
+
         /* ---------- Main column ---------- */
         .app-main {
             margin-left: var(--sidebar-width);

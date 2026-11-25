@@ -344,7 +344,7 @@
         display: none;
         align-items: center;
         justify-content: center;
-        z-index: 120;
+        z-index: 1700;
         padding: 1rem;
     }
     .rep-modal-bg.open { display: flex; }

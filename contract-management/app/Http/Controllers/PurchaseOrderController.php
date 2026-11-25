@@ -20,12 +20,25 @@ class PurchaseOrderController extends Controller
 
         [$query, $search] = $this->filteredQuery($request);
 
-        $purchaseOrders = $query->paginate(5)->appends($request->query());
+        $perPage = (int) $request->get('per_page', 5);
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 5;
+        }
 
-        return view('purchase-orders.index', array_merge(
-            $this->summaryStats(),
-            ['purchaseOrders' => $purchaseOrders, 'search' => $search]
-        ));
+        $purchaseOrders = $query->paginate($perPage)->appends($request->query());
+
+        $statGroups = [
+            'total' => $this->scopeQuery('total')->orderByDesc('approval_date')->orderByDesc('id')->get(),
+            'pending_first' => $this->scopeQuery('pending_first')->orderByDesc('approval_date')->orderByDesc('id')->get(),
+            'pending_second' => $this->scopeQuery('pending_second')->orderByDesc('approval_date')->orderByDesc('id')->get(),
+            'approved' => $this->scopeQuery('approved')->orderByDesc('approval_date')->orderByDesc('id')->get(),
+        ];
+
+        return view('purchase-orders.index', [
+            'purchaseOrders' => $purchaseOrders,
+            'search' => $search,
+            'statGroups' => $statGroups,
+        ]);
     }
 
     public function exportExcel(Request $request)
@@ -61,65 +74,23 @@ class PurchaseOrderController extends Controller
         ))->download('purchase-orders-' . now()->format('Ymd-His') . '.pdf');
     }
 
-    public function summary(string $scope)
+    private function scopeQuery(string $scope)
     {
-        $user = auth()->user();
-
-        if (!$user->canViewPurchaseOrders()) {
-            return response()->json(['message' => 'You are not authorized to view purchase orders.'], 403);
-        }
-
         $threshold = PurchaseOrder::SECOND_APPROVAL_THRESHOLD;
+        $query = PurchaseOrder::with(['gsManagerApprover', 'ddgApprover']);
 
         switch ($scope) {
             case 'pending_first':
-                $query = PurchaseOrder::with(['gsManagerApprover', 'ddgApprover'])
-                    ->whereNull('gs_manager_approved_at');
-                $label = 'Awaiting 1st Approval';
-                break;
+                return $query->whereNull('gs_manager_approved_at');
             case 'pending_second':
-                $query = PurchaseOrder::with(['gsManagerApprover', 'ddgApprover'])
-                    ->whereNotNull('gs_manager_approved_at')
-                    ->whereNull('ddg_approved_at')
+                // Includes orders still awaiting the 1st approval, which show as "Locked".
+                return $query->whereNull('ddg_approved_at')
                     ->where('amount', '>', $threshold);
-                $label = 'Awaiting 2nd Approval';
-                break;
             case 'approved':
-                $query = $this->approvedQuery()->with(['gsManagerApprover', 'ddgApprover']);
-                $label = 'Fully Approved';
-                break;
+                return $this->approvedQuery()->with(['gsManagerApprover', 'ddgApprover']);
             default:
-                $query = PurchaseOrder::with(['gsManagerApprover', 'ddgApprover']);
-                $label = 'Total POs';
-                break;
+                return $query;
         }
-
-        $total = (clone $query)->count();
-
-        $items = $query->orderByDesc('id')
-            ->limit(50)
-            ->get()
-            ->map(fn (PurchaseOrder $order) => [
-                'po_number' => $order->po_number,
-                'amount' => $order->amount !== null ? number_format((float) $order->amount, 2) : '-',
-                'approval_date' => $order->approval_date?->format('M d, Y'),
-                'gs_status' => $order->isGsApproved() ? 'Approved' : 'Pending',
-                'gs_approver' => $order->gsManagerApprover->name ?? null,
-                'gs_approved_at' => $order->gs_manager_approved_at?->format('M d, Y H:i'),
-                'ddg_status' => $order->getSecondApprovalStatusLabel(),
-                'ddg_approver' => $order->ddgApprover->name ?? null,
-                'ddg_approved_at' => $order->ddg_approved_at?->format('M d, Y H:i'),
-                'status' => $order->getStatusLabel(),
-                'status_key' => $order->getStatus(),
-            ]);
-
-        return response()->json([
-            'scope' => $scope,
-            'label' => $label,
-            'total' => $total,
-            'items' => $items,
-            'limited' => $total > $items->count(),
-        ]);
     }
 
     private function approvedQuery()
@@ -185,16 +156,11 @@ class PurchaseOrderController extends Controller
 
     private function summaryStats(): array
     {
-        $threshold = PurchaseOrder::SECOND_APPROVAL_THRESHOLD;
-
         return [
-            'total' => PurchaseOrder::count(),
-            'pendingFirst' => PurchaseOrder::whereNull('gs_manager_approved_at')->count(),
-            'pendingSecond' => PurchaseOrder::whereNotNull('gs_manager_approved_at')
-                ->whereNull('ddg_approved_at')
-                ->where('amount', '>', $threshold)
-                ->count(),
-            'approved' => $this->approvedQuery()->count(),
+            'total' => $this->scopeQuery('total')->count(),
+            'pendingFirst' => $this->scopeQuery('pending_first')->count(),
+            'pendingSecond' => $this->scopeQuery('pending_second')->count(),
+            'approved' => $this->scopeQuery('approved')->count(),
         ];
     }
 

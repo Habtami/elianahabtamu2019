@@ -173,9 +173,6 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'index'])->name('purchase-orders.index');
     Route::get('/purchase-orders/export/excel', [PurchaseOrderController::class, 'exportExcel'])->name('purchase-orders.export.excel');
     Route::get('/purchase-orders/export/pdf', [PurchaseOrderController::class, 'exportPdf'])->name('purchase-orders.export.pdf');
-    Route::get('/purchase-orders/summary/{scope}', [PurchaseOrderController::class, 'summary'])
-        ->whereIn('scope', ['total', 'pending_first', 'pending_second', 'approved'])
-        ->name('purchase-orders.summary');
     Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->name('purchase-orders.store');
     Route::patch('/purchase-orders/{purchaseOrder}/approve-gs', [PurchaseOrderController::class, 'approveGs'])->name('purchase-orders.approve-gs');
     Route::patch('/purchase-orders/{purchaseOrder}/approve-ddg', [PurchaseOrderController::class, 'approveDdg'])->name('purchase-orders.approve-ddg');
