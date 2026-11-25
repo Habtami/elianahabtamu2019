@@ -356,6 +356,10 @@ class BatteryController extends Controller
             'plate_number.required' => 'Serial number and plate number are required.',
         ]);
 
+        if (($validated['material_code'] ?? null) === '__new__') {
+            $validated['material_code'] = null;
+        }
+
         $validated['material_code'] = $validated['material_code'] ?? Battery::getMaterialCodeForType($validated['battery_type']);
         $validated['initial_kilometer'] = $validated['initial_kilometer'] ?? 0;
         $validated['return_kilometer'] = $validated['return_kilometer'] ?? 0;
@@ -399,6 +403,10 @@ class BatteryController extends Controller
             'serial_number.required' => 'Serial number and plate number are required.',
             'plate_number.required' => 'Serial number and plate number are required.',
         ]);
+
+        if (($validated['material_code'] ?? null) === '__new__') {
+            $validated['material_code'] = null;
+        }
 
         $validated['material_code'] = $validated['material_code'] ?? Battery::getMaterialCodeForType($validated['battery_type']);
         $validated['initial_kilometer'] = $validated['initial_kilometer'] ?? 0;
@@ -445,11 +453,16 @@ class BatteryController extends Controller
         $brandName = $request->input('brand');
 
         if ($typeName === '__new__') {
+            $codeRules = $request->input('material_code') === '__new__'
+                ? ['required', 'string', 'max:255', 'unique:battery_types,material_code']
+                : ['nullable', 'string', 'max:255', 'unique:battery_types,material_code'];
+
             $request->validate([
                 'new_battery_type' => 'required|string|max:255',
-                'new_battery_type_code' => 'nullable|string|max:255|unique:battery_types,material_code',
+                'new_battery_type_code' => $codeRules,
             ], [
                 'new_battery_type.required' => 'Enter the new battery type name.',
+                'new_battery_type_code.required' => 'Enter the new material code.',
                 'new_battery_type_code.unique' => 'That material code is already registered to another battery type.',
             ]);
 

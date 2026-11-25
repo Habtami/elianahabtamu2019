@@ -433,7 +433,21 @@
                 </div>
                 <div class="batt-field">
                     <label>Material Code</label>
-                    <input name="material_code" id="b_material" value="{{ old('material_code') }}" placeholder="Auto-filled from battery type">
+                    <select name="material_code" id="b_material" onchange="syncBatteryTypeFromMaterial()">
+                        <option value="">Select material code</option>
+                        @php $listedCodes = []; @endphp
+                        @foreach($batteryTypes as $type)
+                            @if($type['material_code'] && !in_array($type['material_code'], $listedCodes, true))
+                                @php $listedCodes[] = $type['material_code']; @endphp
+                                <option value="{{ $type['material_code'] }}"
+                                        data-type="{{ $type['name'] }}"
+                                        {{ old('material_code') === $type['material_code'] ? 'selected' : '' }}>
+                                    {{ $type['material_code'] }} — {{ $type['name'] }}
+                                </option>
+                            @endif
+                        @endforeach
+                        <option value="__new__" {{ old('material_code') === '__new__' ? 'selected' : '' }}>+ Register new material code...</option>
+                    </select>
                 </div>
                 <div class="batt-field">
                     <label>Battery Type</label>
@@ -733,9 +747,12 @@
     }
 
     function toggleBatteryTypeFields() {
-        const isNew = document.getElementById('b_type').value === '__new__';
+        const typeIsNew = document.getElementById('b_type').value === '__new__';
+        const materialIsNew = document.getElementById('b_material').value === '__new__';
+        const isNew = typeIsNew || materialIsNew;
         document.getElementById('newTypeFields').style.display = isNew ? '' : 'none';
         document.getElementById('newTypeCodeField').style.display = isNew ? '' : 'none';
+        document.getElementById('b_new_type_code').required = materialIsNew;
     }
 
     function toggleBatteryBrandFields() {
@@ -751,7 +768,40 @@
     function syncBatteryMaterial() {
         const select = document.getElementById('b_type');
         const option = select.options[select.selectedIndex];
-        document.getElementById('b_material').value = (option && option.dataset.code) ? option.dataset.code : '';
+        const material = document.getElementById('b_material');
+
+        if (select.value === '__new__') {
+            material.value = '__new__';
+        } else {
+            const code = option && option.dataset.code ? option.dataset.code : '';
+
+            if (code && !Array.from(material.options).some(function (listed) { return listed.value === code; })) {
+                const added = new Option(code + ' — ' + option.value, code);
+                added.dataset.type = option.value;
+                material.add(added);
+            }
+
+            material.value = code;
+        }
+
+        toggleBatteryTypeFields();
+    }
+
+    function syncBatteryTypeFromMaterial() {
+        const material = document.getElementById('b_material');
+        const select = document.getElementById('b_type');
+
+        if (material.value === '__new__') {
+            select.value = '__new__';
+        } else {
+            const option = material.options[material.selectedIndex];
+            const typeName = option && option.dataset.type ? option.dataset.type : '';
+
+            if (typeName && Array.from(select.options).some(function (listed) { return listed.value === typeName; })) {
+                select.value = typeName;
+            }
+        }
+
         toggleBatteryTypeFields();
     }
 
@@ -782,6 +832,16 @@
         }
         select.value = d.type || '';
 
+        const materialSelect = document.getElementById('b_material');
+        if (d.material && !Array.from(materialSelect.options).some(function (option) { return option.value === d.material; })) {
+            const materialOption = new Option(d.material + (d.type ? ' — ' + d.type : ''), d.material);
+            if (d.type) {
+                materialOption.dataset.type = d.type;
+            }
+            materialSelect.add(materialOption);
+        }
+        materialSelect.value = d.material || '';
+
         const driverSelect = document.getElementById('b_driver');
         if (d.driver && !Array.from(driverSelect.options).some(function (option) { return option.value === d.driver; })) {
             driverSelect.add(new Option(d.driver, d.driver, true, true));
@@ -790,7 +850,6 @@
 
         document.getElementById('b_date').value = d.date || '';
         document.getElementById('b_serial').value = d.serial || '';
-        document.getElementById('b_material').value = d.material || '';
         document.getElementById('b_brand').value = d.brand || '';
         document.getElementById('b_plate').value = d.plate || '';
         document.getElementById('b_initkm').value = d.init || 0;
