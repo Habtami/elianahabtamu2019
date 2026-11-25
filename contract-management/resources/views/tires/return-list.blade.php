@@ -1072,11 +1072,6 @@
                 kpiTableBody.appendChild(tr);
             });
 
-            if (totalPages <= 1) {
-                kpiModalFoot.style.display = 'none';
-                return;
-            }
-
             kpiModalFoot.style.display = 'flex';
             kpiModalRange.innerHTML = 'Showing <strong>' + (start + 1) + '–' + (start + pageRows.length) + '</strong> of <strong>' + total + '</strong>';
 
