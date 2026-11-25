@@ -579,13 +579,27 @@
                 <div class="px-6 py-5 space-y-4">
                     <div>
                         <label for="pa_document_type" class="block text-sm font-medium text-gray-700 mb-1">Document <span class="text-red-500">*</span></label>
-                        <select id="pa_document_type" name="document_type" required
+                        <select id="pa_document_type" name="document_type" required onchange="toggleNewDocumentType()"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#b45309]">
                             <option value="">Select document type</option>
                             @foreach($documentTypes as $key => $label)
                                 <option value="{{ $key }}" @selected(old('document_type') === $key)>{{ $label }}</option>
                             @endforeach
+                            <option value="__new__" @selected(old('document_type') === '__new__')>+ Register new document type...</option>
                         </select>
+                        <div id="newDocumentTypeWrap" class="mt-2 hidden">
+                            <div class="flex gap-2">
+                                <input type="text" id="newDocumentTypeName" maxlength="191"
+                                       value="{{ old('new_document_type') }}"
+                                       placeholder="Enter new document type name"
+                                       class="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#b45309]">
+                                <button type="button" id="newDocumentTypeBtn" onclick="registerDocumentType()"
+                                        class="inline-flex items-center px-3 py-2 bg-[#b45309] text-white text-sm font-medium rounded-lg hover:bg-[#92400e] transition disabled:opacity-60">
+                                    <i class="fas fa-plus mr-1"></i>Register
+                                </button>
+                            </div>
+                        </div>
+                        <p id="newDocumentTypeMsg" class="text-sm mt-1 hidden"></p>
                         @error('document_type')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -1122,6 +1136,97 @@
         }
     }
 
+    function toggleNewDocumentType() {
+        const select = document.getElementById('pa_document_type');
+        const wrap = document.getElementById('newDocumentTypeWrap');
+        if (!select || !wrap) return;
+
+        if (select.value === '__new__') {
+            wrap.classList.remove('hidden');
+            document.getElementById('newDocumentTypeName')?.focus();
+            return;
+        }
+
+        wrap.classList.add('hidden');
+        setNewDocumentTypeMsg('', false);
+    }
+
+    function setNewDocumentTypeMsg(text, isError) {
+        const msg = document.getElementById('newDocumentTypeMsg');
+        if (!msg) return;
+
+        msg.textContent = text;
+        msg.classList.toggle('hidden', !text);
+        msg.classList.remove('text-red-600', 'text-green-600');
+
+        if (text) {
+            msg.classList.add(isError ? 'text-red-600' : 'text-green-600');
+        }
+    }
+
+    async function registerDocumentType() {
+        const select = document.getElementById('pa_document_type');
+        const input = document.getElementById('newDocumentTypeName');
+        const button = document.getElementById('newDocumentTypeBtn');
+        const wrap = document.getElementById('newDocumentTypeWrap');
+        if (!select || !input || !button) return;
+
+        const name = input.value.trim();
+        if (!name) {
+            setNewDocumentTypeMsg('Enter the document type name.', true);
+            input.focus();
+            return;
+        }
+
+        button.disabled = true;
+        setNewDocumentTypeMsg('', false);
+
+        try {
+            const response = await fetch('{{ route('purchasing-activities.document-types.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ name: name }),
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const firstError = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+                throw new Error(firstError || data.message || 'Unable to register the document type.');
+            }
+
+            let option = Array.from(select.options).find((item) => item.value === data.name);
+
+            if (!option) {
+                option = new Option(data.name, data.name);
+
+                const nextOption = Array.from(select.options).find((item) =>
+                    item.value !== '' &&
+                    item.value !== '__new__' &&
+                    item.value.localeCompare(data.name, undefined, { sensitivity: 'base' }) > 0
+                );
+
+                select.insertBefore(
+                    option,
+                    nextOption || select.querySelector('option[value="__new__"]')
+                );
+            }
+
+            select.value = data.name;
+            input.value = '';
+            wrap.classList.add('hidden');
+            setNewDocumentTypeMsg(data.message + ' Selected for this activity.', false);
+        } catch (error) {
+            setNewDocumentTypeMsg(error.message, true);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     function toggleNewProcurementType() {
         const select = document.getElementById('pa_procurement_type');
         const wrap = document.getElementById('newProcurementTypeWrap');
@@ -1305,6 +1410,15 @@
     }
 
     function validateActivityForm() {
+        const documentSelect = document.getElementById('pa_document_type');
+
+        if (documentSelect && documentSelect.value === '__new__') {
+            document.getElementById('newDocumentTypeWrap')?.classList.remove('hidden');
+            setNewDocumentTypeMsg('Register the new document type before saving.', true);
+            document.getElementById('newDocumentTypeName')?.focus();
+            return false;
+        }
+
         const typeSelect = document.getElementById('pa_procurement_type');
 
         if (typeSelect && typeSelect.value === '__new__') {
@@ -1336,6 +1450,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        const documentSelect = document.getElementById('pa_document_type');
+
+        if (documentSelect && documentSelect.value === '__new__') {
+            toggleNewDocumentType();
+        }
+
         const typeSelect = document.getElementById('pa_procurement_type');
 
         if (typeSelect && typeSelect.value === '__new__') {

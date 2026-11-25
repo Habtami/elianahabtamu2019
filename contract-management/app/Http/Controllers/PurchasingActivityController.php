@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
+use App\Models\DocumentType;
 use App\Models\MaterialGroup;
 use App\Models\ProcurementType;
 use App\Models\PurchasingActivity;
@@ -222,6 +223,62 @@ class PurchasingActivityController extends Controller
         }
 
         return back()->with('success', 'Procurement type registered.');
+    }
+
+    public function storeDocumentType(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->canCreatePurchasingActivities()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'You are not authorized to register document types.'], 403);
+            }
+
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to register document types.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:191',
+        ], [
+            'name.required' => 'Enter the document type name.',
+        ]);
+
+        $name = trim(preg_replace('/\s+/', ' ', $validated['name']));
+
+        foreach (PurchasingActivity::getDocumentTypes() as $key => $label) {
+            if (mb_strtolower($label) === mb_strtolower($name)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'name' => $key,
+                        'created' => false,
+                        'message' => 'That document type is already registered.',
+                    ]);
+                }
+
+                return back()->with('success', 'Document type registered.');
+            }
+        }
+
+        $type = DocumentType::firstOrCreate(
+            ['name' => $name],
+            [
+                'is_active' => true,
+                'sort_order' => ((int) DocumentType::max('sort_order')) + 1,
+            ]
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'name' => $type->name,
+                'created' => $type->wasRecentlyCreated,
+                'message' => $type->wasRecentlyCreated
+                    ? 'Document type registered.'
+                    : 'That document type is already registered.',
+            ], $type->wasRecentlyCreated ? 201 : 200);
+        }
+
+        return back()->with('success', 'Document type registered.');
     }
 
     public function storeUnit(Request $request)

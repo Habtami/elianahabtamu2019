@@ -43,10 +43,23 @@ class PurchasingActivity extends Model
 
     public static function getDocumentTypes()
     {
-        return [
+        $types = [
             self::DOCUMENT_PROFORMA => 'Proforma',
             self::DOCUMENT_RFQ => 'Request for Quotation',
         ];
+
+        $known = array_map('mb_strtolower', array_merge(array_keys($types), array_values($types)));
+
+        foreach (DocumentType::activeNames() as $name) {
+            if (in_array(mb_strtolower($name), $known, true)) {
+                continue;
+            }
+
+            $types[$name] = $name;
+            $known[] = mb_strtolower($name);
+        }
+
+        return $types;
     }
 
     public static function getProcurementTypes()
