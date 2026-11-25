@@ -18,6 +18,8 @@
 /public/build
 /public/hot
 /public/storage
+/a_contract_backup
+/public/a_contract_backup
 /storage/*.key
 /storage/pail
 /vendor

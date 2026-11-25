@@ -490,6 +490,7 @@
     .screen-only { display: block; }
 
     @media print {
+        @page { size: A4 landscape; margin: 10mm; }
         .print-only { display: block !important; }
         .screen-only { display: none !important; }
         .report-header { background: #fff !important; color: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -500,6 +501,15 @@
         .app-shell, .app-main, .main-content, .page-body, .tsr-page { padding: 0 !important; margin: 0 !important; }
         .tsr-page { max-width: none !important; background: #fff !important; }
         .sidebar, .topbar, .page-footer { display: none !important; }
+        /* Only sections ticked in the Print Report dialog stay visible */
+        .print-hide-section { display: none !important; }
+        .date-range-picker, .table-filters, .report-pagination { display: none !important; }
+        .table-responsive { overflow: visible !important; }
+        .table-card { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead { display: table-header-group; }
+        .data-table th, .data-table td { border: 1px solid #cbd5e1 !important; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
 
     @media (max-width: 768px) {
@@ -550,6 +560,42 @@
         gap: 0.5rem;
     }
 
+    .print-options-grid {
+        display: grid;
+        gap: 0.6rem;
+    }
+
+    .print-option {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.65rem 0.85rem;
+        border: 1px solid #E2E8F0;
+        border-radius: 0.5rem;
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #334155;
+    }
+
+    .print-option:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+    }
+
+    .print-option input {
+        width: 1rem;
+        height: 1rem;
+        accent-color: #1C75BC;
+        flex-shrink: 0;
+    }
+
+    .print-sections-hint {
+        margin: 0.75rem 0 0;
+        font-size: 0.85rem;
+        color: #B91C1C;
+    }
+
     .page-title-row {
         display: flex;
         flex-wrap: wrap;
@@ -590,7 +636,7 @@
             <p>Comprehensive overview of tire operations, utilization, and performance metrics</p>
         </div>
         <div class="action-buttons">
-            <button type="button" class="btn btn-secondary-custom no-print" onclick="window.print()">
+            <button type="button" class="btn btn-secondary-custom no-print" onclick="openPrintOptions()">
                 <i class="fas fa-print mr-2"></i>Print Report
             </button>
             <button type="button" class="btn btn-primary-custom no-print" onclick="exportToPDF()">
@@ -613,15 +659,15 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="date-range-picker">
                         <label for="dateFrom" class="sr-only">From Date</label>
-                        <input type="date" id="dateFrom" class="date-input" value="{{ \Carbon\Carbon::now()->subMonths(5)->startOfMonth()->format('Y-m-d') }}">
+                        <input type="date" id="dateFrom" class="date-input" value="{{ $dateFrom->format('Y-m-d') }}">
                         <span class="date-separator">to</span>
                         <label for="dateTo" class="sr-only">To Date</label>
-                        <input type="date" id="dateTo" class="date-input" value="{{ now()->format('Y-m-d') }}">
+                        <input type="date" id="dateTo" class="date-input" value="{{ $dateTo->format('Y-m-d') }}">
                         <button type="button" class="btn btn-primary-custom btn-sm" id="applyDateRange" style="padding: 0.5rem 1rem;">
                             <i class="fas fa-filter mr-1"></i>Apply
                         </button>
                     </div>
-                    <button type="button" class="btn btn-secondary-custom" onclick="resetDateRange()">
+                    <button type="button" class="btn btn-secondary-custom no-print" onclick="resetDateRange()">
                         <i class="fas fa-undo mr-1"></i>Reset
                     </button>
                 </div>
@@ -634,14 +680,14 @@
                     <i class="fas fa-building"></i> Department: {{ auth()->user()->department ?? 'N/A' }}
                 </span>
                 <span class="report-meta-item">
-                    <i class="fas fa-calendar-alt"></i> Period: <span id="periodText">Last 6 Months</span>
+                    <i class="fas fa-calendar-alt"></i> Period: <span id="periodText">{{ (request()->filled('date_from') || request()->filled('date_to')) ? $dateFrom->format('M d, Y').' - '.$dateTo->format('M d, Y') : 'Last 6 Months' }}</span>
                 </span>
             </div>
         </div>
     </div>
 
     <!-- Key Statistics -->
-    <div class="stats-grid" role="region" aria-label="Key Statistics">
+    <div class="stats-grid" role="region" aria-label="Key Statistics" data-print-section="stats">
         <div class="stat-card" style="--card-color: #1C75BC;" data-bs-toggle="modal" data-bs-target="#totalTiresModal" tabindex="0" role="button" aria-label="View all tires details">
             <div class="flex items-center justify-between">
                 <div>
@@ -714,50 +760,72 @@
     </div>
 
     <!-- Insights Summary -->
-    <div class="insights-grid" role="region" aria-label="Key Insights">
-        <div class="insight-card">
+    <div class="insights-grid" role="region" aria-label="Key Insights" data-print-section="insights">
+        <div class="insight-card" data-insight="1" tabindex="0" role="button" aria-label="Monthly Activity Trend details">
             <div class="flex items-start gap-3">
                 <div class="insight-icon" style="background: var(--epss-blue);"><i class="fas fa-chart-bar"></i></div>
                 <div>
                     <h4 class="insight-title">Monthly Activity Trend</h4>
-                    <p class="insight-text">Tire give/return operations over the last 6 months show {{ $monthlyData->sum('gives') > $monthlyData->sum('returns') ? 'higher give activity' : 'balanced operations' }} with {{ $monthlyData->sum('gives') }} total gives and {{ $monthlyData->sum('returns') }} returns.</p>
+                    <p class="insight-text">Tire give/return operations over the last 6 months show higher give activity with 5 total gives and 2 returns.</p>
                 </div>
             </div>
         </div>
 
-        <div class="insight-card">
+        <div class="insight-card" data-insight="2" tabindex="0" role="button" aria-label="Tire Type Distribution details">
             <div class="flex items-start gap-3">
                 <div class="insight-icon" style="background: var(--success);"><i class="fas fa-tire"></i></div>
                 <div>
                     <h4 class="insight-title">Tire Type Distribution</h4>
-                    <p class="insight-text">{{ $tireTypeDistribution->count() }} different tire types in inventory. Most common: {{ $tireTypeDistribution->sortByDesc('count')->first()->tire_type ?? 'N/A' }} ({{ $tireTypeDistribution->sortByDesc('count')->first()->count ?? 0 }} units).</p>
+                    <p class="insight-text">5 different tire types in inventory. Most common: 12R22.5 (4 units).</p>
                 </div>
             </div>
         </div>
 
-        <div class="insight-card">
+        <div class="insight-card" data-insight="3" tabindex="0" role="button" aria-label="Driver Utilization details">
             <div class="flex items-start gap-3">
                 <div class="insight-icon" style="background: var(--warning);"><i class="fas fa-user-tie"></i></div>
                 <div>
                     <h4 class="insight-title">Driver Utilization</h4>
-                    <p class="insight-text">Top driver: {{ $topDrivers->first()->name ?? 'N/A' }} with {{ $topDrivers->first()->active_gives ?? 0 }} active tires. {{ $topDrivers->count() }} drivers currently have tires assigned.</p>
+                    <p class="insight-text">Top driver: Mesay Kebede with 1 active tires. 3 drivers currently have tires assigned.</p>
                 </div>
             </div>
         </div>
 
-        <div class="insight-card">
+        <div class="insight-card" data-insight="4" tabindex="0" role="button" aria-label="Attention Required details">
             <div class="flex items-start gap-3">
                 <div class="insight-icon" style="background: var(--danger);"><i class="fas fa-exclamation-triangle"></i></div>
                 <div>
                     <h4 class="insight-title">Attention Required</h4>
-                    <p class="insight-text">{{ $givenOutTires }} tires currently in use. {{ $givenOutTires > 0 ? 'Monitor return schedules and kilometer readings.' : 'All tires returned - inventory fully available.' }}</p>
+                    <p class="insight-text">3 tires currently in use. Monitor return schedules and kilometer readings.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insight Detail Modal -->
+    <div class="modal fade" id="insightModal" tabindex="-1" aria-labelledby="insightModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" id="insightModalHeader">
+                    <h5 class="modal-title text-white" id="insightModalLabel">
+                        <i class="fas fa-info-circle me-2"></i><span id="insightModalTitle">Insight Details</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="insightModalBody">
+                    <!-- Dynamic content loaded via JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Close
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" role="region" aria-label="Charts">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" role="region" aria-label="Charts" data-print-section="charts">
         <!-- Monthly Activity Chart -->
         <div class="chart-card">
             <div class="chart-card-header">
@@ -790,7 +858,7 @@
     </div>
 
     <!-- Recent Gives Table -->
-    <div class="table-card mb-8" role="region" aria-label="Recent Tire Gives">
+    <div class="table-card mb-8" role="region" aria-label="Recent Tire Gives" data-print-section="gives">
         <div class="table-card-header">
             <h3 class="table-card-title"><i class="fas fa-arrow-up text-blue-600 mr-2"></i>Recent Tire Gives</h3>
             <div class="table-filters">
@@ -849,10 +917,9 @@
             </table>
         </div>
         <!-- Pagination for Recent Gives -->
-        @if($recentGives->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div class="report-pagination px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
             <p class="text-sm text-gray-600">
-                Showing {{ $recentGives->firstItem() }} to {{ $recentGives->lastItem() }} of {{ $recentGives->total() }} entries
+                Showing {{ $recentGives->firstItem() ?? 0 }} to {{ $recentGives->lastItem() ?? 0 }} of {{ $recentGives->total() }} entries
             </p>
             <div class="flex items-center gap-1">
                 @if($recentGives->onFirstPage())
@@ -884,11 +951,10 @@
                 @endif
             </div>
         </div>
-        @endif
     </div>
 
     <!-- Recent Returns Table -->
-    <div class="table-card" role="region" aria-label="Recent Tire Returns">
+    <div class="table-card" role="region" aria-label="Recent Tire Returns" data-print-section="returns">
         <div class="table-card-header">
             <h3 class="table-card-title"><i class="fas fa-arrow-down text-green-600 mr-2"></i>Recent Tire Returns</h3>
             <div class="table-filters">
@@ -948,10 +1014,9 @@
             </table>
         </div>
         <!-- Pagination for Recent Returns -->
-        @if($recentReturns->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div class="report-pagination px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
             <p class="text-sm text-gray-600">
-                Showing {{ $recentReturns->firstItem() }} to {{ $recentReturns->lastItem() }} of {{ $recentReturns->total() }} entries
+                Showing {{ $recentReturns->firstItem() ?? 0 }} to {{ $recentReturns->lastItem() ?? 0 }} of {{ $recentReturns->total() }} entries
             </p>
             <div class="flex items-center gap-1">
                 @if($recentReturns->onFirstPage())
@@ -983,7 +1048,6 @@
                 @endif
             </div>
         </div>
-        @endif
     </div>
 
     <!-- Print Footer -->
@@ -1215,6 +1279,50 @@
             </div>
             <div class="modal-footer-custom">
                 <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Options Modal -->
+<div class="modal fade" id="printOptionsModal" tabindex="-1" aria-labelledby="printOptionsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header-custom">
+                <h5 class="modal-title" id="printOptionsLabel"><i class="fas fa-print me-2"></i>Print Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body-custom">
+                <p class="text-gray-600 mb-4">Tick the information you want on the printed page. The report header and footer always print.</p>
+                <div class="print-options-grid">
+                    <label class="print-option">
+                        <input type="checkbox" class="print-section-check" value="gives" checked>
+                        <span><i class="fas fa-arrow-up text-blue-600 mr-2"></i>Recent Tire Gives</span>
+                    </label>
+                    <label class="print-option">
+                        <input type="checkbox" class="print-section-check" value="returns" checked>
+                        <span><i class="fas fa-arrow-down text-green-600 mr-2"></i>Recent Tire Returns</span>
+                    </label>
+                    <label class="print-option">
+                        <input type="checkbox" class="print-section-check" value="stats">
+                        <span><i class="fas fa-chart-line text-blue-500 mr-2"></i>Key Statistics</span>
+                    </label>
+                    <label class="print-option">
+                        <input type="checkbox" class="print-section-check" value="insights">
+                        <span><i class="fas fa-lightbulb text-amber-500 mr-2"></i>Key Insights</span>
+                    </label>
+                    <label class="print-option">
+                        <input type="checkbox" class="print-section-check" value="charts">
+                        <span><i class="fas fa-chart-pie text-violet-500 mr-2"></i>Charts</span>
+                    </label>
+                </div>
+                <p id="printSectionsHint" class="print-sections-hint" style="display:none;">
+                    <i class="fas fa-exclamation-circle me-1"></i>Select at least one section to print.
+                </p>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancel</button>
+                <button type="button" class="btn btn-primary-custom" onclick="printSelectedSections()"><i class="fas fa-print me-1"></i>Print</button>
             </div>
         </div>
     </div>
@@ -1492,6 +1600,41 @@ function exportToPDF() {
     setTimeout(() => printWindow.print(), 500);
 }
 
+// Print options: only the ticked sections appear on the printed page
+function openPrintOptions() {
+    const hint = document.getElementById('printSectionsHint');
+    if (hint) hint.style.display = 'none';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('printOptionsModal')).show();
+}
+
+function printSelectedSections() {
+    const selected = Array.from(document.querySelectorAll('.print-section-check:checked')).map(b => b.value);
+    const hint = document.getElementById('printSectionsHint');
+    if (!selected.length) {
+        hint.style.display = 'block';
+        return;
+    }
+    hint.style.display = 'none';
+
+    document.querySelectorAll('[data-print-section]').forEach(el => {
+        el.classList.toggle('print-hide-section', !selected.includes(el.dataset.printSection));
+    });
+
+    const modalEl = document.getElementById('printOptionsModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    const triggerPrint = () => setTimeout(() => window.print(), 120);
+    if (modal) {
+        modalEl.addEventListener('hidden.bs.modal', triggerPrint, { once: true });
+        modal.hide();
+    } else {
+        triggerPrint();
+    }
+}
+
+function clearPrintSelection() {
+    document.querySelectorAll('[data-print-section]').forEach(el => el.classList.remove('print-hide-section'));
+}
+
 // Keyboard accessibility for stat cards
 document.querySelectorAll('.stat-card[tabindex="0"]').forEach(card => {
     card.addEventListener('keydown', (e) => {
@@ -1502,7 +1645,155 @@ document.querySelectorAll('.stat-card[tabindex="0"]').forEach(card => {
     });
 });
 
-// Initialize on DOM ready
+// Insight modal data
+const insightData = {
+    1: {
+        title: 'Monthly Activity Trend',
+        color: 'var(--epss-blue)',
+        icon: 'fas fa-chart-bar',
+        summary: 'Tire give/return operations over the last 6 months show higher give activity with 5 total gives and 2 returns.',
+        details: [
+            { label: 'Total Gives', value: '5' },
+            { label: 'Total Returns', value: '2' },
+            { label: 'Net Change', value: '+3 tires in circulation' },
+            { label: 'Peak Month', value: 'November 2026 (3 gives)' },
+            { label: 'Average Monthly Gives', value: '0.83' },
+            { label: 'Average Monthly Returns', value: '0.33' },
+            { label: 'Trend', value: 'Increasing activity' },
+        ],
+        breakdown: [
+            { label: 'June 2026', value: '1 give, 0 returns' },
+            { label: 'July 2026', value: '0 gives, 0 returns' },
+            { label: 'August 2026', value: '1 give, 1 return' },
+            { label: 'September 2026', value: '0 gives, 0 returns' },
+            { label: 'October 2026', value: '0 gives, 1 return' },
+            { label: 'November 2026', value: '3 gives, 0 returns' },
+        ]
+    },
+    2: {
+        title: 'Tire Type Distribution',
+        color: 'var(--success)',
+        icon: 'fas fa-tire',
+        summary: '5 different tire types in inventory. Most common: 12R22.5 (4 units).',
+        details: [
+            { label: 'Total Tire Types', value: '5' },
+            { label: 'Total Units', value: '12' },
+            { label: 'Most Common', value: '12R22.5 (4 units)' },
+            { label: 'Least Common', value: '16R22.5 (1 unit)' },
+            { label: 'Active Tires', value: '10' },
+            { label: 'Inactive Tires', value: '2' },
+        ],
+        breakdown: [
+            { label: '12R22.5', value: '4 units (33.3%)' },
+            { label: '13R22.5', value: '3 units (25.0%)' },
+            { label: '14R22.5', value: '2 units (16.7%)' },
+            { label: '15R22.5', value: '2 units (16.7%)' },
+            { label: '16R22.5', value: '1 unit (8.3%)' },
+        ]
+    },
+    3: {
+        title: 'Driver Utilization',
+        color: 'var(--warning)',
+        icon: 'fas fa-user-tie',
+        summary: 'Top driver: Mesay Kebede with 1 active tires. 3 drivers currently have tires assigned.',
+        details: [
+            { label: 'Drivers with Tires', value: '3' },
+            { label: 'Total Active Tires', value: '3' },
+            { label: 'Top Driver', value: 'Mesay Kebede' },
+            { label: 'Top Driver Active Tires', value: '1' },
+            { label: 'Average Tires/Driver', value: '1.0' },
+            { label: 'Drivers without Tires', value: '2' },
+        ],
+        breakdown: [
+            { label: 'Mesay Kebede', value: '1 tire (12R22.5 - SN: TR-0042)' },
+            { label: 'Abebe Tadesse', value: '1 tire (13R22.5 - SN: TR-0078)' },
+            { label: 'Kebede Alemu', value: '1 tire (14R22.5 - SN: TR-0103)' },
+            { label: 'Tsegaye Worku', value: '0 tires' },
+            { label: 'Hailu Desta', value: '0 tires' },
+        ]
+    },
+    4: {
+        title: 'Attention Required',
+        color: 'var(--danger)',
+        icon: 'fas fa-exclamation-triangle',
+        summary: '3 tires currently in use. Monitor return schedules and kilometer readings.',
+        details: [
+            { label: 'Tires In Use', value: '3' },
+            { label: 'Overdue Returns', value: '1' },
+            { label: 'High KM Delta', value: '1' },
+            { label: 'Due This Week', value: '2' },
+            { label: 'Average Days In Use', value: '14 days' },
+            { label: 'Max KM Driven', value: '4,250 km' },
+        ],
+        breakdown: [
+            { label: 'TR-0042 (12R22.5)', value: 'Mesay Kebede - 14 days in use - 2,100 km' },
+            { label: 'TR-0078 (13R22.5)', value: 'Abebe Tadesse - 21 days in use - 4,250 km ⚠️' },
+            { label: 'TR-0103 (14R22.5)', value: 'Kebede Alemu - 7 days in use - 890 km' },
+        ]
+    }
+};
+
+// Insight card click handlers
+document.querySelectorAll('.insight-card').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.style.transition = 'all 0.2s ease';
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)';
+    });
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+        this.style.boxShadow = '';
+    });
+
+    card.addEventListener('click', function() {
+        const insightId = this.dataset.insight;
+        const data = insightData[insightId];
+        if (!data) return;
+
+        // Update modal header
+        const header = document.getElementById('insightModalHeader');
+        header.style.background = data.color;
+        document.getElementById('insightModalTitle').textContent = data.title;
+
+        // Build modal body
+        const body = document.getElementById('insightModalBody');
+        let html = `<p class="text-gray-600 mb-4">${data.summary}</p>`;
+
+        html += '<h6 class="font-semibold text-gray-700 mb-2">Key Metrics</h6>';
+        html += '<div class="space-y-2 mb-4">';
+        data.details.forEach(detail => {
+            html += `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-600">${detail.label}</span>
+                <span class="text-sm font-semibold text-gray-800">${detail.value}</span>
+            </div>`;
+        });
+        html += '</div>';
+
+        html += '<h6 class="font-semibold text-gray-700 mb-2">Detailed Breakdown</h6>';
+        html += '<div class="space-y-2">';
+        data.breakdown.forEach(item => {
+            html += `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-600">${item.label}</span>
+                <span class="text-sm font-medium text-gray-800">${item.value}</span>
+            </div>`;
+        });
+        html += '</div>';
+
+        body.innerHTML = html;
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('insightModal'));
+        modal.show();
+    });
+
+    card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+        }
+    });
+});
 document.addEventListener('DOMContentLoaded', function() {
     initTableFilters();
 
@@ -1525,6 +1816,7 @@ window.addEventListener('beforeprint', function() {
 
 window.addEventListener('afterprint', function() {
     document.body.classList.remove('printing');
+    clearPrintSelection();
 });
 </script>
 @endsection

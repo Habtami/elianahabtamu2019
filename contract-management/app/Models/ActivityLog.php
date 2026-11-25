@@ -119,6 +119,11 @@ class ActivityLog extends Model
                     'user_delete' => 'User account deleted',
                     'user_status' => 'User account status changed',
                     'password_reset' => 'Password reset to default',
+                    'backup_created' => 'Database backup created',
+                    'backup_failed' => 'Database backup failed',
+                    'backup_skipped' => 'Scheduled backup skipped',
+                    'backup_deleted' => 'Database backup deleted',
+                    'backup_settings' => 'Backup settings updated',
                 ];
                 if (isset($labels[$this->field_name])) {
                     return $labels[$this->field_name];

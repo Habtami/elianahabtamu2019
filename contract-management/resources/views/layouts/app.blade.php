@@ -883,6 +883,11 @@
                             <i class="fas fa-clock-rotate-left"></i><span>Activity Logs</span>
                         </a>
                     </div>
+                    <div class="sidebar-menu-item">
+                        <a href="{{ route('backup.index') }}" class="{{ request()->routeIs('backup.*') ? 'active' : '' }}" data-tooltip="Database Backups">
+                            <i class="fas fa-database"></i><span>Backups</span>
+                        </a>
+                    </div>
                     @endif
 
                     <div class="sidebar-section-label">Account</div>
@@ -989,12 +994,18 @@
 
             <main class="main-content" id="mainContent">
                 <div class="page-body">
-                    @if(session('success') || session('error') || session('warning'))
+                    @if(session('success') || session('error') || session('warning') || session('info'))
                     <div class="flash-stack">
                         @if(session('success'))
                         <div class="alert alert-success auto-dismiss mb-0 d-flex align-items-center">
                             <i class="fas fa-circle-check me-2"></i>
                             <span>{{ session('success') }}</span>
+                        </div>
+                        @endif
+                        @if(session('info'))
+                        <div class="alert alert-info mb-0 d-flex align-items-center">
+                            <i class="fas fa-circle-info me-2"></i>
+                            <span>{{ session('info') }}</span>
                         </div>
                         @endif
                         @if(session('error'))

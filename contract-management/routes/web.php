@@ -1,22 +1,23 @@
 <?php
 
 use App\Http\Controllers\Admin\TelegramLogController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\BackupController;
+use App\Http\Controllers\BatteryController;
+use App\Http\Controllers\ContractClosureController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\PaymentRequestController;
+use App\Http\Controllers\ProcurementReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseOrderController;
-use App\Http\Controllers\PaymentRequestController;
-use App\Http\Controllers\ContractClosureController;
-use App\Http\Controllers\ProcurementReportController;
 use App\Http\Controllers\PurchasingActivityController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TireController;
-use App\Http\Controllers\DriverController;
-use App\Http\Controllers\BatteryController;
 use App\Http\Controllers\TireGiveController;
 use App\Http\Controllers\TireReportController;
 use App\Http\Controllers\TireTypeController;
@@ -263,6 +264,17 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
         });
     });
 });
+
+// Database backups (any signed-in user; the controller restricts it to admins)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::post('/backup/create', [BackupController::class, 'create'])->name('backup.create');
+    Route::post('/backup/settings', [BackupController::class, 'updateSettings'])->name('backup.settings');
+    Route::post('/backup/skip-next', [BackupController::class, 'skipNext'])->name('backup.skip-next');
+    Route::get('/backup/download/{file}', [BackupController::class, 'download'])->name('backup.download');
+    Route::delete('/backup/delete/{file}', [BackupController::class, 'destroy'])->name('backup.delete');
+});
+
 // Super Admin Routes (require super admin role)
 Route::middleware(['auth'])->group(function () {
     Route::get('/super-admin/dashboard', [App\Http\Controllers\SuperAdminController::class, 'dashboard'])->name('super-admin.dashboard');
