@@ -205,9 +205,6 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Purchasing Daily Activity
     Route::get('/purchasing-activities', [PurchasingActivityController::class, 'index'])->name('purchasing-activities.index');
-    Route::get('/purchasing-activities/summary/{scope}', [PurchasingActivityController::class, 'summary'])
-        ->whereIn('scope', ['total', 'pending', 'complete', 'today'])
-        ->name('purchasing-activities.summary');
     Route::post('/purchasing-activities', [PurchasingActivityController::class, 'store'])->name('purchasing-activities.store');
     Route::post('/purchasing-activities/material-groups', [PurchasingActivityController::class, 'storeMaterialGroup'])->name('purchasing-activities.material-groups.store');
     Route::post('/purchasing-activities/units', [PurchasingActivityController::class, 'storeUnit'])->name('purchasing-activities.units.store');

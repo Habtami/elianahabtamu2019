@@ -46,14 +46,21 @@ class PurchasingActivityController extends Controller
             $query->whereDate('request_date', '<=', $request->to);
         }
 
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 10;
+        }
+
         $activities = $query->orderByDesc('request_date')->orderByDesc('id')
-            ->paginate(10)
+            ->paginate($perPage)
             ->appends($request->query());
 
-        $total = PurchasingActivity::count();
-        $pending = PurchasingActivity::where('status', PurchasingActivity::STATUS_PENDING)->count();
-        $complete = PurchasingActivity::where('status', PurchasingActivity::STATUS_COMPLETE)->count();
-        $today = PurchasingActivity::whereDate('request_date', now()->toDateString())->count();
+        $statGroups = [
+            'total' => $this->scopeQuery('total')->get(),
+            'pending' => $this->scopeQuery('pending')->get(),
+            'complete' => $this->scopeQuery('complete')->get(),
+            'today' => $this->scopeQuery('today')->get(),
+        ];
 
         $materialGroups = Contract::getMaterialGroups();
         $units = Unit::activeNames();
@@ -62,66 +69,27 @@ class PurchasingActivityController extends Controller
         $procurementTypes = PurchasingActivity::getProcurementTypes();
 
         return view('purchasing-activities.index', compact(
-            'activities', 'total', 'pending', 'complete', 'today',
+            'activities', 'statGroups',
             'materialGroups', 'units', 'statuses', 'documentTypes', 'procurementTypes'
         ));
     }
 
-    public function summary(string $scope)
+    private function scopeQuery(string $scope)
     {
-        $user = auth()->user();
-
-        if (!$user->canViewPurchasingActivities()) {
-            return response()->json(['message' => 'You are not authorized to view purchasing activities.'], 403);
-        }
-
-        $query = PurchasingActivity::with(['creator', 'completer']);
+        $query = PurchasingActivity::with(['creator', 'completer'])
+            ->orderByDesc('request_date')
+            ->orderByDesc('id');
 
         switch ($scope) {
             case 'pending':
-                $query->where('status', PurchasingActivity::STATUS_PENDING);
-                $label = 'Pending Activities';
-                break;
+                return $query->where('status', PurchasingActivity::STATUS_PENDING);
             case 'complete':
-                $query->where('status', PurchasingActivity::STATUS_COMPLETE);
-                $label = 'Complete Activities';
-                break;
+                return $query->where('status', PurchasingActivity::STATUS_COMPLETE);
             case 'today':
-                $query->whereDate('request_date', now()->toDateString());
-                $label = "Today's Requests";
-                break;
+                return $query->whereDate('request_date', now()->toDateString());
             default:
-                $label = 'Total Activities';
-                break;
+                return $query;
         }
-
-        $total = (clone $query)->count();
-
-        $items = $query->orderByDesc('request_date')
-            ->orderByDesc('id')
-            ->limit(50)
-            ->get()
-            ->map(fn (PurchasingActivity $activity) => [
-                'date' => $activity->request_date?->format('M d, Y'),
-                'document' => $activity->getDocumentTypeLabel(),
-                'material_group' => $activity->material_group,
-                'remarks' => $activity->remarks,
-                'unit' => $activity->unit,
-                'procurement_type' => $activity->getProcurementTypeLabel(),
-                'status' => $activity->getStatusLabel(),
-                'is_complete' => $activity->isComplete(),
-                'creator' => $activity->creator->name ?? 'Unknown',
-                'completed_by' => $activity->completer->name ?? null,
-                'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
-            ]);
-
-        return response()->json([
-            'scope' => $scope,
-            'label' => $label,
-            'total' => $total,
-            'items' => $items,
-            'limited' => $total > $items->count(),
-        ]);
     }
 
     public function store(Request $request)
