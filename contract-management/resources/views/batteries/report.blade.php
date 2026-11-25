@@ -76,52 +76,75 @@
     /* CARDS */
     .rep-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
         margin-bottom: 1.3rem;
     }
     .rep-card {
-        display: block;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .rep-cards > .rep-card {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
         width: 100%;
         text-align: left;
         font: inherit;
-        background: #fff;
-        border: 1px solid #e3ebf3;
-        border-radius: 14px;
-        padding: 1rem 1.2rem;
-        box-shadow: 0 2px 8px rgba(0, 30, 60, 0.06);
+        padding: 1.1rem 1.2rem;
+        border-left: 4px solid var(--card-color, #1c75bc);
         cursor: pointer;
-        transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     }
-    .rep-card:hover { transform: translateY(-2px); border-color: #b9d3ec; box-shadow: 0 8px 18px rgba(0, 40, 80, 0.12); }
-    .rep-card:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+    .rep-cards > .rep-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        border-color: #cbd5e1;
+        border-left-color: var(--card-color, #1c75bc);
+    }
+    .rep-cards > .rep-card:focus-visible { outline: 2px solid var(--card-color, #1c75bc); outline-offset: 2px; }
+    .rep-card.issues { --card-color: #10b981; }
+    .rep-card.issues.has-issues { --card-color: #ef4444; }
+    .rep-card-main { min-width: 0; }
     .rep-card .label {
         display: block;
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
-        color: #6b8299;
+        letter-spacing: 0.05em;
+        color: #64748b;
     }
     .rep-card .value {
         display: block;
         font-size: 1.7rem;
         font-weight: 700;
-        color: #0f2a44;
-        margin-top: 0.2rem;
-        line-height: 1.1;
+        color: #0f172a;
+        margin-top: 0.3rem;
+        line-height: 1;
     }
-    .rep-card.issues .value { color: #b45309; }
-    .rep-card.issues.has-issues .value { color: #b91c1c; }
-    .rep-card .chips { margin-top: 0.4rem; display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .rep-card-icon {
+        flex: none;
+        padding-top: 0.1rem;
+        font-size: 1.9rem;
+        line-height: 1;
+        color: var(--card-color, #1c75bc);
+        opacity: 0.22;
+    }
+    .rep-card .chips { margin-top: 0.5rem; display: flex; gap: 0.35rem; flex-wrap: wrap; }
     .rep-card-hint {
         display: block;
         margin-top: 0.55rem;
         font-size: 0.68rem;
         font-weight: 600;
         color: #8aa2b8;
+        opacity: 0;
+        transition: opacity 0.15s ease, color 0.15s ease;
     }
-    .rep-card:hover .rep-card-hint { color: #1a6fc4; }
+    .rep-cards > .rep-card:hover .rep-card-hint,
+    .rep-cards > .rep-card:focus-visible .rep-card-hint { opacity: 1; color: #1a6fc4; }
 
     .rep-chip {
         font-size: 0.68rem;
@@ -381,6 +404,44 @@
     .rep-modal-close:hover { background: #dbe6f1; }
     .rep-modal-body { padding: 1rem 1.3rem 1.4rem; overflow-y: auto; }
 
+    .rep-table th.rep-roll,
+    .rep-table td.rep-roll {
+        width: 3.2rem;
+        color: #7a90a6;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .rep-modal-foot {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.7rem 1.3rem;
+        border-top: 1px solid #edf2f8;
+        background: #f8fafc;
+        font-size: 0.82rem;
+        color: #6b8299;
+    }
+    .rep-modal-foot strong { color: #1e293b; font-weight: 600; }
+    .rep-modal-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; }
+    .rep-page-btn {
+        padding: 0.35rem 0.7rem;
+        border: 1px solid #dbe6f1;
+        background: #fff;
+        border-radius: 6px;
+        color: #33506e;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.8rem;
+        font-family: inherit;
+    }
+    .rep-page-btn:hover:not(:disabled) { background: #f1f5f9; }
+    .rep-page-btn.rep-active { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+    .rep-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .rep-page-dots { padding: 0.35rem 0.3rem; color: #6b8299; }
+
     .rep-detail-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
@@ -522,36 +583,48 @@
     <p class="rep-range">
         Showing <strong>{{ $dateBasis }}</strong>:
         <strong>{{ $rangeLabel }}</strong>
-        · {{ $totalBatteries }} record(s)
+        · {{ $rangeTotal }} record(s)
     </p>
 
     <div class="rep-cards">
-        <button type="button" class="rep-card" data-rep-modal="repModalTotal" aria-haspopup="dialog">
-            <span class="label">Total Batteries</span>
-            <span class="value">{{ $totalBatteries }}</span>
-            <span class="rep-card-hint">Click to view full list →</span>
-        </button>
-        <button type="button" class="rep-card" data-rep-modal="repModalInService" aria-haspopup="dialog">
-            <span class="label">In Service</span>
-            <span class="value">{{ $inServiceBatteries }}</span>
-            <span class="rep-card-hint">Click to view full list →</span>
-        </button>
-        <button type="button" class="rep-card" data-rep-modal="repModalReturned" aria-haspopup="dialog">
-            <span class="label">Returned</span>
-            <span class="value">{{ $returnedBatteries }}</span>
-            <span class="rep-card-hint">Click to view full list →</span>
-        </button>
-        <button type="button" class="rep-card issues {{ $rows->count() ? 'has-issues' : '' }}" data-rep-modal="repModalIssues" aria-haspopup="dialog">
-            <span class="label">Batteries With Issues</span>
-            <span class="value">{{ $rows->count() }}</span>
-            <span class="chips">
-                <span class="rep-chip high">{{ $issueCounts['high'] }} high</span>
-                <span class="rep-chip medium">{{ $issueCounts['medium'] }} medium</span>
-                <span class="rep-chip low">{{ $issueCounts['low'] }} low</span>
+        <button type="button" class="rep-card" style="--card-color: #1c75bc;" data-rep-modal="repModalTotal" aria-haspopup="dialog" aria-label="View all batteries" title="View all batteries">
+            <span class="rep-card-main">
+                <span class="label">Total Batteries</span>
+                <span class="value">{{ $totalBatteries }}</span>
+                <span class="rep-card-hint">Click to view full list →</span>
             </span>
-            <span class="rep-card-hint">
-                {{ $rows->count() ? 'Click to review issues →' : 'All clear — no data problems' }}
+            <span class="rep-card-icon" aria-hidden="true"><i class="fas fa-car-battery"></i></span>
+        </button>
+        <button type="button" class="rep-card" style="--card-color: #10b981;" data-rep-modal="repModalInService" aria-haspopup="dialog" aria-label="View in service batteries" title="View in service batteries">
+            <span class="rep-card-main">
+                <span class="label">In Service</span>
+                <span class="value">{{ $inServiceBatteries }}</span>
+                <span class="rep-card-hint">Click to view full list →</span>
             </span>
+            <span class="rep-card-icon" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+        </button>
+        <button type="button" class="rep-card" style="--card-color: #f59e0b;" data-rep-modal="repModalReturned" aria-haspopup="dialog" aria-label="View returned batteries" title="View returned batteries">
+            <span class="rep-card-main">
+                <span class="label">Returned</span>
+                <span class="value">{{ $returnedBatteries }}</span>
+                <span class="rep-card-hint">Click to view full list →</span>
+            </span>
+            <span class="rep-card-icon" aria-hidden="true"><i class="fas fa-rotate-left"></i></span>
+        </button>
+        <button type="button" class="rep-card issues {{ $issueCardRows->count() ? 'has-issues' : '' }}" data-rep-modal="repModalIssues" aria-haspopup="dialog" aria-label="View batteries with issues" title="View batteries with issues">
+            <span class="rep-card-main">
+                <span class="label">Batteries With Issues</span>
+                <span class="value">{{ $issueCardRows->count() }}</span>
+                <span class="chips">
+                    <span class="rep-chip high">{{ $issueCounts['high'] }} high</span>
+                    <span class="rep-chip medium">{{ $issueCounts['medium'] }} medium</span>
+                    <span class="rep-chip low">{{ $issueCounts['low'] }} low</span>
+                </span>
+                <span class="rep-card-hint">
+                    {{ $issueCardRows->count() ? 'Click to review issues →' : 'All clear — no data problems' }}
+                </span>
+            </span>
+            <span class="rep-card-icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></span>
         </button>
     </div>
 
@@ -570,7 +643,7 @@
         <div class="rep-card rep-chart-card">
             <div class="rep-chart-head">
                 <h3>Issues by Category</h3>
-                <span>{{ $rows->sum(fn ($row) => count($row['issues'])) }} finding(s)</span>
+                <span>{{ $issueCardRows->sum(fn ($row) => count($row['issues'])) }} finding(s)</span>
             </div>
             <div class="rep-chart-body">
                 <div id="repCategoryChart" class="rep-hbars"></div>
@@ -695,6 +768,7 @@
                     <table class="rep-table">
                         <thead>
                             <tr>
+                                <th class="rep-roll">No</th>
                                 <th>Serial No</th>
                                 <th>Plate</th>
                                 <th>Type / Brand</th>
@@ -708,6 +782,7 @@
                         <tbody>
                             @foreach($modal['batteries'] as $battery)
                                 <tr>
+                                    <td class="rep-roll">{{ $loop->iteration }}</td>
                                     <td style="font-weight:600;">{{ $battery->serial_number ?: '—' }}</td>
                                     <td>{{ $battery->plate_number ?: '—' }}</td>
                                     <td>{{ $battery->battery_type ?: '—' }}<br><span style="color:#6b8299;">{{ $battery->brand ?: '—' }}</span></td>
@@ -729,6 +804,10 @@
                 </div>
             @endif
         </div>
+        <div class="rep-modal-foot">
+            <span class="rep-modal-range"></span>
+            <div class="rep-modal-pages"></div>
+        </div>
     </div>
 </div>
 @endforeach
@@ -738,13 +817,13 @@
         <div class="rep-modal-head">
             <div>
                 <h3 id="repModalIssuesTitle">Batteries With Issues</h3>
-                <span>{{ $rows->count() }} battery(ies) · {{ $issueCounts['high'] }} high, {{ $issueCounts['medium'] }} medium, {{ $issueCounts['low'] }} low</span>
+                <span>{{ $issueCardRows->count() }} battery(ies) · {{ $issueCounts['high'] }} high, {{ $issueCounts['medium'] }} medium, {{ $issueCounts['low'] }} low</span>
             </div>
             <button type="button" class="rep-modal-close" aria-label="Close" data-rep-close>×</button>
         </div>
         <div class="rep-modal-body">
-            @if($rows->isEmpty())
-                <div class="rep-ok" style="margin-bottom:1rem;">✔ No issues found for the selected range.</div>
+            @if($issueCardRows->isEmpty())
+                <div class="rep-ok" style="margin-bottom:1rem;">✔ No issues found — all battery records look consistent.</div>
                 <p class="rep-checks-title">This report checked every battery for:</p>
                 <ul class="rep-checks">
                     <li>A serial number that is present and not duplicated</li>
@@ -754,12 +833,13 @@
                     <li>Plate number, material code, battery type, brand and manufacture date</li>
                     <li>At least one entry in the battery history</li>
                 </ul>
-                <p class="rep-checks-note">All {{ $totalBatteries }} battery record(s) in this range passed these checks.</p>
+                <p class="rep-checks-note">All {{ $totalBatteries }} battery record(s) passed these checks.</p>
             @else
                 <div class="rep-table-wrap">
                     <table class="rep-table">
                         <thead>
                             <tr>
+                                <th class="rep-roll">No</th>
                                 <th>Severity</th>
                                 <th>Serial No</th>
                                 <th>Plate</th>
@@ -769,9 +849,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($rows as $row)
+                            @foreach($issueCardRows as $row)
                                 @php $battery = $row['battery']; @endphp
                                 <tr>
+                                    <td class="rep-roll">{{ $loop->iteration }}</td>
                                     <td><span class="sev {{ $row['severity'] }}">{{ $row['severity'] }}</span></td>
                                     <td style="font-weight:600;">{{ $battery->serial_number ?: '—' }}</td>
                                     <td>{{ $battery->plate_number ?: '—' }}</td>
@@ -792,6 +873,10 @@
                     </table>
                 </div>
             @endif
+        </div>
+        <div class="rep-modal-foot">
+            <span class="rep-modal-range"></span>
+            <div class="rep-modal-pages"></div>
         </div>
     </div>
 </div>
@@ -867,7 +952,7 @@
         var total = segments.reduce(function (sum, seg) { return sum + seg.value; }, 0);
 
         if (!total) {
-            wrap.appendChild(emptyNote('No batteries in the selected range.'));
+            wrap.appendChild(emptyNote('No batteries recorded yet.'));
             return;
         }
 
@@ -1106,6 +1191,106 @@
         }
     }
 
+    var MODAL_PAGE_SIZE = 10;
+
+    function pageWindow(current, last) {
+        var pages = [];
+        for (var page = 1; page <= last; page++) {
+            if (page === 1 || page === last || Math.abs(page - current) <= 1) {
+                pages.push(page);
+            } else if (pages[pages.length - 1] !== '...') {
+                pages.push('...');
+            }
+        }
+        return pages;
+    }
+
+    function initModalPager(modal) {
+        if (!modal) return;
+        var table = modal.querySelector('.rep-modal-body .rep-table');
+        if (!table) return;
+
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+        if (!rows.length) return;
+
+        var foot = modal.querySelector('.rep-modal-foot');
+        var rangeNode = foot && foot.querySelector('.rep-modal-range');
+        var pagesNode = foot && foot.querySelector('.rep-modal-pages');
+        if (!foot || !rangeNode || !pagesNode) return;
+
+        var state = modal.repPager;
+        if (!state) {
+            state = modal.repPager = { rows: rows, page: 1, foot: foot, range: rangeNode, pages: pagesNode };
+        }
+        state.page = 1;
+        paintModalPage(state, false);
+    }
+
+    function paintModalPage(state, refocus) {
+        var rows = state.rows;
+        var total = rows.length;
+        var lastPage = Math.max(1, Math.ceil(total / MODAL_PAGE_SIZE));
+        state.page = Math.min(Math.max(state.page, 1), lastPage);
+
+        var start = (state.page - 1) * MODAL_PAGE_SIZE;
+        var end = Math.min(start + MODAL_PAGE_SIZE, total);
+
+        rows.forEach(function (row, index) {
+            row.hidden = index < start || index >= end;
+        });
+
+        state.foot.style.display = 'flex';
+        state.range.innerHTML = 'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + total + '</strong>';
+
+        state.pages.textContent = '';
+
+        state.pages.appendChild(pagerButton('« Prev', state.page <= 1, false, function () {
+            goToModalPage(state, state.page - 1);
+        }));
+
+        pageWindow(state.page, lastPage).forEach(function (item) {
+            if (item === '...') {
+                var dots = document.createElement('span');
+                dots.className = 'rep-page-dots';
+                dots.textContent = '...';
+                state.pages.appendChild(dots);
+                return;
+            }
+
+            var button = pagerButton(String(item), false, item === state.page, function () {
+                goToModalPage(state, item);
+            });
+            if (item === state.page) button.setAttribute('aria-current', 'page');
+            state.pages.appendChild(button);
+        });
+
+        state.pages.appendChild(pagerButton('Next »', state.page >= lastPage, false, function () {
+            goToModalPage(state, state.page + 1);
+        }));
+
+        if (refocus) {
+            var active = state.pages.querySelector('.rep-active');
+            if (active) active.focus();
+        }
+    }
+
+    function pagerButton(label, disabled, active, onClick) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'rep-page-btn' + (active ? ' rep-active' : '');
+        button.textContent = label;
+        button.disabled = disabled;
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
+    function goToModalPage(state, page) {
+        state.page = page;
+        paintModalPage(state, true);
+        var body = state.foot.parentNode.querySelector('.rep-modal-body');
+        if (body) body.scrollTop = 0;
+    }
+
     function detailField(label, value) {
         var cell = document.createElement('div');
         cell.className = 'rep-detail-field';
@@ -1214,7 +1399,9 @@
     function bindModals() {
         Array.prototype.forEach.call(document.querySelectorAll('[data-rep-modal]'), function (button) {
             button.addEventListener('click', function () {
-                openModal(button.getAttribute('data-rep-modal'));
+                var id = button.getAttribute('data-rep-modal');
+                initModalPager(document.getElementById(id));
+                openModal(id);
             });
         });
 

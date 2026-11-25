@@ -88,9 +88,11 @@ class BatteryController extends Controller
         }
 
         $report = $this->buildIssueReport($request);
-        $issueCounts = $report['issueCounts'];
-        $inServiceList = $report['inServiceList'];
-        $returnedList = $report['returnedList'];
+
+        $allBatteries = Battery::with(['histories.creator', 'creator'])->orderBy('serial_number')->get();
+        [$issueCardRows, $issueCardCounts, $issueCardSeries] = $this->buildIssueRows($allBatteries);
+        $inServiceList = $allBatteries->filter(fn (Battery $battery) => !$battery->isReturned())->values();
+        $returnedList = $allBatteries->filter(fn (Battery $battery) => $battery->isReturned())->values();
 
         $perPage = (int) $request->get('per_page', 5);
         if (!in_array($perPage, [5, 10, 25, 50], true)) {
@@ -112,9 +114,11 @@ class BatteryController extends Controller
         return view('batteries.report', [
             'rows' => $report['rows'],
             'issuePaginator' => $issuePaginator,
-            'batteries' => $report['batteries'],
-            'issueCounts' => $issueCounts,
-            'totalBatteries' => $report['batteries']->count(),
+            'batteries' => $allBatteries,
+            'issueCounts' => $issueCardCounts,
+            'issueCardRows' => $issueCardRows,
+            'totalBatteries' => $allBatteries->count(),
+            'rangeTotal' => $report['batteries']->count(),
             'inServiceBatteries' => $inServiceList->count(),
             'returnedBatteries' => $returnedList->count(),
             'inServiceList' => $inServiceList,
@@ -128,11 +132,11 @@ class BatteryController extends Controller
                     ['label' => 'Returned', 'value' => $returnedList->count(), 'color' => '#f59e0b'],
                 ],
                 'severity' => [
-                    ['label' => 'High', 'value' => $issueCounts['high'], 'color' => '#dc2626'],
-                    ['label' => 'Medium', 'value' => $issueCounts['medium'], 'color' => '#d97706'],
-                    ['label' => 'Low', 'value' => $issueCounts['low'], 'color' => '#0284c7'],
+                    ['label' => 'High', 'value' => $issueCardCounts['high'], 'color' => '#dc2626'],
+                    ['label' => 'Medium', 'value' => $issueCardCounts['medium'], 'color' => '#d97706'],
+                    ['label' => 'Low', 'value' => $issueCardCounts['low'], 'color' => '#0284c7'],
                 ],
-                'categories' => $report['categorySeries'],
+                'categories' => $issueCardSeries,
                 'trend' => $report['trendSeries'],
             ],
         ]);
@@ -174,35 +178,13 @@ class BatteryController extends Controller
             ->download('battery_issues_' . now()->format('Y-m-d') . '.pdf');
     }
 
-    private function buildIssueReport(Request $request): array
+    /**
+     * Detect the data issues found on a set of batteries.
+     *
+     * @return array{0: \Illuminate\Support\Collection, 1: array<string, int>, 2: \Illuminate\Support\Collection}
+     */
+    private function buildIssueRows(\Illuminate\Support\Collection $batteries): array
     {
-        $validated = $request->validate([
-            'date_field' => 'nullable|in:given,manufacture',
-            'from' => 'nullable|date',
-            'to' => 'nullable|date',
-        ]);
-
-        $dateField = $validated['date_field'] ?? 'given';
-        $from = $validated['from'] ?? null;
-        $to = $validated['to'] ?? null;
-
-        if ($from && $to && \Carbon\Carbon::parse($to)->lt(\Carbon\Carbon::parse($from))) {
-            throw ValidationException::withMessages([
-                'to' => 'The "To" date must be on or after the "From" date.',
-            ]);
-        }
-
-        $dateColumn = $dateField === 'manufacture' ? 'date_of_manufacture' : 'created_at';
-
-        $batteryQuery = Battery::with(['histories.creator', 'creator']);
-        if ($from) {
-            $batteryQuery->whereDate($dateColumn, '>=', $from);
-        }
-        if ($to) {
-            $batteryQuery->whereDate($dateColumn, '<=', $to);
-        }
-        $batteries = $batteryQuery->orderBy('serial_number')->get();
-
         $duplicateSerials = Battery::select('serial_number')
             ->groupBy('serial_number')
             ->havingRaw('COUNT(*) > 1')
@@ -290,6 +272,40 @@ class BatteryController extends Controller
         $categorySeries = collect($categoryCounts)
             ->map(fn ($value, $label) => ['label' => $label, 'value' => $value])
             ->values();
+
+        return [$rows, $issueCounts, $categorySeries];
+    }
+
+    private function buildIssueReport(Request $request): array
+    {
+        $validated = $request->validate([
+            'date_field' => 'nullable|in:given,manufacture',
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+        ]);
+
+        $dateField = $validated['date_field'] ?? 'given';
+        $from = $validated['from'] ?? null;
+        $to = $validated['to'] ?? null;
+
+        if ($from && $to && \Carbon\Carbon::parse($to)->lt(\Carbon\Carbon::parse($from))) {
+            throw ValidationException::withMessages([
+                'to' => 'The "To" date must be on or after the "From" date.',
+            ]);
+        }
+
+        $dateColumn = $dateField === 'manufacture' ? 'date_of_manufacture' : 'created_at';
+
+        $batteryQuery = Battery::with(['histories.creator', 'creator']);
+        if ($from) {
+            $batteryQuery->whereDate($dateColumn, '>=', $from);
+        }
+        if ($to) {
+            $batteryQuery->whereDate($dateColumn, '<=', $to);
+        }
+        $batteries = $batteryQuery->orderBy('serial_number')->get();
+
+        [$rows, $issueCounts, $categorySeries] = $this->buildIssueRows($batteries);
 
         $groupedByMonth = $batteries->groupBy(function (Battery $battery) use ($dateField) {
             $date = $dateField === 'manufacture' ? $battery->date_of_manufacture : $battery->created_at;
