@@ -268,29 +268,9 @@
         padding: 0.85rem 1.2rem;
         border-top: 1px solid #edf2f8;
     }
-    .rep-page-info { font-size: 0.75rem; color: #6b8299; }
-    .rep-pagination nav { margin-left: auto; }
-    .rep-pagination nav span,
-    .rep-pagination nav a {
-        display: inline-block;
-        min-width: 30px;
-        padding: 0.3rem 0.55rem;
-        margin: 0 0.1rem;
-        border: 1px solid #d7e2ee;
-        border-radius: 7px;
-        font-size: 0.75rem;
-        color: #1a4a73;
-        text-align: center;
-        text-decoration: none;
-        background: #fff;
-    }
-    .rep-pagination nav a:hover { background: #e8eff7; }
-    .rep-pagination nav span[aria-current="page"] span,
-    .rep-pagination nav .bg-white {
-        background: #1a6fc4 !important;
-        color: #fff !important;
-        border-color: #1a6fc4 !important;
-    }
+    .rep-page-info { font-size: 0.78rem; color: #6b8299; }
+    .rep-page-info strong { color: #1e293b; font-weight: 600; }
+    .rep-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; }
 
     .rep-table-wrap { overflow-x: auto; }
     .rep-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
@@ -427,6 +407,7 @@
     .rep-modal-foot strong { color: #1e293b; font-weight: 600; }
     .rep-modal-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; }
     .rep-page-btn {
+        display: inline-block;
         padding: 0.35rem 0.7rem;
         border: 1px solid #dbe6f1;
         background: #fff;
@@ -436,6 +417,8 @@
         font-weight: 500;
         font-size: 0.8rem;
         font-family: inherit;
+        text-decoration: none;
+        text-align: center;
     }
     .rep-page-btn:hover:not(:disabled) { background: #f1f5f9; }
     .rep-page-btn.rep-active { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
@@ -672,10 +655,7 @@
             <div class="rep-card-head">
                 <h3>Issues Requiring Attention</h3>
                 <div class="rep-card-tools">
-                    <span>
-                        Showing {{ $issuePaginator->firstItem() ?? 0 }}–{{ $issuePaginator->lastItem() ?? 0 }}
-                        of {{ $issuePaginator->total() }}
-                    </span>
+                    <span>{{ $issuePaginator->total() }} battery(ies) with issues</span>
                     <form method="GET" action="{{ route('batteries.report') }}" class="rep-perpage no-print">
                         @if($dateField)
                             <input type="hidden" name="date_field" value="{{ $dateField }}">
@@ -699,6 +679,7 @@
                 <table class="rep-table">
                     <thead>
                         <tr>
+                            <th class="rep-roll">No</th>
                             <th>Severity</th>
                             <th>Serial No</th>
                             <th>Plate No</th>
@@ -713,6 +694,7 @@
                         @foreach($issuePaginator as $row)
                         @php $battery = $row['battery']; @endphp
                         <tr>
+                            <td class="rep-roll">{{ ($issuePaginator->firstItem() ?? 1) + $loop->index }}</td>
                             <td><span class="sev {{ $row['severity'] }}">{{ $row['severity'] }}</span></td>
                             <td style="font-weight:600;">{{ $battery->serial_number ?: '—' }}</td>
                             <td>{{ $battery->plate_number ?: '—' }}</td>
@@ -738,14 +720,42 @@
                     </tbody>
                 </table>
             </div>
-            @if($issuePaginator->hasPages())
-                <div class="rep-pagination no-print">
-                    <span class="rep-page-info">
-                        Page {{ $issuePaginator->currentPage() }} of {{ $issuePaginator->lastPage() }}
-                    </span>
-                    {{ $issuePaginator->links() }}
+            @php
+                $repCurrent = $issuePaginator->currentPage();
+                $repLast = $issuePaginator->lastPage();
+                $repPages = [];
+                for ($repPage = 1; $repPage <= $repLast; $repPage++) {
+                    if ($repPage === 1 || $repPage === $repLast || abs($repPage - $repCurrent) <= 1) {
+                        $repPages[] = $repPage;
+                    } elseif (end($repPages) !== '...') {
+                        $repPages[] = '...';
+                    }
+                }
+            @endphp
+            <div class="rep-pagination no-print">
+                <span class="rep-page-info">
+                    Showing <strong>{{ $issuePaginator->firstItem() }}–{{ $issuePaginator->lastItem() }}</strong> of <strong>{{ $issuePaginator->total() }}</strong>
+                </span>
+                <div class="rep-pages">
+                    @if($repCurrent > 1)
+                        <a class="rep-page-btn" href="{{ $issuePaginator->url($repCurrent - 1) }}" rel="prev">« Prev</a>
+                    @else
+                        <button type="button" class="rep-page-btn" disabled>« Prev</button>
+                    @endif
+                    @foreach($repPages as $repPage)
+                        @if($repPage === '...')
+                            <span class="rep-page-dots">...</span>
+                        @else
+                            <a class="rep-page-btn {{ $repPage === $repCurrent ? 'rep-active' : '' }}" href="{{ $issuePaginator->url($repPage) }}" @if($repPage === $repCurrent) aria-current="page" @endif>{{ $repPage }}</a>
+                        @endif
+                    @endforeach
+                    @if($repCurrent < $repLast)
+                        <a class="rep-page-btn" href="{{ $issuePaginator->url($repCurrent + 1) }}" rel="next">Next »</a>
+                    @else
+                        <button type="button" class="rep-page-btn" disabled>Next »</button>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
     @endif
 </div>

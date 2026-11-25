@@ -99,12 +99,12 @@ class BatteryController extends Controller
             $perPage = 5;
         }
         $page = max(1, (int) $request->get('issues_page', 1));
-        $lastPage = max(1, (int) ceil($report['rows']->count() / $perPage));
+        $lastPage = max(1, (int) ceil($issueCardRows->count() / $perPage));
         $page = min($page, $lastPage);
 
         $issuePaginator = new LengthAwarePaginator(
-            $report['rows']->forPage($page, $perPage)->values(),
-            $report['rows']->count(),
+            $issueCardRows->forPage($page, $perPage)->values(),
+            $issueCardRows->count(),
             $perPage,
             $page,
             ['path' => route('batteries.report'), 'pageName' => 'issues_page']
@@ -112,7 +112,7 @@ class BatteryController extends Controller
         $issuePaginator->appends($request->only(['date_field', 'from', 'to', 'per_page']));
 
         return view('batteries.report', [
-            'rows' => $report['rows'],
+            'rows' => $issueCardRows,
             'issuePaginator' => $issuePaginator,
             'batteries' => $allBatteries,
             'issueCounts' => $issueCardCounts,
