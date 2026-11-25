@@ -164,6 +164,104 @@
     .tsr-kpi-icon { opacity: 0.2; width: 32px; height: 32px; transition: all 0.3s ease; }
     .tsr-kpi-icon svg { width: 100%; height: 100%; }
 
+    .tsr-kpi-card.tsr-clickable { cursor: pointer; }
+    .tsr-kpi-card.tsr-clickable:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--tsr-shadow-md);
+        border-color: #cbd5e1;
+    }
+    .tsr-kpi-card.tsr-clickable:focus-visible {
+        outline: 2px solid var(--tsr-primary);
+        outline-offset: 2px;
+    }
+
+    /* ---------- KPI detail modal ---------- */
+    .tsr-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.55);
+    }
+    .tsr-modal-overlay.tsr-open { display: flex; }
+    .tsr-modal-card {
+        width: min(960px, 100%);
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--tsr-surface);
+        border-radius: var(--tsr-radius-md);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+        overflow: hidden;
+    }
+    .tsr-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--tsr-border);
+    }
+    .tsr-modal-head h3 { font-size: 1.05rem; font-weight: 700; }
+    .tsr-modal-subtitle {
+        margin-top: 0.2rem;
+        font-size: 0.83rem;
+        color: var(--tsr-text-muted);
+    }
+    .tsr-modal-close {
+        border: none;
+        background: transparent;
+        color: var(--tsr-text-muted);
+        font-size: 1.6rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0.25rem;
+        border-radius: var(--tsr-radius-sm);
+    }
+    .tsr-modal-close:hover { color: var(--tsr-text-main); background: #f1f5f9; }
+    .tsr-modal-body { overflow: auto; }
+    .tsr-modal-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+    }
+    .tsr-modal-table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8fafc;
+        text-align: left;
+        padding: 0.7rem 1rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--tsr-text-muted);
+        border-bottom: 1px solid var(--tsr-border);
+        white-space: nowrap;
+    }
+    .tsr-modal-table td {
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        color: var(--tsr-text-main);
+    }
+    .tsr-modal-table tbody tr:hover { background: #f8fafc; }
+    .tsr-modal-table td.tsr-modal-danger { color: var(--tsr-danger); font-weight: 700; }
+    .tsr-modal-empty {
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        color: var(--tsr-text-muted);
+        font-size: 0.9rem;
+    }
+    @media (max-width: 720px) {
+        .tsr-modal-overlay { padding: 0.75rem; }
+        .tsr-modal-head { padding: 0.85rem 1rem; }
+        .tsr-modal-table th, .tsr-modal-table td { padding: 0.55rem 0.65rem; }
+    }
+
     .tsr-kpi-grid.tsr-compact { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.6rem; }
     .tsr-kpi-grid.tsr-compact .tsr-kpi-card { padding: 0.6rem 0.9rem; border-radius: var(--tsr-radius-sm); }
     .tsr-kpi-grid.tsr-compact .tsr-kpi-content h4 { font-size: 0.65rem; }
@@ -630,7 +728,7 @@
 
         {{-- KPI cards --}}
         <div class="tsr-kpi-grid {{ $searching ? 'tsr-compact' : '' }}" id="kpiGrid">
-            <div class="tsr-kpi-card tsr-blue">
+            <div class="tsr-kpi-card tsr-blue tsr-clickable" role="button" tabindex="0" data-kpi="tires" aria-haspopup="dialog" title="View tires currently out">
                 <div class="tsr-kpi-content">
                     <h4>Tires Out</h4>
                     <div class="tsr-value">{{ $tiresOut }}</div>
@@ -638,7 +736,7 @@
                 </div>
                 <div class="tsr-kpi-icon" style="color:#3b82f6;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-purple">
+            <div class="tsr-kpi-card tsr-purple tsr-clickable" role="button" tabindex="0" data-kpi="drivers" aria-haspopup="dialog" title="View drivers holding a tire">
                 <div class="tsr-kpi-content">
                     <h4>Drivers</h4>
                     <div class="tsr-value">{{ $driversOut }}</div>
@@ -646,7 +744,7 @@
                 </div>
                 <div class="tsr-kpi-icon" style="color:#8b5cf6;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-red">
+            <div class="tsr-kpi-card tsr-red tsr-clickable" role="button" tabindex="0" data-kpi="overdue" aria-haspopup="dialog" title="View tires out more than 30 days">
                 <div class="tsr-kpi-content">
                     <h4>Overdue</h4>
                     <div class="tsr-value">{{ $overdueCount }}</div>
@@ -654,7 +752,7 @@
                 </div>
                 <div class="tsr-kpi-icon" style="color:#ef4444;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
             </div>
-            <div class="tsr-kpi-card tsr-orange">
+            <div class="tsr-kpi-card tsr-orange tsr-clickable" role="button" tabindex="0" data-kpi="average" aria-haspopup="dialog" title="View days out across open issues">
                 <div class="tsr-kpi-content">
                     <h4>Avg Days Out</h4>
                     <div class="tsr-value">{{ $averageDays }}</div>
@@ -822,6 +920,20 @@
 
     </div>
 
+    {{-- KPI detail modal --}}
+    <div id="kpiModal" class="tsr-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="kpiModalTitle">
+        <div class="tsr-modal-card">
+            <div class="tsr-modal-head">
+                <div>
+                    <h3 id="kpiModalTitle">Details</h3>
+                    <p id="kpiModalSubtitle" class="tsr-modal-subtitle"></p>
+                </div>
+                <button type="button" class="tsr-modal-close" id="kpiModalClose" aria-label="Close details">&times;</button>
+            </div>
+            <div class="tsr-modal-body" id="kpiModalBody"></div>
+        </div>
+    </div>
+
     <div class="tsr-toast" id="tsrToast" role="status" aria-live="polite">Exported successfully</div>
 </div>
 @endsection
@@ -868,6 +980,105 @@
                 });
                 if (visibleCount) {
                     visibleCount.textContent = visible;
+                }
+            });
+        }
+
+        // KPI cards open a modal listing the rows behind the count
+        const kpiData = @json($kpiModal, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        const kpiModal = document.getElementById('kpiModal');
+        const kpiModalTitle = document.getElementById('kpiModalTitle');
+        const kpiModalSubtitle = document.getElementById('kpiModalSubtitle');
+        const kpiModalBody = document.getElementById('kpiModalBody');
+        const kpiModalClose = document.getElementById('kpiModalClose');
+        let kpiLastFocus = null;
+
+        function renderKpiTable(data) {
+            kpiModalBody.innerHTML = '';
+            const rows = data.rows || [];
+
+            if (rows.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'tsr-modal-empty';
+                empty.textContent = 'No records to show.';
+                kpiModalBody.appendChild(empty);
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'tsr-modal-table';
+
+            const thead = document.createElement('thead');
+            const headRow = document.createElement('tr');
+            data.columns.forEach(function (label) {
+                const th = document.createElement('th');
+                th.textContent = label;
+                headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            const daysIndex = data.columns.indexOf('Days Out');
+            rows.forEach(function (row) {
+                const tr = document.createElement('tr');
+                row.forEach(function (value, index) {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    if (index === daysIndex && Number(value) > 30) {
+                        td.classList.add('tsr-modal-danger');
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            kpiModalBody.appendChild(table);
+        }
+
+        function openKpiModal(key) {
+            const data = kpiData[key];
+            if (!data) return;
+
+            kpiLastFocus = document.activeElement;
+            kpiModalTitle.textContent = data.title;
+            const count = (data.rows || []).length;
+            kpiModalSubtitle.textContent = data.subtitle + ' · ' + count + (count === 1 ? ' record' : ' records');
+            renderKpiTable(data);
+            kpiModal.classList.add('tsr-open');
+            document.body.style.overflow = 'hidden';
+            kpiModalClose.focus();
+        }
+
+        function closeKpiModal() {
+            kpiModal.classList.remove('tsr-open');
+            document.body.style.overflow = '';
+            if (kpiLastFocus && typeof kpiLastFocus.focus === 'function') {
+                kpiLastFocus.focus();
+            }
+        }
+
+        document.querySelectorAll('[data-kpi]').forEach(function (card) {
+            card.addEventListener('click', function () {
+                openKpiModal(card.dataset.kpi);
+            });
+            card.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openKpiModal(card.dataset.kpi);
+                }
+            });
+        });
+
+        if (kpiModal) {
+            kpiModalClose.addEventListener('click', closeKpiModal);
+            kpiModal.addEventListener('click', function (event) {
+                if (event.target === kpiModal) closeKpiModal();
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && kpiModal.classList.contains('tsr-open')) {
+                    closeKpiModal();
                 }
             });
         }

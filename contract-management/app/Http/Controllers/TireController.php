@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Exports\TireReturnsExport;
+use App\Models\Driver;
 use App\Models\ExportLog;
 use App\Models\Tire;
 use App\Models\TireGive;
 use App\Models\TireReturn;
 use App\Models\TireType;
-use App\Models\Driver;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class TireController extends Controller
 {
@@ -26,9 +26,9 @@ class TireController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('serial_number', 'like', '%' . $search . '%')
-                  ->orWhere('tire_type', 'like', '%' . $search . '%')
-                  ->orWhere('plate_number', 'like', '%' . $search . '%');
+                $q->where('serial_number', 'like', '%'.$search.'%')
+                    ->orWhere('tire_type', 'like', '%'.$search.'%')
+                    ->orWhere('plate_number', 'like', '%'.$search.'%');
             });
         }
 
@@ -80,7 +80,7 @@ class TireController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->canAccessTireTracking()) {
+        if (! $user->canAccessTireTracking()) {
             return response()->json(['message' => 'You are not authorized to view tire details.'], 403);
         }
 
@@ -116,8 +116,8 @@ class TireController extends Controller
 
                         return [
                             'title' => $driver->name,
-                            'subtitle' => $driver->license_number ? 'License ' . $driver->license_number : '—',
-                            'meta' => $out . ' tire(s) out',
+                            'subtitle' => $driver->license_number ? 'License '.$driver->license_number : '—',
+                            'meta' => $out.' tire(s) out',
                             'badge' => 'Active',
                             'tone' => 'green',
                             'url' => route('drivers.show', $driver->id),
@@ -148,12 +148,12 @@ class TireController extends Controller
         if ($state === 'in_use' && $activeGive) {
             $meta[] = $activeGive->driver->name ?? 'No driver';
             if ($activeGive->give_date) {
-                $meta[] = 'Given ' . $activeGive->give_date->format('M d, Y');
+                $meta[] = 'Given '.$activeGive->give_date->format('M d, Y');
             }
         }
 
         if ($tire->plate_number) {
-            $meta[] = 'Plate ' . $tire->plate_number;
+            $meta[] = 'Plate '.$tire->plate_number;
         }
 
         return [
@@ -169,19 +169,20 @@ class TireController extends Controller
     public function create()
     {
         $user = auth()->user();
-        if (!$user->canManageTires()) {
+        if (! $user->canManageTires()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to create tires.');
         }
 
         $tireTypes = TireType::where('is_active', true)->orderBy('sort_order')->get();
+
         return view('tires.create', compact('tireTypes'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
-        if (!$user->canManageTires()) {
+        if (! $user->canManageTires()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to create tires.');
         }
@@ -211,13 +212,14 @@ class TireController extends Controller
     {
         $tireGives = $tire->tireGives()->with(['driver', 'givenBy', 'tireReturn'])->latest()->get();
         $tireReturns = $tire->tireReturns()->with(['driver', 'returnedBy', 'tireGive.driver'])->latest()->get();
+
         return view('tires.show', compact('tire', 'tireGives', 'tireReturns'));
     }
 
     public function edit(Tire $tire)
     {
         $user = auth()->user();
-        if (!$user->canManageTires()) {
+        if (! $user->canManageTires()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to edit tires.');
         }
@@ -228,13 +230,14 @@ class TireController extends Controller
         }
 
         $tireTypes = TireType::where('is_active', true)->orderBy('sort_order')->get();
+
         return view('tires.edit', compact('tire', 'tireTypes'));
     }
 
     public function update(Request $request, Tire $tire)
     {
         $user = auth()->user();
-        if (!$user->canManageTires()) {
+        if (! $user->canManageTires()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to edit tires.');
         }
@@ -246,7 +249,7 @@ class TireController extends Controller
 
         $validated = $request->validate([
             'tire_type' => 'required|string|max:255',
-            'serial_number' => 'required|string|max:255|unique:tires,serial_number,' . $tire->id,
+            'serial_number' => 'required|string|max:255|unique:tires,serial_number,'.$tire->id,
             'plate_number' => 'nullable|string|max:255',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'initial_kilometer' => 'nullable|integer|min:0',
@@ -270,7 +273,7 @@ class TireController extends Controller
     public function destroy(Tire $tire)
     {
         $user = auth()->user();
-        if (!$user->canManageTires()) {
+        if (! $user->canManageTires()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to delete tires.');
         }
@@ -291,10 +294,11 @@ class TireController extends Controller
         if (strlen($query) < 1) {
             return response()->json([]);
         }
-        $tires = Tire::where('serial_number', 'like', '%' . $query . '%')
-            ->orWhere('tire_type', 'like', '%' . $query . '%')
+        $tires = Tire::where('serial_number', 'like', '%'.$query.'%')
+            ->orWhere('tire_type', 'like', '%'.$query.'%')
             ->limit(10)
             ->get(['id', 'serial_number', 'tire_type', 'plate_number']);
+
         return response()->json($tires);
     }
 
@@ -305,47 +309,50 @@ class TireController extends Controller
             return response()->json(['exists' => false]);
         }
         $exists = Tire::where('serial_number', $serial)->exists();
+
         return response()->json(['exists' => $exists]);
     }
 
     public function showApi(Tire $tire)
     {
         $tire->load(['tireGives.givenBy', 'tireGives.driver', 'tireGives.tireReturn', 'tireReturns.returnedBy']);
+
         return response()->json([
             'id' => $tire->id,
             'serial_number' => $tire->serial_number,
             'tire_type' => $tire->tire_type,
             'plate_number' => $tire->plate_number,
             'initial_kilometer' => $tire->initial_kilometer ?? 0,
-            'photo' => $tire->photo ? asset('storage/' . $tire->photo) : null,
+            'photo' => $tire->photo ? asset('storage/'.$tire->photo) : null,
             'is_active' => $tire->is_active,
             'created_at' => $tire->created_at ? $tire->created_at->format('M d, Y') : null,
             'is_given_out' => $tire->isGivenOut(),
             'current_give' => $tire->tireGives()->where('is_returned', false)->with(['givenBy', 'driver'])->first(),
-                'gives' => $tire->tireGives->map(function ($give) {
-                    $return = $give->tireReturn;
-                    return [
-                        'id' => $give->id,
-                        'driver_name' => $give->driver->name ?? 'N/A',
-                        'driver' => $give->driver ? ['name' => $give->driver->name] : null,
-                        'given_by' => $give->givenBy->name ?? 'N/A',
-                        'givenBy' => $give->givenBy ? ['name' => $give->givenBy->name] : null,
-                        'give_date' => $give->give_date ? $give->give_date->format('M d, Y') : null,
-                        'given_kilometer' => $give->given_kilometer,
-                        'is_returned' => $give->is_returned,
-                        'photo' => $give->photo ? asset('storage/' . $give->photo) : null,
-                        'return_photo' => $return && $return->photo ? asset('storage/' . $return->photo) : null,
-                        'return_date' => $return && $return->return_date ? $return->return_date->format('M d, Y') : null,
-                        'current_kilometer' => $return ? $return->current_kilometer : null,
-                    ];
-                }),
+            'gives' => $tire->tireGives->map(function ($give) {
+                $return = $give->tireReturn;
+
+                return [
+                    'id' => $give->id,
+                    'driver_name' => $give->driver->name ?? 'N/A',
+                    'driver' => $give->driver ? ['name' => $give->driver->name] : null,
+                    'given_by' => $give->givenBy->name ?? 'N/A',
+                    'givenBy' => $give->givenBy ? ['name' => $give->givenBy->name] : null,
+                    'give_date' => $give->give_date ? $give->give_date->format('M d, Y') : null,
+                    'given_kilometer' => $give->given_kilometer,
+                    'is_returned' => $give->is_returned,
+                    'photo' => $give->photo ? asset('storage/'.$give->photo) : null,
+                    'return_photo' => $return && $return->photo ? asset('storage/'.$return->photo) : null,
+                    'return_date' => $return && $return->return_date ? $return->return_date->format('M d, Y') : null,
+                    'current_kilometer' => $return ? $return->current_kilometer : null,
+                ];
+            }),
         ]);
     }
 
     public function dashboard()
     {
         $user = auth()->user();
-        if (!$user->canViewTireReports()) {
+        if (! $user->canViewTireReports()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to view the tire dashboard.');
         }
@@ -382,13 +389,13 @@ class TireController extends Controller
             ->with(['driver', 'givenBy'])
             ->orderBy('give_date', 'desc')
             ->get();
-        
+
         $returns = TireReturn::where('tire_id', $tire->id)
             ->with(['driver', 'returnedBy'])
             ->orderBy('return_date', 'desc')
             ->get();
-        
-        $history = $gives->map(function($give) {
+
+        $history = $gives->map(function ($give) {
             return [
                 'date' => $give->give_date->format('Y-m-d'),
                 'type' => 'given',
@@ -396,7 +403,7 @@ class TireController extends Controller
                 'km' => $give->given_kilometer,
                 'user' => $give->givenBy->name ?? '-',
             ];
-        })->concat($returns->map(function($return) {
+        })->concat($returns->map(function ($return) {
             return [
                 'date' => $return->return_date->format('Y-m-d'),
                 'type' => 'returned',
@@ -427,7 +434,7 @@ class TireController extends Controller
     public function returnList(Request $request)
     {
         $user = auth()->user();
-        if (!$user->canPerformTireOperations()) {
+        if (! $user->canPerformTireOperations()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to return tires.');
         }
@@ -440,29 +447,97 @@ class TireController extends Controller
             ->withQueryString();
 
         // Summary counts stay independent of search/filter so the cards never jump around
-        $outstanding = TireGive::where('is_returned', false)->get(['driver_id', 'give_date']);
+        $outstanding = TireGive::where('is_returned', false)
+            ->with(['tire', 'driver'])
+            ->get(['id', 'tire_id', 'driver_id', 'plate_number', 'give_date']);
+
+        $daysOut = fn (TireGive $give) => $give->give_date
+            ? (int) $give->give_date->diffInDays(now())
+            : 0;
+
         $tiresOut = $outstanding->count();
         $driversOut = $outstanding->pluck('driver_id')->filter()->unique()->count();
-        $overdueCount = $outstanding->filter(
-            fn (TireGive $give) => $give->give_date && $give->give_date->diffInDays(now()) > 30
-        )->count();
+        $overdueCount = $outstanding->filter(fn (TireGive $give) => $daysOut($give) > 30)->count();
         $averageDays = $tiresOut > 0
-            ? (int) round($outstanding->avg(
-                fn (TireGive $give) => $give->give_date ? $give->give_date->diffInDays(now()) : 0
-            ))
+            ? (int) round($outstanding->avg(fn (TireGive $give) => $daysOut($give)))
             : 0;
         $recentCount = max($tiresOut - $overdueCount, 0);
 
+        $tireRows = $outstanding
+            ->sortByDesc(fn (TireGive $give) => $daysOut($give))
+            ->map(fn (TireGive $give) => [
+                'serial' => $give->tire?->serial_number ?? '—',
+                'type' => $give->tire?->tire_type ?? '—',
+                'driver' => $give->driver?->name ?? '—',
+                'plate' => $give->plate_number ?: ($give->tire?->plate_number ?? '—'),
+                'given' => $give->give_date?->format('Y-m-d') ?? '—',
+                'days' => $daysOut($give),
+            ])
+            ->values();
+
+        $driverRows = $outstanding
+            ->filter(fn (TireGive $give) => $give->driver_id !== null)
+            ->groupBy('driver_id')
+            ->map(function ($group) use ($daysOut) {
+                $driver = $group->first()->driver;
+                $oldest = $group->sortBy('give_date')->first();
+
+                return [
+                    'name' => $driver?->name ?? '—',
+                    'license' => $driver?->license_number ?? '—',
+                    'phone' => $driver?->phone ?? '—',
+                    'tires' => $group->count(),
+                    'oldest' => $oldest?->give_date?->format('Y-m-d') ?? '—',
+                    'days' => $oldest ? $daysOut($oldest) : 0,
+                ];
+            })
+            ->sortByDesc('days')
+            ->values();
+
+        $kpiModal = [
+            'tires' => [
+                'title' => 'Tires Out',
+                'subtitle' => 'Every tire currently issued to a driver',
+                'columns' => ['Serial', 'Type', 'Driver', 'Plate', 'Given', 'Days Out'],
+                'rows' => $tireRows->map(fn (array $row) => array_values($row))->all(),
+            ],
+            'drivers' => [
+                'title' => 'Drivers',
+                'subtitle' => 'Drivers who still hold at least one tire',
+                'columns' => ['Driver', 'License', 'Phone', 'Tires', 'Oldest Give', 'Days Out'],
+                'rows' => $driverRows->map(fn (array $row) => array_values($row))->all(),
+            ],
+            'overdue' => [
+                'title' => 'Overdue',
+                'subtitle' => 'Tires out for more than 30 days',
+                'columns' => ['Serial', 'Type', 'Driver', 'Plate', 'Given', 'Days Out'],
+                'rows' => $tireRows
+                    ->filter(fn (array $row) => $row['days'] > 30)
+                    ->map(fn (array $row) => array_values($row))
+                    ->values()
+                    ->all(),
+            ],
+            'average' => [
+                'title' => 'Avg Days Out',
+                'subtitle' => $tiresOut > 0
+                    ? 'Average of '.$averageDays.' days across '.$tiresOut.' open '.($tiresOut === 1 ? 'issue' : 'issues')
+                    : 'No tires are currently issued',
+                'columns' => ['Serial', 'Type', 'Driver', 'Plate', 'Given', 'Days Out'],
+                'rows' => $tireRows->map(fn (array $row) => array_values($row))->all(),
+            ],
+        ];
+
         return view('tires.return-list', compact(
             'tireReturns', 'sort', 'direction',
-            'tiresOut', 'driversOut', 'overdueCount', 'averageDays', 'recentCount'
+            'tiresOut', 'driversOut', 'overdueCount', 'averageDays', 'recentCount',
+            'kpiModal'
         ));
     }
 
     public function exportReturnExcel(Request $request)
     {
         $user = auth()->user();
-        if (!$user->canPerformTireOperations()) {
+        if (! $user->canPerformTireOperations()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to export tire returns.');
         }
@@ -480,14 +555,14 @@ class TireController extends Controller
         ]);
 
         return (new TireReturnsExport($gives))->download(
-            'tire_returns_' . now()->format('Y-m-d') . '.xlsx'
+            'tire_returns_'.now()->format('Y-m-d').'.xlsx'
         );
     }
 
     public function exportReturnPdf(Request $request)
     {
         $user = auth()->user();
-        if (!$user->canPerformTireOperations()) {
+        if (! $user->canPerformTireOperations()) {
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to export tire returns.');
         }
@@ -508,7 +583,7 @@ class TireController extends Controller
             'gives' => $gives,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-            ->download('tire_returns_' . now()->format('Y-m-d') . '.pdf');
+            ->download('tire_returns_'.now()->format('Y-m-d').'.pdf');
     }
 
     private function resolveReturnSort(Request $request): array
@@ -533,7 +608,7 @@ class TireController extends Controller
             ->with(['tire', 'driver', 'givenBy']);
 
         if ($request->filled('search')) {
-            $term = '%' . $request->search . '%';
+            $term = '%'.$request->search.'%';
             $query->where(function ($q) use ($term) {
                 $q->where('tires.serial_number', 'like', $term)
                     ->orWhere('drivers.name', 'like', $term)
@@ -558,12 +633,14 @@ class TireController extends Controller
     public function audit(Request $request)
     {
         $logs = \App\Models\ActivityLog::orderBy('created_at', 'desc')->paginate(25);
+
         return view('tires.audit', compact('logs'));
     }
 
     public function label(Tire $tire)
     {
         $currentGive = $tire->tireGives()->where('is_returned', false)->first();
+
         return view('tires.label', compact('tire', 'currentGive'));
     }
 
