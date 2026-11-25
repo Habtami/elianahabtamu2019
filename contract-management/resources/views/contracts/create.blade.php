@@ -362,7 +362,7 @@
                                 <input type="number" 
                                        id="alert_days_before_guarantee_end" 
                                        name="alert_days_before_guarantee_end" 
-                                       value="{{ old('alert_days_before_guarantee_end', 30) }}"
+                                       value="{{ old('alert_days_before_guarantee_end') }}"
                                        min="0" 
                                        max="365"
                                        class="form-input"
