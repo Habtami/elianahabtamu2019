@@ -32,20 +32,7 @@
 <body>
     <h1>Battery Report — Issues Requiring Attention</h1>
     <div class="meta">Generated: {{ $generatedAt->format('d M Y H:i') }}</div>
-    <div class="meta">
-        Date basis: {{ $dateField === 'manufacture' ? 'Date of Manufacture' : 'Date Given' }}
-        ·
-        @if($from && $to)
-            {{ \Carbon\Carbon::parse($from)->format('d M Y') }} – {{ \Carbon\Carbon::parse($to)->format('d M Y') }}
-        @elseif($from)
-            From {{ \Carbon\Carbon::parse($from)->format('d M Y') }}
-        @elseif($to)
-            Up to {{ \Carbon\Carbon::parse($to)->format('d M Y') }}
-        @else
-            All dates
-        @endif
-        · {{ $totalBatteries }} battery record(s)
-    </div>
+    <div class="meta">All battery records · {{ $totalBatteries }} battery record(s)</div>
 
     <div class="summary">
         <span>{{ $rows->count() }} battery(ies) with issues</span>
@@ -55,7 +42,7 @@
     </div>
 
     @if($rows->isEmpty())
-        <div class="empty">No issues found for the selected range — all battery records look consistent.</div>
+        <div class="empty">No issues found — all battery records look consistent.</div>
     @else
         <table>
             <thead>

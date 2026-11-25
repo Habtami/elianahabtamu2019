@@ -425,6 +425,20 @@
     .rep-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .rep-page-dots { padding: 0.35rem 0.3rem; color: #6b8299; }
 
+    .rep-modal.rep-modal-sm { max-width: 480px; }
+    .rep-print-options { display: flex; flex-direction: column; gap: 0.55rem; }
+    .rep-print-options label {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.88rem;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .rep-print-options input { width: 16px; height: 16px; accent-color: #1a6fc4; }
+    .rep-print-hint { margin: 0.7rem 0 0; font-size: 0.78rem; font-weight: 600; color: #b91c1c; }
+    .rep-table-actions { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+
     .rep-detail-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
@@ -457,7 +471,8 @@
     @media print {
         @page { size: A4 landscape; margin: 10mm; }
         .sidebar, .sidebar-toggle, .page-header, .page-footer, .rep-actions,
-        .rep-filter, .rep-chart-switch, .rep-card-hint, .rep-modal-bg, .no-print { display: none !important; }
+        .rep-filter, .rep-range, .rep-chart-switch, .rep-card-hint, .rep-modal-bg, .no-print { display: none !important; }
+        .print-hide-section { display: none !important; }
         body { background: #fff; }
         .main-content, .main-content.expanded { margin-left: 0 !important; }
         .rep-wrapper { max-width: none; margin: 0; padding: 0; }
@@ -527,11 +542,11 @@
     <div class="rep-toolbar">
         <h2>🔋 Battery Report</h2>
         <div class="rep-actions no-print">
-            <a href="{{ route('batteries.report.export.excel', request()->only(['date_field', 'from', 'to'])) }}"
-               class="rep-btn secondary" title="Export all issues in the selected range">📊 Excel</a>
-            <a href="{{ route('batteries.report.export.pdf', request()->only(['date_field', 'from', 'to'])) }}"
-               class="rep-btn secondary" title="Export all issues in the selected range">📄 PDF</a>
-            <button type="button" class="rep-btn secondary" onclick="window.print()">🖨️ Print</button>
+            <a href="{{ route('batteries.report.export.excel') }}"
+               class="rep-btn secondary" title="Export all battery issues to Excel">📊 Excel</a>
+            <a href="{{ route('batteries.report.export.pdf') }}"
+               class="rep-btn secondary" title="Export all battery issues to PDF">📄 PDF</a>
+            <button type="button" class="rep-btn secondary" data-rep-print-options title="Choose which sections to print">🖨️ Print</button>
             @if(auth()->user()->canViewBatteries())
             <a href="{{ route('batteries.index') }}" class="rep-btn secondary">← Back to Register</a>
             @endif
@@ -569,7 +584,7 @@
         · {{ $rangeTotal }} record(s)
     </p>
 
-    <div class="rep-cards">
+    <div class="rep-cards" data-print-section="cards">
         <button type="button" class="rep-card" style="--card-color: #1c75bc;" data-rep-modal="repModalTotal" aria-haspopup="dialog" aria-label="View all batteries" title="View all batteries">
             <span class="rep-card-main">
                 <span class="label">Total Batteries</span>
@@ -611,7 +626,7 @@
         </button>
     </div>
 
-    <div class="rep-charts">
+    <div class="rep-charts" data-print-section="charts">
         <div class="rep-card rep-chart-card">
             <div class="rep-chart-head">
                 <h3>Status Split</h3>
@@ -648,6 +663,7 @@
         </div>
     </div>
 
+    <div data-print-section="issues">
     @if($rows->isEmpty())
         <div class="rep-ok">✔ No issues found — all battery records look consistent.</div>
     @else
@@ -656,6 +672,11 @@
                 <h3>Issues Requiring Attention</h3>
                 <div class="rep-card-tools">
                     <span>{{ $issuePaginator->total() }} battery(ies) with issues</span>
+                    <div class="rep-table-actions no-print">
+                        <a href="{{ route('batteries.report.export.excel') }}" class="rep-btn secondary rep-mini" title="Export this table to Excel">📊 Excel</a>
+                        <a href="{{ route('batteries.report.export.pdf') }}" class="rep-btn secondary rep-mini" title="Export this table to PDF">📄 PDF</a>
+                        <button type="button" class="rep-btn secondary rep-mini" data-rep-print-options data-print-default="issues" title="Print this table only">🖨️ Print</button>
+                    </div>
                     <form method="GET" action="{{ route('batteries.report') }}" class="rep-perpage no-print">
                         @if($dateField)
                             <input type="hidden" name="date_field" value="{{ $dateField }}">
@@ -758,6 +779,7 @@
             </div>
         </div>
     @endif
+    </div>
 </div>
 
 @foreach($cardModals as $modal)
@@ -887,6 +909,33 @@
         <div class="rep-modal-foot">
             <span class="rep-modal-range"></span>
             <div class="rep-modal-pages"></div>
+        </div>
+    </div>
+</div>
+
+<div class="rep-modal-bg" id="repModalPrint" role="dialog" aria-modal="true" aria-labelledby="repPrintTitle">
+    <div class="rep-modal rep-modal-sm">
+        <div class="rep-modal-head">
+            <div>
+                <h3 id="repPrintTitle">Print Report</h3>
+                <span>Choose which sections appear on the printed page</span>
+            </div>
+            <button type="button" class="rep-modal-close" aria-label="Close" data-rep-close>×</button>
+        </div>
+        <div class="rep-modal-body">
+            <div class="rep-print-options">
+                <label><input type="checkbox" class="rep-print-check" value="cards"> Summary cards</label>
+                <label><input type="checkbox" class="rep-print-check" value="charts"> Charts</label>
+                <label><input type="checkbox" class="rep-print-check" value="issues" checked> Issues table</label>
+            </div>
+            <p id="repPrintHint" class="rep-print-hint" style="display:none;">Select at least one section to print.</p>
+        </div>
+        <div class="rep-modal-foot" style="display:flex;">
+            <span></span>
+            <div class="rep-modal-pages">
+                <button type="button" class="rep-btn secondary" data-rep-close>Cancel</button>
+                <button type="button" class="rep-btn" id="repPrintGo">🖨️ Print</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1301,6 +1350,48 @@
         if (body) body.scrollTop = 0;
     }
 
+    var printModal = document.getElementById('repModalPrint');
+    var printChecks = Array.prototype.slice.call(document.querySelectorAll('.rep-print-check'));
+    var printHint = document.getElementById('repPrintHint');
+
+    function openPrintOptions(defaultSection) {
+        var wanted = defaultSection || 'issues';
+        printChecks.forEach(function (check) {
+            check.checked = check.value === wanted;
+        });
+        if (printHint) printHint.style.display = 'none';
+        openModal('repModalPrint');
+    }
+
+    function printSelectedSections() {
+        var selected = printChecks
+            .filter(function (check) { return check.checked; })
+            .map(function (check) { return check.value; });
+
+        if (!selected.length) {
+            if (printHint) printHint.style.display = 'block';
+            return;
+        }
+
+        var sections = document.querySelectorAll('[data-print-section]');
+
+        function restoreSections() {
+            Array.prototype.forEach.call(sections, function (section) {
+                section.classList.remove('print-hide-section');
+            });
+            window.removeEventListener('afterprint', restoreSections);
+        }
+
+        Array.prototype.forEach.call(sections, function (section) {
+            var key = section.getAttribute('data-print-section');
+            section.classList.toggle('print-hide-section', selected.indexOf(key) === -1);
+        });
+
+        closeModal(printModal);
+        window.addEventListener('afterprint', restoreSections, { once: true });
+        window.print();
+    }
+
     function detailField(label, value) {
         var cell = document.createElement('div');
         cell.className = 'rep-detail-field';
@@ -1432,6 +1523,17 @@
                 showDetail(button.getAttribute('data-battery-detail'));
             });
         });
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-rep-print-options]'), function (button) {
+            button.addEventListener('click', function () {
+                openPrintOptions(button.getAttribute('data-print-default'));
+            });
+        });
+
+        var printGo = document.getElementById('repPrintGo');
+        if (printGo) {
+            printGo.addEventListener('click', printSelectedSections);
+        }
 
         document.addEventListener('keydown', function (event) {
             if (event.key !== 'Escape') return;

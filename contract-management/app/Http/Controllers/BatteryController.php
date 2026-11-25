@@ -150,9 +150,10 @@ class BatteryController extends Controller
                 ->with('error', 'You are not authorized to export battery reports.');
         }
 
-        $report = $this->buildIssueReport($request);
+        $allBatteries = Battery::with(['histories.creator', 'creator'])->orderBy('serial_number')->get();
+        [$rows] = $this->buildIssueRows($allBatteries);
 
-        (new \App\Exports\BatteryIssuesExport($report['rows']))
+        (new \App\Exports\BatteryIssuesExport($rows))
             ->download('battery_issues_' . now()->format('Y-m-d') . '.xlsx');
     }
 
@@ -164,15 +165,13 @@ class BatteryController extends Controller
                 ->with('error', 'You are not authorized to export battery reports.');
         }
 
-        $report = $this->buildIssueReport($request);
+        $allBatteries = Battery::with(['histories.creator', 'creator'])->orderBy('serial_number')->get();
+        [$rows, $issueCounts] = $this->buildIssueRows($allBatteries);
 
         return Pdf::loadView('batteries.report_pdf', [
-            'rows' => $report['rows'],
-            'issueCounts' => $report['issueCounts'],
-            'dateField' => $report['dateField'],
-            'from' => $report['from'],
-            'to' => $report['to'],
-            'totalBatteries' => $report['batteries']->count(),
+            'rows' => $rows,
+            'issueCounts' => $issueCounts,
+            'totalBatteries' => $allBatteries->count(),
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
             ->download('battery_issues_' . now()->format('Y-m-d') . '.pdf');
