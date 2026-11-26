@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ReportMeta;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\CurrencyType;
@@ -85,11 +86,33 @@ class ContractController extends Controller
 
         $departments = User::getContractDepartments();
         $statuses = Contract::getStatuses();
+        $reportMeta = ReportMeta::build(
+            $contracts->getCollection(),
+            $this->letterheadFilters($request, $user),
+            null,
+            null,
+            'created_at',
+            $contracts->total()
+        );
 
         return view('contracts.index', compact(
             'contracts', 'departments', 'statuses', 'totalContracts', 'totalActive', 'totalExpiring', 'totalExpired',
-            'statRows', 'sortBy', 'sortDirection', 'perPage'
+            'statRows', 'sortBy', 'sortDirection', 'perPage', 'reportMeta'
         ));
+    }
+
+    /**
+     * @return array<int, string|null>
+     */
+    private function letterheadFilters(Request $request, $user): array
+    {
+        $statusLabels = Contract::getStatuses();
+
+        return [
+            $request->filled('search') ? 'Search: '.$request->search : null,
+            $request->filled('status') && array_key_exists($request->status, $statusLabels) ? 'Status: '.$statusLabels[$request->status] : null,
+            $request->filled('department') && $user->canViewAllContracts() ? 'Department: '.ucfirst(str_replace('_', ' ', $request->department)) : null,
+        ];
     }
 
     public function exportList(Request $request)
@@ -108,13 +131,14 @@ class ContractController extends Controller
         }
 
         $contracts = $query->orderBy('name')->get();
+        $reportMeta = ReportMeta::build($contracts, $this->letterheadFilters($request, $user));
 
         if ($request->input('format') === 'pdf') {
-            return Pdf::loadView('contracts.pdf', compact('contracts'))
+            return Pdf::loadView('contracts.pdf', compact('contracts', 'reportMeta'))
                 ->download('contracts-' . now()->format('Ymd-His') . '.pdf');
         }
 
-        (new \App\Exports\ContractsExport($contracts))->download('contracts_export.xlsx');
+        (new \App\Exports\ContractsExport($contracts, $reportMeta))->download('contracts_export.xlsx');
     }
     
     public function create()

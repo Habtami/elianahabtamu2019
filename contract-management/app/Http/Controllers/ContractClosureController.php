@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ContractClosuresExport;
+use App\Helpers\ReportMeta;
 use App\Models\Contract;
 use App\Models\ContractClosure;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -33,6 +34,15 @@ class ContractClosureController extends Controller
             ->orderBy('name')
             ->get();
 
+        $reportMeta = ReportMeta::build(
+            $closures->getCollection(),
+            $this->letterheadFilters($request),
+            $request->input('from'),
+            $request->input('to'),
+            'closing_date',
+            $closures->total()
+        );
+
         return view('contract-closures.index', array_merge(
             $this->summaryStats(),
             [
@@ -41,6 +51,7 @@ class ContractClosureController extends Controller
                 'statGroups' => $this->statGroups(),
                 'contracts' => $contracts,
                 'statuses' => ContractClosure::getStatuses(),
+                'reportMeta' => $reportMeta,
             ]
         ));
     }
@@ -55,8 +66,16 @@ class ContractClosureController extends Controller
         }
 
         [$query, $search] = $this->filteredQuery($request);
+        $closures = $query->get();
+        $reportMeta = ReportMeta::build(
+            $closures,
+            $this->letterheadFilters($request),
+            $request->input('from'),
+            $request->input('to'),
+            'closing_date'
+        );
 
-        (new ContractClosuresExport($query->get(), $search))
+        (new ContractClosuresExport($closures, $search, $reportMeta))
             ->download('contract-closures-' . now()->format('Ymd-His') . '.xlsx');
     }
 
@@ -71,11 +90,31 @@ class ContractClosureController extends Controller
 
         [$query, $search] = $this->filteredQuery($request);
         $closures = $query->get();
+        $reportMeta = ReportMeta::build(
+            $closures,
+            $this->letterheadFilters($request),
+            $request->input('from'),
+            $request->input('to'),
+            'closing_date'
+        );
 
         return Pdf::loadView('contract-closures.pdf', array_merge(
             $this->summaryStats(),
-            ['closures' => $closures, 'search' => $search]
+            ['closures' => $closures, 'search' => $search, 'reportMeta' => $reportMeta]
         ))->download('contract-closures-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    /**
+     * @return array<int, string|null>
+     */
+    private function letterheadFilters(Request $request): array
+    {
+        $statusLabels = ContractClosure::getStatuses();
+
+        return [
+            $request->filled('search') ? 'Search: '.$request->input('search') : null,
+            $request->filled('status') && array_key_exists($request->status, $statusLabels) ? 'Status: '.$statusLabels[$request->status] : null,
+        ];
     }
 
     /**

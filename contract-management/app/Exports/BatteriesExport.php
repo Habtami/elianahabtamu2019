@@ -3,15 +3,19 @@
 namespace App\Exports;
 
 use App\Helpers\ExcelExport;
+use App\Helpers\ReportMeta;
 use App\Models\Battery;
 
 class BatteriesExport
 {
     protected $batteries;
 
-    public function __construct($batteries)
+    protected $reportMeta;
+
+    public function __construct($batteries, ?array $reportMeta = null)
     {
         $this->batteries = $batteries;
+        $this->reportMeta = $reportMeta;
     }
 
     public function download(string $filename = 'battery_given_and_return.xlsx')
@@ -23,6 +27,8 @@ class BatteriesExport
             ],
             'Batteries'
         );
+
+        $excel->setMeta(ReportMeta::sheetLines($this->reportMeta, 'Batteries Register'));
 
         foreach ($this->batteries as $battery) {
             $initial = (int) $battery->initial_kilometer;

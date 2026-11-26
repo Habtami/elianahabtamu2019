@@ -1,11 +1,3 @@
-@php
-    $statusLabels = \App\Models\Contract::getStatuses();
-    $appliedFilters = collect([
-        request()->filled('search') ? 'Search: ' . request('search') : null,
-        request()->filled('status') && array_key_exists(request('status'), $statusLabels) ? 'Status: ' . $statusLabels[request('status')] : null,
-        request()->filled('department') ? 'Department: ' . ucfirst(str_replace('_', ' ', request('department'))) : null,
-    ])->filter();
-@endphp
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,8 +6,6 @@
     <style>
         @page { size: A4 landscape; margin: 8mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #1f2937; }
-        h2 { margin: 0 0 4px; font-size: 17px; }
-        .muted { color: #6b7280; margin-bottom: 10px; }
         table.records { width: 100%; border-collapse: collapse; }
         table.records th { background: #f3f4f6; text-align: left; padding: 5px; border: 1px solid #d1d5db; font-size: 8px; text-transform: uppercase; }
         table.records td { padding: 5px; border: 1px solid #e5e7eb; vertical-align: top; }
@@ -25,14 +15,7 @@
     </style>
 </head>
 <body>
-    <h2>Contracts</h2>
-    <div class="muted">
-        {{ $contracts->count() }} record(s)
-        @if($appliedFilters->isNotEmpty())
-            &middot; {{ $appliedFilters->implode(' · ') }}
-        @endif
-        &middot; Generated: {{ now()->format('M d, Y H:i') }}
-    </div>
+    @include('partials.pdf-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Contracts Register'])
 
     <table class="records">
         <thead>

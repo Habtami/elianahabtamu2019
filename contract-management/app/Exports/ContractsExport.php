@@ -3,14 +3,18 @@
 namespace App\Exports;
 
 use App\Helpers\ExcelExport;
+use App\Helpers\ReportMeta;
 
 class ContractsExport
 {
     protected $contracts;
 
-    public function __construct($contracts)
+    protected $reportMeta;
+
+    public function __construct($contracts, ?array $reportMeta = null)
     {
         $this->contracts = $contracts;
+        $this->reportMeta = $reportMeta;
     }
 
     public function download(string $filename = 'contracts_export.xlsx')
@@ -19,6 +23,8 @@ class ContractsExport
             ['ID', 'Name', 'Supplier', 'Department', 'Type', 'Start Date', 'End Date', 'PG Amount', 'Currency', 'PG End Date', 'Status', 'Created By'],
             'Contracts'
         );
+
+        $excel->setMeta(ReportMeta::sheetLines($this->reportMeta, 'Contracts Register'));
 
         foreach ($this->contracts as $contract) {
             $excel->addRow([

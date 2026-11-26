@@ -3,16 +3,19 @@
 namespace App\Exports;
 
 use App\Helpers\ExcelExport;
+use App\Helpers\ReportMeta;
 
 class ContractClosuresExport
 {
     protected $closures;
     protected $search;
+    protected $reportMeta;
 
-    public function __construct($closures, string $search = '')
+    public function __construct($closures, string $search = '', ?array $reportMeta = null)
     {
         $this->closures = $closures;
         $this->search = $search;
+        $this->reportMeta = $reportMeta;
     }
 
     public function download(string $filename = 'contract_closures_export.xlsx')
@@ -32,6 +35,8 @@ class ContractClosuresExport
             ],
             'Contract Closings'
         );
+
+        $excel->setMeta(ReportMeta::sheetLines($this->reportMeta, 'Contract Closings Register'));
 
         foreach ($this->closures as $closure) {
             $excel->addRow([

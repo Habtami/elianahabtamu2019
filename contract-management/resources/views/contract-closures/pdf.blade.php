@@ -21,16 +21,7 @@
     </style>
 </head>
 <body>
-    <h2>Contract Closings</h2>
-    <div class="muted">
-        @if($search !== '')
-            Filtered by: &ldquo;{{ $search }}&rdquo;
-        @else
-            All contract closings
-        @endif
-        &middot; {{ $closures->count() }} record(s) listed
-        &middot; Generated: {{ now()->format('M d, Y H:i') }}
-    </div>
+    @include('partials.pdf-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Contract Closings Register'])
 
     <table class="summary">
         <tr>

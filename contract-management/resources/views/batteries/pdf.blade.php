@@ -6,9 +6,6 @@
     <style>
         @page { margin: 12mm; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9px; color: #1e293b; }
-        h1 { font-size: 16px; margin: 0 0 3px; color: #0f2a44; }
-        .meta { font-size: 9px; color: #46617d; margin-bottom: 10px; }
-        .meta span { margin-right: 14px; }
         table { width: 100%; border-collapse: collapse; }
         thead { display: table-header-group; }
         th {
@@ -32,13 +29,7 @@
     </style>
 </head>
 <body>
-    <h1>Battery Given and Return</h1>
-    <div class="meta">
-        <span>Generated: {{ $generatedAt->format('Y-m-d H:i') }}</span>
-        <span>Total records: {{ $batteries->count() }}</span>
-        @if($search)<span>Search: {{ $search }}</span>@endif
-        @if($brand)<span>Brand: {{ $brand }}</span>@endif
-    </div>
+    @include('partials.pdf-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Batteries Register'])
 
     <table>
         <thead>

@@ -504,7 +504,7 @@
 
     @media print {
         @page { size: A4 landscape; margin: 10mm; }
-        .sidebar, .sidebar-toggle, .page-header, .page-footer,
+        .sidebar, .sidebar-toggle, .topbar, .page-header, .page-footer,
         .filter-card, .ct-toolbar, .ct-actions, .ct-pagination, .ct-modal-bg,
         .table-tip-btn, .table-tip-panel, .no-print { display: none !important; }
         .print-hide-section { display: none !important; }
@@ -754,6 +754,7 @@
         </form>
 
         <!-- Contracts Table -->
+        @include('partials.print-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Contracts Register'])
         <div class="table-container" data-print-section="table">
             <div class="ct-toolbar no-print">
                 <form method="GET" action="{{ route('contracts.index') }}" class="ct-perpage">

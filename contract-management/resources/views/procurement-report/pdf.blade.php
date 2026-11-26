@@ -20,12 +20,7 @@
     </style>
 </head>
 <body>
-    <h2>Procurement Report</h2>
-    <div class="muted">
-        Date range: {{ $from ?: 'All time' }} to {{ $to ?: 'All time' }}
-        &middot; Category: {{ $category === 'purchase' ? 'By Purchase' : ($category === 'tender' ? 'By Tender' : 'All') }}
-        &middot; Generated: {{ now()->format('M d, Y H:i') }}
-    </div>
+    @include('partials.pdf-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Procurement Report'])
 
     <table class="summary">
         <tr>

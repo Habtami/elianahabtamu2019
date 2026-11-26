@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ReportMeta;
 use App\Models\Battery;
 use App\Models\BatteryBrand;
 use App\Models\BatteryHistory;
@@ -39,11 +40,30 @@ class BatteryController extends Controller
         $totalBatteries = Battery::count();
         $returnedBatteries = Battery::returned()->count();
         $inServiceBatteries = Battery::inService()->count();
+        $reportMeta = ReportMeta::build(
+            $batteries->getCollection(),
+            $this->letterheadFilters($request),
+            null,
+            null,
+            'created_at',
+            $batteries->total()
+        );
 
         return view('batteries.index', compact(
             'batteries', 'brands', 'batteryTypes', 'batteryStatuses', 'drivers',
-            'totalBatteries', 'returnedBatteries', 'inServiceBatteries'
+            'totalBatteries', 'returnedBatteries', 'inServiceBatteries', 'reportMeta'
         ))->with('statGroups', $this->statGroups());
+    }
+
+    /**
+     * @return array<int, string|null>
+     */
+    private function letterheadFilters(Request $request): array
+    {
+        return [
+            $request->filled('search') ? 'Search: '.$request->search : null,
+            $request->filled('brand') ? 'Brand: '.$request->brand : null,
+        ];
     }
 
     private function scopeQuery(string $scope)
@@ -83,8 +103,9 @@ class BatteryController extends Controller
         }
 
         $batteries = $this->filteredBatteryQuery($request)->latest()->get();
+        $reportMeta = ReportMeta::build($batteries, $this->letterheadFilters($request));
 
-        (new \App\Exports\BatteriesExport($batteries))
+        (new \App\Exports\BatteriesExport($batteries, $reportMeta))
             ->download('battery_given_and_return_' . now()->format('Y-m-d') . '.xlsx');
     }
 
@@ -97,12 +118,13 @@ class BatteryController extends Controller
         }
 
         $batteries = $this->filteredBatteryQuery($request)->latest()->get();
+        $reportMeta = ReportMeta::build($batteries, $this->letterheadFilters($request));
 
         return Pdf::loadView('batteries.pdf', [
             'batteries' => $batteries,
             'search' => $request->search,
             'brand' => $request->brand,
-            'generatedAt' => now(),
+            'reportMeta' => $reportMeta,
         ])->setPaper('a4', 'landscape')
             ->download('battery_given_and_return_' . now()->format('Y-m-d') . '.pdf');
     }

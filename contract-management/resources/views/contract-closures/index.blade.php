@@ -277,7 +277,7 @@
 
     @media print {
         @page { size: A4 landscape; margin: 10mm; }
-        .sidebar, .sidebar-toggle, .page-header, .page-footer, .no-print,
+        .sidebar, .sidebar-toggle, .topbar, .page-header, .page-footer, .no-print,
         .cc-modal-bg { display: none !important; }
         .print-hide-section { display: none !important; }
         body { background: #fff; }
@@ -366,6 +366,7 @@
     </div>
 
     <!-- Table -->
+    @include('partials.print-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Contract Closings Register'])
     <div class="cc-table-card bg-white rounded-lg shadow-sm border border-gray-200" data-print-section="table">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 px-6 py-4 border-b border-gray-200">
             <div>

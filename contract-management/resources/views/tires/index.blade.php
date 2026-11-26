@@ -1233,6 +1233,7 @@
             overflow-wrap: anywhere;
         }
         .modern-table tbody td * { white-space: normal !important; }
+        .modern-table tbody tr { page-break-inside: avoid; break-inside: avoid; }
         .modern-table .sort-icon { display: none !important; }
         .table-card-header { display: none !important; }
         .modern-table .col-actions { display: none !important; }

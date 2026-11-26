@@ -486,7 +486,7 @@
 
     @media print {
         @page { size: A4 landscape; margin: 10mm; }
-        .sidebar, .sidebar-toggle, .page-header, .page-footer,
+        .sidebar, .sidebar-toggle, .topbar, .page-header, .page-footer,
         .bb-stats-actions, .bb-filter-bar, .bb-actions, .batt-btn,
         .bb-pagination, .batt-modal-bg, .bb-modal-bg, .batt-actions, .no-print { display: none !important; }
         .print-hide-section { display: none !important; }
@@ -577,6 +577,8 @@
             </button>
         @endforeach
     </div>
+
+    @include('partials.print-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Batteries Register'])
 
     <div class="batt-card bb-table-card" data-print-section="table">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-gray-200">

@@ -263,7 +263,7 @@
 
     @media print {
         @page { size: A4 landscape; margin: 10mm; }
-        .sidebar, .sidebar-toggle, .page-header, .page-footer,
+        .sidebar, .sidebar-toggle, .topbar, .page-header, .page-footer,
         .pr-filter-bar, .pr-actions, .pr-pagination, .pr-modal-bg,
         .table-tip-btn, .table-tip-panel, .no-print { display: none !important; }
         .print-hide-section { display: none !important; }
@@ -498,6 +498,8 @@
             Date range applies to the purchase order approval date and the contract start date.
         </p>
     </form>
+
+    @include('partials.print-letterhead', ['reportMeta' => $reportMeta, 'letterheadTitle' => 'Procurement Report'])
 
     <!-- Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 print-card" data-print-section="table">

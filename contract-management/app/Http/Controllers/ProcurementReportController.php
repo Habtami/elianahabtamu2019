@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ReportMeta;
 use App\Models\Contract;
 use App\Models\PurchaseOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -46,6 +47,12 @@ class ProcurementReportController extends Controller
 
         return response()->streamDownload(function () use ($data) {
             $out = fopen('php://output', 'w');
+
+            foreach (ReportMeta::sheetLines($data['exportMeta'], 'Procurement Report') as $line) {
+                fputcsv($out, [$line]);
+            }
+
+            fputcsv($out, []);
             fputcsv($out, ['Category', 'Type', 'Reference', 'Supplier', 'Date', 'Amount (ETB)']);
 
             foreach ($data['rows'] as $row) {
@@ -176,7 +183,25 @@ class ProcurementReportController extends Controller
             ->sortDesc()
             ->take(6);
 
+        $letterheadFilters = [];
+        if ($category) {
+            $letterheadFilters[] = 'Category: '.($category === 'purchase' ? 'Purchase' : 'Tender');
+        }
+
+        $reportMeta = ReportMeta::build(
+            $paginatedRows->getCollection(),
+            $letterheadFilters,
+            $from,
+            $to,
+            'date',
+            $rows->count()
+        );
+
+        $exportMeta = ReportMeta::build($rows, $letterheadFilters, $from, $to, 'date');
+
         return [
+            'reportMeta' => $reportMeta,
+            'exportMeta' => $exportMeta,
             'rows' => $rows,
             'paginatedRows' => $paginatedRows,
             'purchaseTotal' => $purchaseTotal,
