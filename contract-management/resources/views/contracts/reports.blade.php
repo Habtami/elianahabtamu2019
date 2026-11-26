@@ -42,6 +42,9 @@
                     <div class="mt-3 d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center">
+                                @include('partials.type-of-report', ['reportTypeCurrent' => 'contract-analytics'])
+                            </div>
+                            <div class="d-flex align-items-center">
                                 <label class="text-white-50 me-2 mb-0">Date Range:</label>
                                 <select id="dateRange" onchange="changeDateRange(this.value)" class="form-select form-select-sm" style="width: auto;">
                                     <option value="6_months" {{ $dateRange == '6_months' ? 'selected' : '' }}>Last 6 months</option>

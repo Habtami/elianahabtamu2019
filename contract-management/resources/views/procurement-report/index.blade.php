@@ -294,6 +294,7 @@
             <p class="text-gray-600 mt-2">Total procurement by amount, split by purchase and by tender. Amounts in ETB.</p>
         </div>
         <div class="flex flex-wrap gap-2 no-print">
+            @include('partials.type-of-report', ['reportTypeCurrent' => 'procurement-report'])
             <button type="button" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition"
                     data-pr-print-options data-print-default="cards">
                 <i class="fas fa-print mr-2"></i>Print

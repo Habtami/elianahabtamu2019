@@ -636,6 +636,7 @@
             <p>Comprehensive overview of tire operations, utilization, and performance metrics</p>
         </div>
         <div class="action-buttons">
+            @include('partials.type-of-report', ['reportTypeCurrent' => 'tire-reports'])
             <button type="button" class="btn btn-secondary-custom no-print" onclick="openPrintOptions()">
                 <i class="fas fa-print mr-2"></i>Print Report
             </button>

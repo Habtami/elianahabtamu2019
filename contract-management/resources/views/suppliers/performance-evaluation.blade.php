@@ -63,8 +63,13 @@
 @section('content')
 <div class="container-card">
     <header class="header-card">
-        <h1>Supplier Performance Management</h1>
-        <div class="subtitle">Rate and monitor supplier performance across key metrics</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <div>
+                <h1>Supplier Performance Management</h1>
+                <div class="subtitle">Rate and monitor supplier performance across key metrics</div>
+            </div>
+            @include('partials.type-of-report', ['reportTypeCurrent' => 'supplier-performance'])
+        </div>
     </header>
     <div class="content">
         <div class="tabs">

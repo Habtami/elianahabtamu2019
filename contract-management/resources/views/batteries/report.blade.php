@@ -542,6 +542,7 @@
     <div class="rep-toolbar">
         <h2>🔋 Battery Report</h2>
         <div class="rep-actions no-print">
+            @include('partials.type-of-report', ['reportTypeCurrent' => 'battery-report'])
             <a href="{{ route('batteries.report.export.excel') }}"
                class="rep-btn secondary" title="Export all battery issues to Excel">📊 Excel</a>
             <a href="{{ route('batteries.report.export.pdf') }}"
