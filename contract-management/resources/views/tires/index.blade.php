@@ -1178,7 +1178,7 @@
     }
 
     @media print {
-        @page { size: A4 landscape; margin: 10mm; }
+        @page { size: A4 portrait; margin: 8mm; }
         .sidebar, .sidebar-toggle, .page-header, .page-footer,
         .toolbar, .action-btn, .table-controls, .row-actions,
         .pagination-wrapper, .ti-modal-bg, .table-tip-btn, .table-tip-panel,
@@ -1186,10 +1186,32 @@
         .print-hide-section { display: none !important; }
         body { background: #fff; }
         .main-content, .main-content.expanded { margin-left: 0 !important; }
-        .table-card { box-shadow: none; border: none; }
-        .modern-table { width: 100%; font-size: 9pt; }
+        .table-card { box-shadow: none; border: none; overflow: visible !important; }
+        .overflow-x-auto { overflow: visible !important; }
+        .modern-table { width: 100% !important; font-size: 6.6pt; table-layout: fixed; border-collapse: collapse; }
         .modern-table thead { display: table-header-group; }
-        .modern-table th, .modern-table td { border: 1px solid #9aa9b8; padding: 0.3rem 0.35rem; }
+        .modern-table thead th {
+            font-size: 6.2pt !important;
+            padding: 0.16rem 0.2rem !important;
+            letter-spacing: 0;
+            border: 1px solid #9aa9b8;
+            white-space: normal !important;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .modern-table tbody td {
+            font-size: 7pt !important;
+            padding: 0.16rem 0.2rem !important;
+            border: 1px solid #9aa9b8;
+            white-space: normal !important;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .modern-table tbody td * { white-space: normal !important; }
+        .modern-table .sort-icon { display: none !important; }
+        .table-card-header { padding: 0.4rem 0.6rem; }
+        .table-card-title { font-size: 8pt; }
+        .modern-table .col-actions { display: none !important; }
         .modern-table tbody tr:hover { background: transparent; }
         .ti-stat { box-shadow: none; cursor: default; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1402,7 +1424,7 @@
                               <th data-sort="8" class="sortable" tabindex="0" role="button" aria-sort="none">Current KM <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
                               <th data-sort="9" class="sortable" tabindex="0" role="button" aria-sort="none">KM Difference <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
                               <th data-sort="10" class="sortable" tabindex="0" role="button" aria-sort="none">Status <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                              <th style="text-align:right;">Actions</th>
+                              <th class="col-actions" style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1482,7 +1504,7 @@
                                       <span class="dot"></span> {{ $statusLabel }}
                                   </span>
                               </td>
-                            <td>
+                            <td class="col-actions">
                                 <div class="row-actions">
                                      <button type="button" class="act-view"
                                             title="View" aria-label="View tire {{ $tire->serial_number }}"

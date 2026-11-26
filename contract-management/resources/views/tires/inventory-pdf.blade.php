@@ -7,17 +7,17 @@
     <meta charset="utf-8">
     <title>Tire Inventory</title>
     <style>
-        @page { size: A4 landscape; margin: 8mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #1f2937; }
-        h2 { margin: 0 0 4px; font-size: 17px; }
-        .muted { color: #6b7280; margin-bottom: 10px; }
-        table.records { width: 100%; border-collapse: collapse; }
-        table.records th { background: #f3f4f6; text-align: left; padding: 5px; border: 1px solid #d1d5db; font-size: 8px; text-transform: uppercase; }
-        table.records td { padding: 5px; border: 1px solid #e5e7eb; vertical-align: top; }
-        table.records td.roll { color: #6b7280; width: 28px; }
+        @page { size: A4 portrait; margin: 8mm; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 7.5px; color: #1f2937; }
+        h2 { margin: 0 0 4px; font-size: 15px; }
+        .muted { color: #6b7280; margin-bottom: 8px; font-size: 8px; }
+        table.records { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        table.records th { background: #f3f4f6; text-align: left; padding: 3px 3px; border: 1px solid #d1d5db; font-size: 6.5px; text-transform: uppercase; word-break: break-word; }
+        table.records td { padding: 3px 3px; border: 1px solid #e5e7eb; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; }
+        table.records td.roll { color: #6b7280; }
         table.records td.num { text-align: right; }
         table.records th.num { text-align: right; }
-        .footer { margin-top: 10px; font-size: 8px; color: #6b7280; }
+        .footer { margin-top: 8px; font-size: 7px; color: #6b7280; }
     </style>
 </head>
 <body>
@@ -31,6 +31,19 @@
     </div>
 
     <table class="records">
+        <colgroup>
+            <col style="width:5%;">
+            <col style="width:7%;">
+            <col style="width:13%;">
+            <col style="width:15%;">
+            <col style="width:11%;">
+            <col style="width:12%;">
+            <col style="width:12%;">
+            <col style="width:7%;">
+            <col style="width:7%;">
+            <col style="width:7%;">
+            <col style="width:4%;">
+        </colgroup>
         <thead>
             <tr>
                 <th>No</th>
