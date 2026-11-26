@@ -21,6 +21,24 @@
     .activities-list { transition: max-height 0.28s ease; }
     .activities-list.compact { max-height: 300px; overflow: auto; }
     .activities-list.full { max-height: 1000vh; overflow: visible; }
+
+    /* Collapsible recent activities */
+    .activities-collapse-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: transparent;
+        border: none;
+        padding: 0;
+        text-align: left;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    .activities-collapse-btn:hover h3 { color: #1C75BC; }
+    .activities-collapse-btn:focus-visible { outline: 2px solid #1C75BC; outline-offset: 3px; }
+    .activities-chevron { color: #94a3b8; font-size: 0.8rem; transition: transform 0.2s ease; }
+    .activities-collapse-btn[aria-expanded="false"] .activities-chevron { transform: rotate(180deg); }
+    .activities-body.collapsed { display: none; }
 </style>
 @endsection
 
@@ -179,10 +197,13 @@
         <!-- Recent Activities Section -->
         <div class="card overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap justify-between items-center gap-2">
-                <div class="recent-activities-header">
-                    <h3 class="text-lg font-bold text-slate-800">System-wide Recent Activities</h3>
-                    <span class="text-sm text-slate-500">({{ $recentActivities->count() }})</span>
-                </div>
+                <button type="button" id="activitiesCollapseBtn" class="activities-collapse-btn" aria-expanded="false" aria-controls="activitiesBody" title="Show recent activities">
+                    <div class="recent-activities-header">
+                        <h3 class="text-lg font-bold text-slate-800">System-wide Recent Activities</h3>
+                        <span class="text-sm text-slate-500">({{ $recentActivities->count() }})</span>
+                    </div>
+                    <i class="fas fa-chevron-up activities-chevron" aria-hidden="true"></i>
+                </button>
                 <div class="flex items-center gap-3">
                     <button id="activitiesToggleBtn" class="activities-toggle-btn text-sm" aria-expanded="true">Compact view</button>
                     <button onclick="refreshData(event)" class="text-slate-400 hover:text-[#1C75BC] transition-colors" title="Refresh">
@@ -190,7 +211,7 @@
                     </button>
                 </div>
             </div>
-            <div class="p-5">
+            <div class="p-5 activities-body collapsed" id="activitiesBody">
                 <div id="activitiesList" class="activity-timeline activities-list relative pl-8 space-y-6" data-count="{{ $recentActivities->count() }}">
                     @forelse($recentActivities as $activity)
                     <div class="relative">
@@ -383,6 +404,19 @@
                 cutout: '70%'
             }
         });
+
+        // Collapse/expand the recent activities list
+        (function() {
+            const btn = document.getElementById('activitiesCollapseBtn');
+            const body = document.getElementById('activitiesBody');
+            if (!btn || !body) return;
+
+            btn.addEventListener('click', function() {
+                const collapsed = body.classList.toggle('collapsed');
+                btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                btn.title = collapsed ? 'Show recent activities' : 'Hide recent activities';
+            });
+        })();
 
         // Recent activities compact/full toggle
         (function() {
