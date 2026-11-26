@@ -1,4 +1,5 @@
-"test_*.php" 
-"reset_all_passwords.php" 
-"dashboard.html" 
-"habdash.html" 
+# Local scratch files and one-off test scripts (never committed)
+test_*.php
+reset_all_passwords.php
+dashboard.html
+habdash.html
