@@ -117,14 +117,14 @@
     /* ---------- KPI cards ---------- */
     .tsr-kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
         transition: all 0.3s ease;
     }
     .tsr-kpi-card {
         background: var(--tsr-surface);
         border-radius: var(--tsr-radius-md);
-        padding: 1.25rem;
+        padding: 0.85rem 1rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -140,7 +140,7 @@
     .tsr-kpi-card.tsr-orange { border-left-color: #f59e0b; }
 
     .tsr-kpi-content h4 {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
         color: var(--tsr-text-muted);
         letter-spacing: 0.05em;
@@ -148,20 +148,20 @@
         transition: font-size 0.3s ease;
     }
     .tsr-kpi-content .tsr-value {
-        font-size: 1.8rem;
+        font-size: 1.45rem;
         font-weight: 700;
-        margin: 0.2rem 0;
+        margin: 0.15rem 0;
         line-height: 1;
         transition: font-size 0.3s ease;
     }
     .tsr-kpi-content .tsr-sub {
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         color: var(--tsr-text-light);
         transition: opacity 0.25s ease, max-height 0.3s ease;
         overflow: hidden;
         max-height: 30px;
     }
-    .tsr-kpi-icon { opacity: 0.2; width: 32px; height: 32px; transition: all 0.3s ease; }
+    .tsr-kpi-icon { opacity: 0.2; width: 26px; height: 26px; transition: all 0.3s ease; }
     .tsr-kpi-icon svg { width: 100%; height: 100%; }
 
     .tsr-kpi-card.tsr-clickable { cursor: pointer; }
@@ -188,8 +188,8 @@
     }
     .tsr-modal-overlay.tsr-open { display: flex; }
     .tsr-modal-card {
-        width: min(960px, 100%);
-        max-height: 85vh;
+        width: min(780px, 100%);
+        max-height: 76vh;
         display: flex;
         flex-direction: column;
         background: var(--tsr-surface);
@@ -202,13 +202,13 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
-        padding: 1rem 1.25rem;
+        padding: 0.8rem 1rem;
         border-bottom: 1px solid var(--tsr-border);
     }
-    .tsr-modal-head h3 { font-size: 1.05rem; font-weight: 700; }
+    .tsr-modal-head h3 { font-size: 0.98rem; font-weight: 700; }
     .tsr-modal-subtitle {
-        margin-top: 0.2rem;
-        font-size: 0.83rem;
+        margin-top: 0.15rem;
+        font-size: 0.78rem;
         color: var(--tsr-text-muted);
     }
     .tsr-modal-close {
@@ -226,7 +226,7 @@
     .tsr-modal-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
     }
     .tsr-modal-table th {
         position: sticky;
@@ -234,8 +234,8 @@
         z-index: 1;
         background: #f8fafc;
         text-align: left;
-        padding: 0.7rem 1rem;
-        font-size: 0.72rem;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.68rem;
         font-weight: 700;
         letter-spacing: 0.05em;
         text-transform: uppercase;
@@ -244,7 +244,7 @@
         white-space: nowrap;
     }
     .tsr-modal-table td {
-        padding: 0.7rem 1rem;
+        padding: 0.55rem 0.85rem;
         border-bottom: 1px solid #f1f5f9;
         color: var(--tsr-text-main);
     }
@@ -269,10 +269,10 @@
         justify-content: space-between;
         gap: 0.75rem;
         flex-wrap: wrap;
-        padding: 0.75rem 1.25rem;
+        padding: 0.6rem 1rem;
         border-top: 1px solid var(--tsr-border);
         background: #f8fafc;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: var(--tsr-text-muted);
     }
     .tsr-modal-foot strong { color: var(--tsr-text-main); font-weight: 600; }
