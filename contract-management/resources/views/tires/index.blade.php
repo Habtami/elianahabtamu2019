@@ -1000,7 +1000,7 @@
     .ti-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
+        gap: 0.75rem;
         margin-bottom: 1.5rem;
     }
     .ti-stat {
@@ -1015,7 +1015,7 @@
         border: 1px solid #e2e8f0;
         border-left: 4px solid var(--card-color, #1C75BC);
         border-radius: 12px;
-        padding: 1.1rem 1.2rem;
+        padding: 0.85rem 1rem;
         cursor: pointer;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
         transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
@@ -1030,7 +1030,7 @@
     .ti-stat-main { min-width: 0; }
     .ti-stat-label {
         display: block;
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -1038,17 +1038,17 @@
     }
     .ti-stat-value {
         display: block;
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         font-weight: 700;
         color: #0f172a;
-        margin-top: 0.3rem;
+        margin-top: 0.15rem;
         line-height: 1.15;
     }
-    .ti-stat-sub { display: block; margin-top: 0.35rem; font-size: 0.74rem; font-weight: 500; color: #7a90a6; }
+    .ti-stat-sub { display: block; margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: #7a90a6; }
     .ti-stat-hint {
         display: block;
-        margin-top: 0.45rem;
-        font-size: 0.68rem;
+        margin-top: 0.3rem;
+        font-size: 0.66rem;
         font-weight: 600;
         color: #8aa2b8;
         opacity: 0;
@@ -1059,7 +1059,7 @@
     .ti-stat-icon {
         flex: none;
         padding-top: 0.1rem;
-        font-size: 1.9rem;
+        font-size: 1.5rem;
         line-height: 1;
         color: var(--card-color, #1C75BC);
         opacity: 0.22;
@@ -1080,8 +1080,8 @@
         background: #fff;
         border-radius: 16px;
         width: 100%;
-        max-width: 1080px;
-        max-height: 88vh;
+        max-width: 780px;
+        max-height: 76vh;
         display: flex;
         flex-direction: column;
         box-shadow: 0 24px 60px rgba(8, 25, 45, 0.35);
@@ -1093,55 +1093,55 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
-        padding: 1rem 1.3rem;
+        padding: 0.8rem 1rem;
         border-bottom: 1px solid #edf2f8;
     }
-    .ti-modal-head h3 { margin: 0; font-size: 1.05rem; color: #0f2a44; }
-    .ti-modal-head span { font-size: 0.75rem; color: #6b8299; }
+    .ti-modal-head h3 { margin: 0; font-size: 0.98rem; color: #0f2a44; }
+    .ti-modal-head span { font-size: 0.78rem; color: #6b8299; }
     .ti-modal-close {
         border: none;
         background: #eef2f7;
         color: #33506e;
-        width: 32px;
-        height: 32px;
-        border-radius: 9px;
-        font-size: 1.1rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        font-size: 1rem;
         line-height: 1;
         cursor: pointer;
         flex-shrink: 0;
     }
     .ti-modal-close:hover { background: #dbe6f1; }
-    .ti-modal-body { padding: 1rem 1.3rem 1.4rem; overflow-y: auto; }
+    .ti-modal-body { padding: 0.75rem 1rem 1rem; overflow-y: auto; }
     .ti-modal-foot {
         display: none;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
         flex-wrap: wrap;
-        padding: 0.7rem 1.3rem;
+        padding: 0.6rem 1rem;
         border-top: 1px solid #edf2f8;
         background: #f8fafc;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         color: #6b8299;
     }
     .ti-modal-foot strong { color: #1e293b; font-weight: 600; }
     .ti-modal-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; }
 
     .ti-table-wrap { overflow-x: auto; }
-    .ti-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .ti-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     .ti-table th {
         background: #f3f7fc;
         color: #345572;
         text-align: left;
-        padding: 0.65rem 0.6rem;
-        font-size: 0.7rem;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         border-bottom: 2px solid #d7e2ee;
         white-space: nowrap;
     }
     .ti-table td {
-        padding: 0.7rem 0.6rem;
+        padding: 0.55rem 0.7rem;
         border-bottom: 1px solid #edf2f8;
         color: #1e293b;
         vertical-align: middle;

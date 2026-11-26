@@ -123,13 +123,13 @@
     /* ---------- KPI cards ---------- */
     .tsr-kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
     }
     .tsr-kpi-card {
         background: var(--tsr-surface);
         border-radius: var(--tsr-radius-md);
-        padding: 1.25rem;
+        padding: 0.85rem 1rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -146,30 +146,30 @@
 
     .tsr-kpi-content { min-width: 0; }
     .tsr-kpi-content h4 {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
         color: var(--tsr-text-muted);
         letter-spacing: 0.05em;
         font-weight: 600;
     }
     .tsr-kpi-content .tsr-value {
-        font-size: 1.8rem;
+        font-size: 1.45rem;
         font-weight: 700;
-        margin: 0.2rem 0;
+        margin: 0.15rem 0;
         line-height: 1.1;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .tsr-kpi-content .tsr-value.tsr-value-text { font-size: 1.25rem; }
+    .tsr-kpi-content .tsr-value.tsr-value-text { font-size: 1.15rem; }
     .tsr-kpi-content .tsr-sub {
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         color: var(--tsr-text-light);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .tsr-kpi-icon { opacity: 0.2; width: 32px; height: 32px; flex: none; }
+    .tsr-kpi-icon { opacity: 0.2; width: 26px; height: 26px; flex: none; }
     .tsr-kpi-icon svg { width: 100%; height: 100%; }
 
     /* ---------- layout grid ---------- */

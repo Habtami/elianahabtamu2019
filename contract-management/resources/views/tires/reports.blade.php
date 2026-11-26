@@ -80,14 +80,14 @@
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
+        gap: 0.75rem;
         margin-bottom: 1.25rem;
     }
 
     .stat-card {
         background: var(--tsr-surface);
         border-radius: var(--tsr-radius-md);
-        padding: 1.15rem 1.25rem;
+        padding: 0.85rem 1rem;
         border: 1px solid var(--tsr-border);
         border-left: 4px solid var(--card-color, var(--tsr-primary));
         box-shadow: var(--tsr-shadow-sm);
@@ -108,12 +108,12 @@
     }
 
     .stat-card .stat-icon {
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.75rem;
+        font-size: 1.35rem;
         color: var(--card-color, var(--tsr-primary));
         background: transparent;
         opacity: 0.2;
@@ -121,15 +121,15 @@
     }
 
     .stat-card .stat-value {
-        font-size: 1.7rem;
+        font-size: 1.45rem;
         font-weight: 700;
         color: var(--tsr-text-main);
         line-height: 1;
-        margin: 0.2rem 0;
+        margin: 0.15rem 0;
     }
 
     .stat-card .stat-label {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 600;
         color: var(--tsr-text-muted);
         text-transform: uppercase;
@@ -137,7 +137,7 @@
     }
 
     .stat-card .stat-trend {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
@@ -328,29 +328,33 @@
     }
 
     .modal-xl-custom {
-        max-width: 1200px;
+        max-width: 900px;
     }
 
     .modal-header-custom {
-        padding: 1rem 1.5rem;
+        padding: 0.8rem 1.25rem;
         background: var(--tsr-surface);
         color: var(--tsr-text-main);
         border-bottom: 1px solid var(--tsr-border);
     }
 
     .modal-header-custom .modal-title {
-        font-size: 1.05rem;
+        font-size: 1rem;
         font-weight: 700;
     }
 
     .modal-body-custom {
-        padding: 1.5rem;
-        max-height: 70vh;
+        padding: 1rem 1.25rem;
+        max-height: 68vh;
         overflow-y: auto;
     }
 
+    .modal-body-custom .data-table { font-size: 0.78rem; }
+    .modal-body-custom .data-table thead th { padding: 0.55rem 0.8rem; font-size: 0.68rem; }
+    .modal-body-custom .data-table tbody td { padding: 0.55rem 0.8rem; }
+
     .modal-footer-custom {
-        padding: 0.85rem 1.5rem;
+        padding: 0.65rem 1.25rem;
         border-top: 1px solid var(--tsr-border);
         background: #f8fafc;
     }
