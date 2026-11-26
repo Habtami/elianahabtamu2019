@@ -179,7 +179,7 @@
     .tsr-modal-overlay {
         position: fixed;
         inset: 0;
-        z-index: 1000;
+        z-index: 1700;
         display: none;
         align-items: center;
         justify-content: center;
