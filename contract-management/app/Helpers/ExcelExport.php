@@ -12,6 +12,8 @@ class ExcelExport
 
     protected $sheetName = 'Sheet1';
 
+    protected $meta = [];
+
     public function __construct(array $headers = [], string $sheetName = 'Sheet1')
     {
         $this->headers = $headers;
@@ -33,6 +35,23 @@ class ExcelExport
     public function setHeaders(array $headers): void
     {
         $this->headers = $headers;
+    }
+
+    /**
+     * Letterhead lines printed above the header row, spanning the full table width.
+     *
+     * @param  array<int, string|null>  $lines
+     */
+    public function setMeta(array $lines): void
+    {
+        $this->meta = array_values(array_filter(
+            array_map(function ($line) {
+                return trim((string) $line);
+            }, $lines),
+            function ($line) {
+                return $line !== '';
+            }
+        ));
     }
 
     public function download(string $filename): void
@@ -166,6 +185,14 @@ class ExcelExport
         $xml .= '<sheetData>';
 
         $rowNum = 1;
+        foreach ($this->meta as $line) {
+            $xml .= '<row r="'.$rowNum.'">'
+                .'<c r="A'.$rowNum.'" t="inlineStr"><is><t xml:space="preserve">'
+                .htmlspecialchars($line, ENT_XML1).'</t></is></c>'
+                .'</row>';
+            $rowNum++;
+        }
+
         $headerCellsRow = $this->convertCellsToStrings([$this->headers])[0];
         $xml .= '<row r="'.$rowNum.'">';
         $colNum = 1;
@@ -201,6 +228,17 @@ class ExcelExport
         }
 
         $xml .= '</sheetData>';
+
+        if ($this->meta && count($this->headers) > 1) {
+            $lastCol = preg_replace('/\d+/', '', $this->getCellReference(count($this->headers), 1));
+            $xml .= '<mergeCells count="'.count($this->meta).'">';
+            foreach (array_keys($this->meta) as $i) {
+                $r = $i + 1;
+                $xml .= '<mergeCell ref="A'.$r.':'.$lastCol.$r.'"/>';
+            }
+            $xml .= '</mergeCells>';
+        }
+
         $xml .= '</worksheet>';
 
         return $xml;
