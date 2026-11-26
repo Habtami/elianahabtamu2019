@@ -134,7 +134,10 @@ class ProcurementReportController extends Controller
         $ncbTotal = (float) $tenderRows->where('type', 'NCB')->sum('amount');
 
         $page = Paginator::resolveCurrentPage('page');
-        $perPage = 15;
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 50, 100], true)) {
+            $perPage = 10;
+        }
 
         $paginatedRows = new LengthAwarePaginator(
             $rows->forPage($page, $perPage)->values(),

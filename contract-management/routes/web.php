@@ -102,9 +102,6 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Tire Tracking Routes
     Route::get('/tires', [TireController::class, 'index'])->name('tires.index');
-    Route::get('/tires/summary/{scope}', [TireController::class, 'summary'])
-        ->whereIn('scope', ['total-tires', 'in-use', 'returned', 'active-drivers'])
-        ->name('tires.summary');
     Route::resource('tires/types', TireTypeController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])->names([
         'index' => 'tires.types.index',
         'create' => 'tires.types.create',
@@ -119,6 +116,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::post('/tires/give', [TireGiveController::class, 'store'])->name('tires.give.store');
 
     Route::get('/tires/create', [TireController::class, 'create'])->name('tires.create');
+    Route::get('/tires/export', [TireController::class, 'exportList'])->name('tires.export');
     Route::post('/tires', [TireController::class, 'store'])->name('tires.store');
 
     // Tire Reports (must come before tires/{tire} wildcard)
@@ -192,6 +190,8 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Contract Closing
     Route::get('/contract-closures', [ContractClosureController::class, 'index'])->name('contract-closures.index');
+    Route::get('/contract-closures/export/excel', [ContractClosureController::class, 'exportExcel'])->name('contract-closures.export.excel');
+    Route::get('/contract-closures/export/pdf', [ContractClosureController::class, 'exportPdf'])->name('contract-closures.export.pdf');
     Route::post('/contract-closures', [ContractClosureController::class, 'store'])->name('contract-closures.store');
     Route::get('/contract-closures/{contractClosure}', [ContractClosureController::class, 'show'])->name('contract-closures.show');
     Route::patch('/contract-closures/{contractClosure}/complete', [ContractClosureController::class, 'complete'])->name('contract-closures.complete');

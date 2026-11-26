@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\ActivityLog;
 use App\Rules\GuaranteeAlertDays;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -54,11 +55,21 @@ class ContractController extends Controller
 
         // Summary cards always reflect the full set allowed for the user,
         // matching the /dashboard/summary endpoints behind the detail modals.
-        $statsBase = Contract::forUser($user);
-        $totalContracts = (clone $statsBase)->count();
-        $totalActive = (clone $statsBase)->where('status', Contract::STATUS_ACTIVE)->count();
-        $totalExpiring = (clone $statsBase)->where('status', Contract::STATUS_EXPIRING)->count();
-        $totalExpired = (clone $statsBase)->where('status', Contract::STATUS_EXPIRED)->count();
+        $statContracts = Contract::forUser($user)
+            ->orderByDesc('id')
+            ->get(['id', 'name', 'supplier_name', 'department', 'start_date', 'end_date', 'status', 'performance_guarantee_amount', 'extended_count']);
+
+        $statRows = [
+            'total' => $statContracts,
+            'active' => $statContracts->where('status', Contract::STATUS_ACTIVE)->values(),
+            'expiring' => $statContracts->where('status', Contract::STATUS_EXPIRING)->values(),
+            'expired' => $statContracts->where('status', Contract::STATUS_EXPIRED)->values(),
+        ];
+
+        $totalContracts = $statRows['total']->count();
+        $totalActive = $statRows['active']->count();
+        $totalExpiring = $statRows['expiring']->count();
+        $totalExpired = $statRows['expired']->count();
 
         $perPage = $request->get('per_page', 5);
         $allowedPerPage = [5, 10, 25, 50, 100];
@@ -77,7 +88,7 @@ class ContractController extends Controller
 
         return view('contracts.index', compact(
             'contracts', 'departments', 'statuses', 'totalContracts', 'totalActive', 'totalExpiring', 'totalExpired',
-            'sortBy', 'sortDirection', 'perPage'
+            'statRows', 'sortBy', 'sortDirection', 'perPage'
         ));
     }
 
@@ -97,6 +108,11 @@ class ContractController extends Controller
         }
 
         $contracts = $query->orderBy('name')->get();
+
+        if ($request->input('format') === 'pdf') {
+            return Pdf::loadView('contracts.pdf', compact('contracts'))
+                ->download('contracts-' . now()->format('Ymd-His') . '.pdf');
+        }
 
         (new \App\Exports\ContractsExport($contracts))->download('contracts_export.xlsx');
     }

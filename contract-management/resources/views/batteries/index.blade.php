@@ -118,7 +118,7 @@
         display: none;
         align-items: center;
         justify-content: center;
-        z-index: 100;
+        z-index: 1700;
         padding: 1rem;
     }
     .batt-modal-bg.open { display: flex; }
@@ -231,68 +231,408 @@
     }
     .batt-errors ul { margin: 0; padding-left: 1.1rem; }
 
+    /* SHARED REGISTER PATTERN */
+    .bb-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .bb-stat {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--card-color, #1a6fc4);
+        border-radius: 12px;
+        padding: 1.1rem 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .bb-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        border-color: #cbd5e1;
+        border-left-color: var(--card-color, #1a6fc4);
+    }
+    .bb-stat:focus-visible { outline: 2px solid var(--card-color, #1a6fc4); outline-offset: 2px; }
+    .bb-stat-main { min-width: 0; }
+    .bb-stat-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+    .bb-stat-value {
+        display: block;
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 0.3rem;
+        line-height: 1;
+    }
+    .bb-stat-hint {
+        display: block;
+        margin-top: 0.55rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #8aa2b8;
+        opacity: 0;
+        transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .bb-stat:hover .bb-stat-hint,
+    .bb-stat:focus-visible .bb-stat-hint { opacity: 1; color: #1a6fc4; }
+    .bb-stat-icon {
+        flex: none;
+        padding-top: 0.1rem;
+        font-size: 1.9rem;
+        line-height: 1;
+        color: var(--card-color, #1a6fc4);
+        opacity: 0.22;
+    }
+
+    .bb-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border-radius: 7px;
+        border: 1px solid #dbe6f1;
+        background: #fff;
+        color: #33506e;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .bb-action-btn:hover { background: #f1f5f9; }
+    .bb-actions { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+    .bb-action-btn-active { background: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
+
+    .bb-perpage { display: flex; align-items: center; gap: 0.35rem; }
+    .bb-perpage label { font-size: 0.72rem; font-weight: 600; color: #6b8299; margin: 0; }
+    .bb-perpage select {
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #cfdcea;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        background: #fff;
+        color: #1e293b;
+    }
+
+    .bb-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        padding: 0.85rem 1.5rem;
+        border-top: 1px solid #edf2f8;
+        font-size: 0.78rem;
+        color: #6b8299;
+    }
+    .bb-pagination strong { color: #1e293b; font-weight: 600; }
+    .bb-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; }
+    .bb-page-btn {
+        display: inline-block;
+        padding: 0.35rem 0.7rem;
+        border: 1px solid #dbe6f1;
+        background: #fff;
+        border-radius: 6px;
+        color: #33506e;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.8rem;
+        font-family: inherit;
+        text-decoration: none;
+        text-align: center;
+    }
+    .bb-page-btn:hover:not(:disabled) { background: #f1f5f9; }
+    .bb-page-btn.bb-active { background: #1a6fc4; border-color: #1a6fc4; color: #fff; }
+    .bb-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .bb-page-dots { padding: 0.35rem 0.3rem; color: #6b8299; }
+
+    .bb-modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 25, 45, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1700;
+        padding: 1rem;
+    }
+    .bb-modal-bg.open { display: flex; }
+    .bb-modal {
+        background: #fff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 1080px;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 60px rgba(8, 25, 45, 0.35);
+        overflow: hidden;
+    }
+    .bb-modal.bb-modal-sm { max-width: 480px; }
+    .bb-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.3rem;
+        border-bottom: 1px solid #edf2f8;
+    }
+    .bb-modal-head h3 { margin: 0; font-size: 1.05rem; color: #0f2a44; }
+    .bb-modal-head span { font-size: 0.75rem; color: #6b8299; }
+    .bb-modal-close {
+        border: none;
+        background: #eef2f7;
+        color: #33506e;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .bb-modal-close:hover { background: #dbe6f1; }
+    .bb-modal-body { padding: 1rem 1.3rem 1.4rem; overflow-y: auto; }
+    .bb-modal-foot {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.7rem 1.3rem;
+        border-top: 1px solid #edf2f8;
+        background: #f8fafc;
+        font-size: 0.82rem;
+        color: #6b8299;
+    }
+    .bb-modal-foot strong { color: #1e293b; font-weight: 600; }
+    .bb-modal-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; }
+
+    .bb-table-wrap { overflow-x: auto; }
+    .bb-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .bb-table th {
+        background: #f3f7fc;
+        color: #345572;
+        text-align: left;
+        padding: 0.65rem 0.6rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid #d7e2ee;
+        white-space: nowrap;
+    }
+    .bb-table td {
+        padding: 0.7rem 0.6rem;
+        border-bottom: 1px solid #edf2f8;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+    .bb-table tbody tr:hover td { background: #f8fbff; }
+    .bb-table th.bb-roll,
+    .bb-table td.bb-roll {
+        width: 3.2rem;
+        color: #7a90a6;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .bb-empty { text-align: center; color: #8ca3b8; padding: 2rem 1rem; font-style: italic; }
+    .bb-modal-sub { font-size: 0.72rem; color: #7a90a6; }
+
+    .bb-print-options { display: flex; flex-direction: column; gap: 0.55rem; }
+    .bb-print-options label {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.88rem;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .bb-print-options input { width: 16px; height: 16px; accent-color: #1a6fc4; }
+    .bb-print-hint { margin: 0.7rem 0 0; font-size: 0.78rem; font-weight: 600; color: #b91c1c; }
+
+    .bb-filter-bar {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .bb-filter-bar input, .bb-filter-bar select {
+        padding: 0.45rem 0.7rem;
+        border: 1px solid #cddaea;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        background: #fff;
+        color: #1e293b;
+    }
+    .bb-filter-bar input:focus, .bb-filter-bar select:focus {
+        outline: none;
+        border-color: #1a6fc4;
+        box-shadow: 0 0 0 3px rgba(26, 111, 196, 0.12);
+    }
+
     @media print {
         @page { size: A4 landscape; margin: 10mm; }
         .sidebar, .sidebar-toggle, .page-header, .page-footer,
-        .batt-toolbar, .batt-card-head, .batt-search, .batt-btn,
-        .batt-modal-bg, .batt-actions, .no-print { display: none !important; }
+        .bb-stats-actions, .bb-filter-bar, .bb-actions, .batt-btn,
+        .bb-pagination, .batt-modal-bg, .bb-modal-bg, .batt-actions, .no-print { display: none !important; }
+        .print-hide-section { display: none !important; }
         body { background: #fff; }
         .main-content, .main-content.expanded { margin-left: 0 !important; }
-        .batt-wrapper { max-width: none; margin: 0; padding: 0; }
-        .batt-card { box-shadow: none; border: none; border-radius: 0; padding: 0; margin: 0; }
-        .batt-table-wrap { overflow: visible; }
-        .batt-table { width: 100%; font-size: 9pt; }
-        .batt-table thead { display: table-header-group; }
-        .batt-table th, .batt-table td { border: 1px solid #9aa9b8; padding: 0.3rem 0.35rem; }
-        .batt-table tr:hover td { background: transparent; }
+        .batt-wrapper, .bb-page { max-width: none; margin: 0; padding: 0; }
+        .batt-card, .bb-table-card { box-shadow: none; border: none; border-radius: 0; padding: 0; margin: 0; }
+        .batt-table-wrap, .bb-table-scroll { overflow: visible; }
+        .bb-table { width: 100%; font-size: 9pt; }
+        .bb-table thead { display: table-header-group; }
+        .bb-table th, .bb-table td { border: 1px solid #9aa9b8; padding: 0.3rem 0.35rem; }
+        .bb-table tr:hover td { background: transparent; }
         .batt-status { padding: 0; border-radius: 0; background: transparent !important; }
+        .bb-stat { box-shadow: none; cursor: default; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="batt-wrapper">
+<div class="batt-wrapper bb-page">
 
-    <div class="batt-toolbar">
-        <h2>🔋 Battery Given and Return</h2>
-        <div class="no-print" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-            <button type="button" class="batt-btn secondary" onclick="window.print()">🖨️ Print</button>
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl lg:text-3xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-battery-full text-[#1a6fc4] mr-3"></i>
+                Battery Given and Return
+            </h1>
+            <p class="text-gray-600 mt-2">Register batteries given to drivers and track their return, status and mileage.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 no-print">
+            <button type="button" class="batt-btn secondary" data-bb-print-options data-print-default="table">
+                <i class="fas fa-print"></i> Print
+            </button>
             @if(auth()->user()->canExportBatteries())
-            <a href="{{ route('batteries.export.excel', request()->only(['search', 'brand'])) }}" class="batt-btn secondary" style="text-decoration:none;">⬇️ Excel</a>
-            <a href="{{ route('batteries.export.pdf', request()->only(['search', 'brand'])) }}" class="batt-btn secondary" style="text-decoration:none;">📄 PDF</a>
+            <a href="{{ route('batteries.export.excel', request()->query()) }}" class="batt-btn secondary" style="text-decoration:none;">
+                <i class="fas fa-file-excel"></i> Excel
+            </a>
+            <a href="{{ route('batteries.export.pdf', request()->query()) }}" class="batt-btn secondary" style="text-decoration:none;">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
             @endif
             @if(auth()->user()->canViewBatteryReports())
-                <a href="{{ route('batteries.report') }}" class="batt-btn secondary" style="text-decoration:none;">📋 Report</a>
+            <a href="{{ route('batteries.report') }}" class="batt-btn secondary" style="text-decoration:none;">
+                <i class="fas fa-clipboard-list"></i> Report
+            </a>
             @endif
             @if(auth()->user()->canGiveBatteries())
-            <button type="button" class="batt-btn" onclick="openBatteryModal()">+ Give Battery</button>
+            <button type="button" class="batt-btn" onclick="openBatteryModal()">
+                <i class="fas fa-plus"></i> Give Battery
+            </button>
             @endif
         </div>
     </div>
 
-    <div class="batt-card">
-        <div class="batt-card-head">
-            <h3>Given Batteries <span style="color:#6b8299; font-weight:400; font-size:0.8rem;">({{ $totalBatteries }} total &middot; {{ $inServiceBatteries }} in service &middot; {{ $returnedBatteries }} returned)</span></h3>
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-6">
+            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+        </div>
+    @endif
 
-            <form method="GET" action="{{ route('batteries.index') }}" class="batt-search no-print">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search serial, type, plate, driver...">
-                <select name="brand">
+    @php
+        $statCards = [
+            ['key' => 'total', 'label' => 'Total Batteries', 'color' => '#1a6fc4', 'icon' => 'fa-battery-full', 'id' => 'bbModalTotal', 'hint' => 'Click to view all batteries →', 'view' => 'View all batteries'],
+            ['key' => 'in_service', 'label' => 'In Service', 'color' => '#10b981', 'icon' => 'fa-circle-check', 'id' => 'bbModalInService', 'hint' => 'Click to view batteries in service →', 'view' => 'View batteries in service'],
+            ['key' => 'returned', 'label' => 'Returned', 'color' => '#f59e0b', 'icon' => 'fa-rotate-left', 'id' => 'bbModalReturned', 'hint' => 'Click to view returned batteries →', 'view' => 'View returned batteries'],
+            ['key' => 'variance', 'label' => 'KM Difference', 'color' => '#8b5cf6', 'icon' => 'fa-arrow-trend-up', 'id' => 'bbModalVariance', 'hint' => 'Click to view batteries with a KM difference →', 'view' => 'View batteries with a kilometre difference'],
+        ];
+    @endphp
+
+    <div class="bb-stats" data-print-section="cards">
+        @foreach($statCards as $card)
+            @php $statBatteries = $statGroups[$card['key']]; @endphp
+            <button type="button" class="bb-stat" style="--card-color: {{ $card['color'] }};"
+                    data-bb-modal="{{ $card['id'] }}" aria-haspopup="dialog"
+                    aria-label="{{ $card['view'] }}" title="{{ $card['view'] }}">
+                <span class="bb-stat-main">
+                    <span class="bb-stat-label">{{ $card['label'] }}</span>
+                    <span class="bb-stat-value">{{ $statBatteries->count() }}</span>
+                    <span class="bb-stat-hint">{{ $card['hint'] }}</span>
+                </span>
+                <span class="bb-stat-icon" aria-hidden="true"><i class="fas {{ $card['icon'] }}"></i></span>
+            </button>
+        @endforeach
+    </div>
+
+    <div class="batt-card bb-table-card" data-print-section="table">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-gray-200">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800">Given Batteries</h2>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    @if(request('search'))
+                        {{ $batteries->total() }} result(s) for &ldquo;{{ request('search') }}&rdquo;
+                    @else
+                        {{ $batteries->total() }} battery(ies)
+                    @endif
+                    &middot; page {{ $batteries->currentPage() }} of {{ $batteries->lastPage() }}
+                </p>
+            </div>
+            <div class="bb-actions no-print">
+                <button type="button" class="bb-action-btn" data-bb-tip aria-expanded="false" aria-controls="tipBatteries">
+                    <i class="fas fa-info-circle"></i> TIP: info
+                </button>
+                <button type="button" class="bb-action-btn" data-bb-print-options data-print-default="table" title="Print this table only">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+
+        <div class="py-3 no-print">
+            <form method="GET" action="{{ route('batteries.index') }}" class="bb-filter-bar">
+                <input type="hidden" name="per_page" value="{{ $batteries->perPage() }}">
+                <input type="text" name="search" value="{{ request('search') }}" autocomplete="off"
+                       aria-label="Search"
+                       placeholder="Search serial, type, plate, driver..."
+                       class="w-full sm:w-64">
+                <select name="brand" aria-label="Brand">
                     <option value="">All Brands</option>
                     @foreach($brands as $key => $label)
                         <option value="{{ $key }}" {{ request('brand') === $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
-                <select name="per_page">
+                <button type="submit" class="batt-btn small">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="{{ route('batteries.index') }}" class="batt-btn secondary small" style="text-decoration:none;">
+                    <i class="fas fa-rotate-left"></i> Reset
+                </a>
+            </form>
+            <form method="GET" action="{{ route('batteries.index') }}" class="bb-perpage mt-2">
+                @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                    @if(is_scalar($value))
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+                <label for="bbPerPage">Rows</label>
+                <select name="per_page" id="bbPerPage" onchange="this.form.submit()">
                     @foreach([5, 10, 25, 50, 100] as $size)
-                        <option value="{{ $size }}" {{ (int) request('per_page', 10) === $size ? 'selected' : '' }}>{{ $size }} per page</option>
+                        <option value="{{ $size }}" @selected($batteries->perPage() === $size)>{{ $size }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="batt-btn small">Search</button>
-                @if(request()->has('search') || request()->has('brand'))
-                    <a href="{{ route('batteries.index') }}" class="batt-btn secondary small" style="text-decoration:none;">Clear</a>
-                @endif
-                <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipBatteries"><i class="fas fa-info-circle"></i> TIP: info</button>
             </form>
         </div>
 
@@ -300,18 +640,19 @@
             <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
             <ul>
                 <li>Columns show serial, material code, battery type, brand, plate, driver, initial and return KM, difference and status.</li>
-                <li>Search matches serial, type, plate and driver; the brand filter and rows-per-page limit the register.</li>
+                <li>Search matches serial, type, plate and driver; the brand filter and Rows selector limit the register, then press Filter.</li>
                 <li>Status stays "In service" until a battery is returned; Difference shows for returned rows or when return KM exceeds initial.</li>
                 <li>Row actions are permission-based: History opens the audit trail, Return needs the exact serial, plus Edit and Del.</li>
                 <li>Give Battery registers a battery and can add a new material code, type, brand or driver inline; difference recalculates automatically.</li>
-                <li>Header totals count all, in-service and returned rows; Excel and PDF export the active search and brand filter.</li>
+                <li>The KPI cards open the full list regardless of search, brand or page size; Excel, PDF and Print follow the current filters.</li>
             </ul>
         </div>
 
-        <div class="batt-table-wrap">
-            <table class="batt-table">
+        <div class="batt-table-wrap bb-table-scroll">
+            <table class="batt-table bb-table">
                 <thead>
                     <tr>
+                        <th class="bb-roll">No</th>
                         <th>Date Mfg</th>
                         <th>Serial No</th>
                         <th>Material Code</th>
@@ -329,6 +670,7 @@
                 <tbody>
                     @forelse($batteries as $battery)
                     <tr>
+                        <td class="bb-roll">{{ ($batteries->firstItem() ?? 1) + $loop->index }}</td>
                         <td>{{ $battery->date_of_manufacture ? $battery->date_of_manufacture->format('Y-m-d') : '—' }}</td>
                         <td style="font-weight:600;">{{ $battery->serial_number }}</td>
                         <td>{{ $battery->material_code ?: '—' }}</td>
@@ -396,17 +738,51 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="12" class="batt-empty">No batteries given yet</td>
+                        <td colspan="13" class="batt-empty">No batteries given yet</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        @if($batteries->hasPages())
-        <div class="no-print" style="margin-top:1rem;">
-            {{ $batteries->appends(request()->query())->links() }}
-        </div>
+        @if($batteries->total() > 0)
+            @php
+                $bbCurrent = $batteries->currentPage();
+                $bbLast = $batteries->lastPage();
+                $bbPages = [];
+                for ($bbPage = 1; $bbPage <= $bbLast; $bbPage++) {
+                    if ($bbPage === 1 || $bbPage === $bbLast || abs($bbPage - $bbCurrent) <= 1) {
+                        $bbPages[] = $bbPage;
+                    } elseif (end($bbPages) !== '...') {
+                        $bbPages[] = '...';
+                    }
+                }
+            @endphp
+            <div class="bb-pagination no-print">
+                <span>
+                    Showing <strong>{{ $batteries->firstItem() }}–{{ $batteries->lastItem() }}</strong>
+                    of <strong>{{ $batteries->total() }}</strong>
+                </span>
+                <div class="bb-pages">
+                    @if($bbCurrent > 1)
+                        <a class="bb-page-btn" href="{{ $batteries->url($bbCurrent - 1) }}" rel="prev">« Prev</a>
+                    @else
+                        <button type="button" class="bb-page-btn" disabled>« Prev</button>
+                    @endif
+                    @foreach($bbPages as $bbPage)
+                        @if($bbPage === '...')
+                            <span class="bb-page-dots">...</span>
+                        @else
+                            <a class="bb-page-btn {{ $bbPage === $bbCurrent ? 'bb-active' : '' }}" href="{{ $batteries->url($bbPage) }}" @if($bbPage === $bbCurrent) aria-current="page" @endif>{{ $bbPage }}</a>
+                        @endif
+                    @endforeach
+                    @if($bbCurrent < $bbLast)
+                        <a class="bb-page-btn" href="{{ $batteries->url($bbCurrent + 1) }}" rel="next">Next »</a>
+                    @else
+                        <button type="button" class="bb-page-btn" disabled>Next »</button>
+                    @endif
+                </div>
+            </div>
         @endif
     </div>
 </div>
@@ -614,6 +990,102 @@
         </div>
         <div class="batt-form-actions">
             <button type="button" class="batt-btn secondary" onclick="closeHistoryModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+@foreach($statCards as $card)
+    @php $modalBatteries = $statGroups[$card['key']]; @endphp
+    <div class="bb-modal-bg" id="{{ $card['id'] }}" role="dialog" aria-modal="true" aria-labelledby="{{ $card['id'] }}Title">
+        <div class="bb-modal">
+            <div class="bb-modal-head">
+                <div>
+                    <h3 id="{{ $card['id'] }}Title">{{ $card['label'] }}</h3>
+                    <span>{{ $modalBatteries->count() }} record(s)</span>
+                </div>
+                <button type="button" class="bb-modal-close" aria-label="Close" data-bb-close>×</button>
+            </div>
+            <div class="bb-modal-body">
+                @if($modalBatteries->isEmpty())
+                    <div class="bb-empty">No batteries in this group.</div>
+                @else
+                    <div class="bb-table-wrap">
+                        <table class="bb-table">
+                            <thead>
+                                <tr>
+                                    <th class="bb-roll">No</th>
+                                    <th>Serial No</th>
+                                    <th>Material Code</th>
+                                    <th>Battery Type</th>
+                                    <th>Brand</th>
+                                    <th>Plate No</th>
+                                    <th>Driver</th>
+                                    <th>Initial KM</th>
+                                    <th>Return KM</th>
+                                    <th>Difference</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($modalBatteries as $battery)
+                                    <tr>
+                                        <td class="bb-roll">{{ $loop->iteration }}</td>
+                                        <td class="whitespace-nowrap font-semibold">{{ $battery->serial_number }}</td>
+                                        <td>{{ $battery->material_code ?: '—' }}</td>
+                                        <td>{{ $battery->battery_type }}</td>
+                                        <td>{{ $battery->brand }}</td>
+                                        <td>{{ $battery->plate_number }}</td>
+                                        <td>{{ $battery->driver_name ?: '—' }}</td>
+                                        <td>{{ number_format($battery->initial_kilometer) }}</td>
+                                        <td>{{ number_format($battery->return_kilometer) }}</td>
+                                        <td>
+                                            @php $bbDiff = (int) $battery->return_kilometer - (int) $battery->initial_kilometer; @endphp
+                                            {{ $bbDiff > 0 ? '+' . number_format($bbDiff) : number_format($bbDiff) }}
+                                        </td>
+                                        <td>
+                                            <span class="batt-status {{ $battery->status === 'returned' ? 'returned' : 'in-service' }}">
+                                                {{ $battery->getStatusDisplayName() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+            <div class="bb-modal-foot">
+                <span class="bb-modal-range"></span>
+                <div class="bb-modal-pages"></div>
+            </div>
+        </div>
+    </div>
+@endforeach
+
+<div class="bb-modal-bg" id="bbModalPrint" role="dialog" aria-modal="true" aria-labelledby="bbPrintTitle">
+    <div class="bb-modal bb-modal-sm">
+        <div class="bb-modal-head">
+            <div>
+                <h3 id="bbPrintTitle">Print Batteries</h3>
+                <span>Choose which sections appear on the printed page</span>
+            </div>
+            <button type="button" class="bb-modal-close" aria-label="Close" data-bb-close>×</button>
+        </div>
+        <div class="bb-modal-body">
+            <div class="bb-print-options">
+                <label><input type="checkbox" class="bb-print-check" value="cards"> Summary cards</label>
+                <label><input type="checkbox" class="bb-print-check" value="table" checked> Batteries table</label>
+            </div>
+            <p id="bbPrintHint" class="bb-print-hint" style="display:none;">Select at least one section to print.</p>
+        </div>
+        <div class="bb-modal-foot" style="display:flex;">
+            <span></span>
+            <div class="bb-modal-pages">
+                <button type="button" class="bb-action-btn" data-bb-close>Cancel</button>
+                <button type="button" class="inline-flex items-center px-3 py-1.5 bg-[#1a6fc4] text-white text-xs font-semibold rounded-lg hover:bg-[#155a9e]" id="bbPrintGo">
+                    <i class="fas fa-print mr-1"></i> Print
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -970,5 +1442,214 @@
         returnForm.action = document.getElementById('returnActionInput').value;
         document.getElementById('returnSerialDisplay').textContent = document.getElementById('returnSerialInput').value || '—';
     }
+
+    (function () {
+        'use strict';
+
+        var MODAL_PAGE_SIZE = 10;
+
+        function openModalEl(modal) {
+            if (!modal) return;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modal) {
+            if (!modal) return;
+            modal.classList.remove('open');
+            if (!document.querySelector('.bb-modal-bg.open') && !document.querySelector('.batt-modal-bg.open')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function pageWindow(current, last) {
+            var pages = [];
+            for (var page = 1; page <= last; page++) {
+                if (page === 1 || page === last || Math.abs(page - current) <= 1) {
+                    pages.push(page);
+                } else if (pages[pages.length - 1] !== '...') {
+                    pages.push('...');
+                }
+            }
+            return pages;
+        }
+
+        function initModalPager(modal) {
+            if (!modal) return;
+            var table = modal.querySelector('.bb-modal-body .bb-table');
+            if (!table) return;
+
+            var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+            if (!rows.length) return;
+
+            var foot = modal.querySelector('.bb-modal-foot');
+            var rangeNode = foot && foot.querySelector('.bb-modal-range');
+            var pagesNode = foot && foot.querySelector('.bb-modal-pages');
+            if (!foot || !rangeNode || !pagesNode) return;
+
+            var state = modal.bbPager;
+            if (!state) {
+                state = modal.bbPager = { rows: rows, page: 1, foot: foot, range: rangeNode, pages: pagesNode };
+            }
+            state.page = 1;
+            paintModalPage(state, false);
+        }
+
+        function paintModalPage(state, refocus) {
+            var rows = state.rows;
+            var total = rows.length;
+            var lastPage = Math.max(1, Math.ceil(total / MODAL_PAGE_SIZE));
+            state.page = Math.min(Math.max(state.page, 1), lastPage);
+
+            var start = (state.page - 1) * MODAL_PAGE_SIZE;
+            var end = Math.min(start + MODAL_PAGE_SIZE, total);
+
+            rows.forEach(function (row, index) {
+                row.hidden = index < start || index >= end;
+            });
+
+            state.foot.style.display = 'flex';
+            state.range.innerHTML = 'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + total + '</strong>';
+
+            state.pages.textContent = '';
+
+            state.pages.appendChild(pagerButton('« Prev', state.page <= 1, false, function () {
+                goToModalPage(state, state.page - 1);
+            }));
+
+            pageWindow(state.page, lastPage).forEach(function (item) {
+                if (item === '...') {
+                    var dots = document.createElement('span');
+                    dots.className = 'bb-page-dots';
+                    dots.textContent = '...';
+                    state.pages.appendChild(dots);
+                    return;
+                }
+
+                var button = pagerButton(String(item), false, item === state.page, function () {
+                    goToModalPage(state, item);
+                });
+                if (item === state.page) button.setAttribute('aria-current', 'page');
+                state.pages.appendChild(button);
+            });
+
+            state.pages.appendChild(pagerButton('Next »', state.page >= lastPage, false, function () {
+                goToModalPage(state, state.page + 1);
+            }));
+
+            if (refocus) {
+                var active = state.pages.querySelector('.bb-active');
+                if (active) active.focus();
+            }
+        }
+
+        function pagerButton(label, disabled, active, onClick) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'bb-page-btn' + (active ? ' bb-active' : '');
+            button.textContent = label;
+            button.disabled = disabled;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+        function goToModalPage(state, page) {
+            state.page = page;
+            paintModalPage(state, true);
+            var body = state.foot.parentNode.querySelector('.bb-modal-body');
+            if (body) body.scrollTop = 0;
+        }
+
+        var printModal = document.getElementById('bbModalPrint');
+        var printChecks = Array.prototype.slice.call(document.querySelectorAll('.bb-print-check'));
+        var printHint = document.getElementById('bbPrintHint');
+
+        function openPrintOptions(defaultSection) {
+            var wanted = defaultSection || 'table';
+            printChecks.forEach(function (check) {
+                check.checked = check.value === wanted;
+            });
+            if (printHint) printHint.style.display = 'none';
+            openModalEl(printModal);
+        }
+
+        function printSelectedSections() {
+            var selected = printChecks
+                .filter(function (check) { return check.checked; })
+                .map(function (check) { return check.value; });
+
+            if (!selected.length) {
+                if (printHint) printHint.style.display = 'block';
+                return;
+            }
+
+            var sections = document.querySelectorAll('[data-print-section]');
+
+            function restoreSections() {
+                Array.prototype.forEach.call(sections, function (section) {
+                    section.classList.remove('print-hide-section');
+                });
+                window.removeEventListener('afterprint', restoreSections);
+            }
+
+            Array.prototype.forEach.call(sections, function (section) {
+                var key = section.getAttribute('data-print-section');
+                section.classList.toggle('print-hide-section', selected.indexOf(key) === -1);
+            });
+
+            closeModal(printModal);
+            window.addEventListener('afterprint', restoreSections, { once: true });
+            window.print();
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-bb-modal]'), function (button) {
+            button.addEventListener('click', function () {
+                var modal = document.getElementById(button.getAttribute('data-bb-modal'));
+                initModalPager(modal);
+                openModalEl(modal);
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('.bb-modal-bg'), function (backdrop) {
+            backdrop.addEventListener('click', function (event) {
+                if (event.target === backdrop) closeModal(backdrop);
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-bb-close]'), function (button) {
+            button.addEventListener('click', function () {
+                closeModal(button.closest('.bb-modal-bg'));
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-bb-print-options]'), function (button) {
+            button.addEventListener('click', function () {
+                openPrintOptions(button.getAttribute('data-print-default'));
+            });
+        });
+
+        var printGo = document.getElementById('bbPrintGo');
+        if (printGo) {
+            printGo.addEventListener('click', printSelectedSections);
+        }
+
+        var tipButton = document.querySelector('[data-bb-tip]');
+        var tipBox = document.getElementById('tipBatteries');
+        if (tipButton && tipBox) {
+            tipButton.addEventListener('click', function () {
+                var open = tipBox.classList.toggle('open');
+                tipButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+                tipButton.classList.toggle('bb-action-btn-active', open);
+            });
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') return;
+            var open = document.querySelectorAll('.bb-modal-bg.open');
+            if (open.length) {
+                closeModal(open[open.length - 1]);
+            }
+        });
+    })();
 </script>
 @endsection

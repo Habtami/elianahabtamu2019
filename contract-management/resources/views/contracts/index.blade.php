@@ -258,61 +258,339 @@
     body.dark-theme .table-footer a:hover {
         background: #16233a;
     }
+
+    /* ---- shared register pattern ---- */
+    .ct-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .ct-stat {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--card-color, #0ea5e9);
+        border-radius: 12px;
+        padding: 1.1rem 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .ct-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        border-color: #cbd5e1;
+        border-left-color: var(--card-color, #0ea5e9);
+    }
+    .ct-stat:focus-visible { outline: 2px solid var(--card-color, #0ea5e9); outline-offset: 2px; }
+    .ct-stat-main { min-width: 0; }
+    .ct-stat-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+    .ct-stat-value {
+        display: block;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 0.3rem;
+        line-height: 1.15;
+    }
+    .ct-stat-sub { display: block; margin-top: 0.35rem; font-size: 0.74rem; font-weight: 500; color: #7a90a6; }
+    .ct-stat-hint {
+        display: block;
+        margin-top: 0.45rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #8aa2b8;
+        opacity: 0;
+        transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .ct-stat:hover .ct-stat-hint,
+    .ct-stat:focus-visible .ct-stat-hint { opacity: 1; color: #0ea5e9; }
+    .ct-stat-icon {
+        flex: none;
+        padding-top: 0.1rem;
+        font-size: 1.9rem;
+        line-height: 1;
+        color: var(--card-color, #0ea5e9);
+        opacity: 0.22;
+    }
+
+    .ct-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid #edf2f8;
+        background: #fbfdff;
+    }
+    .ct-perpage { display: flex; align-items: center; gap: 0.35rem; margin: 0; }
+    .ct-perpage label { font-size: 0.72rem; font-weight: 600; color: #6b8299; margin: 0; }
+    .ct-perpage select {
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #cfdcea;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        background: #fff;
+        color: #1e293b;
+    }
+    .ct-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border-radius: 7px;
+        border: 1px solid #dbe6f1;
+        background: #fff;
+        color: #33506e;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .ct-action-btn:hover { background: #f1f5f9; }
+    .ct-actions { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+
+    .ct-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        padding: 0.85rem 1.5rem;
+        border-top: 1px solid #edf2f8;
+        font-size: 0.78rem;
+        color: #6b8299;
+    }
+    .ct-pagination strong { color: #1e293b; font-weight: 600; }
+    .ct-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; }
+    .ct-page-btn {
+        display: inline-block;
+        padding: 0.35rem 0.7rem;
+        border: 1px solid #dbe6f1;
+        background: #fff;
+        border-radius: 6px;
+        color: #33506e;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.8rem;
+        font-family: inherit;
+        text-decoration: none;
+        text-align: center;
+    }
+    .ct-page-btn:hover:not(:disabled) { background: #f1f5f9; }
+    .ct-page-btn.ct-active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+    .ct-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ct-page-dots { padding: 0.35rem 0.3rem; color: #6b8299; }
+
+    .ct-modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 25, 45, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1700;
+        padding: 1rem;
+    }
+    .ct-modal-bg.open { display: flex; }
+    .ct-modal {
+        background: #fff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 1080px;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 60px rgba(8, 25, 45, 0.35);
+        overflow: hidden;
+    }
+    .ct-modal.ct-modal-sm { max-width: 480px; }
+    .ct-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.3rem;
+        border-bottom: 1px solid #edf2f8;
+    }
+    .ct-modal-head h3 { margin: 0; font-size: 1.05rem; color: #0f2a44; }
+    .ct-modal-head span { font-size: 0.75rem; color: #6b8299; }
+    .ct-modal-close {
+        border: none;
+        background: #eef2f7;
+        color: #33506e;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .ct-modal-close:hover { background: #dbe6f1; }
+    .ct-modal-body { padding: 1rem 1.3rem 1.4rem; overflow-y: auto; }
+    .ct-modal-foot {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.7rem 1.3rem;
+        border-top: 1px solid #edf2f8;
+        background: #f8fafc;
+        font-size: 0.82rem;
+        color: #6b8299;
+    }
+    .ct-modal-foot strong { color: #1e293b; font-weight: 600; }
+    .ct-modal-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; }
+
+    .ct-table-wrap { overflow-x: auto; }
+    .ct-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .ct-table th {
+        background: #f3f7fc;
+        color: #345572;
+        text-align: left;
+        padding: 0.65rem 0.6rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid #d7e2ee;
+        white-space: nowrap;
+    }
+    .ct-table td {
+        padding: 0.7rem 0.6rem;
+        border-bottom: 1px solid #edf2f8;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+    .ct-table tbody tr:hover td { background: #f8fbff; }
+    .ct-table th.ct-roll,
+    .ct-table td.ct-roll {
+        width: 3.2rem;
+        color: #7a90a6;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .ct-table th.ct-amount,
+    .ct-table td.ct-amount { text-align: right; font-variant-numeric: tabular-nums; }
+    .ct-empty { text-align: center; color: #8ca3b8; padding: 2rem 1rem; font-style: italic; }
+
+    .ct-print-options { display: flex; flex-direction: column; gap: 0.55rem; }
+    .ct-print-options label {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.88rem;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .ct-print-options input { width: 16px; height: 16px; accent-color: #0ea5e9; }
+    .ct-print-hint { margin: 0.7rem 0 0; font-size: 0.78rem; font-weight: 600; color: #b91c1c; }
+
+    @media print {
+        @page { size: A4 landscape; margin: 10mm; }
+        .sidebar, .sidebar-toggle, .page-header, .page-footer,
+        .filter-card, .ct-toolbar, .ct-actions, .ct-pagination, .ct-modal-bg,
+        .table-tip-btn, .table-tip-panel, .no-print { display: none !important; }
+        .print-hide-section { display: none !important; }
+        body { background: #fff; }
+        .main-content, .main-content.expanded { margin-left: 0 !important; }
+        .page-container { min-height: 0; background: #fff; }
+        .page-container > .container { max-width: none !important; padding: 0 !important; }
+        .content-card, .table-container { box-shadow: none; border: none; }
+        .contracts-table { width: 100%; font-size: 9pt; }
+        .contracts-table thead { display: table-header-group; }
+        .contracts-table th, .contracts-table td { border: 1px solid #9aa9b8; padding: 0.3rem 0.35rem; }
+        .table-row:hover { background: transparent; }
+        .ct-stat { box-shadow: none; cursor: default; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
 </style>
 @endsection
 
 @section('content')
 <div class="page-container py-8">
     <div class="container mx-auto px-4">
+        @php
+            $statCards = [
+                [
+                    'key' => 'total',
+                    'label' => 'Total Contracts',
+                    'value' => $totalContracts,
+                    'sub' => 'All contracts in system',
+                    'color' => '#0ea5e9',
+                    'icon' => 'fa-file-contract',
+                    'id' => 'ctModalTotal',
+                    'hint' => 'Click to view every contract →',
+                    'rows' => $statRows['total'],
+                ],
+                [
+                    'key' => 'active',
+                    'label' => 'Active',
+                    'value' => $totalActive,
+                    'sub' => 'Currently active contracts',
+                    'color' => '#10b981',
+                    'icon' => 'fa-check-circle',
+                    'id' => 'ctModalActive',
+                    'hint' => 'Click to view active contracts →',
+                    'rows' => $statRows['active'],
+                ],
+                [
+                    'key' => 'expiring',
+                    'label' => 'Expiring Soon',
+                    'value' => $totalExpiring,
+                    'sub' => 'Require attention',
+                    'color' => '#f59e0b',
+                    'icon' => 'fa-clock',
+                    'id' => 'ctModalExpiring',
+                    'hint' => 'Click to view contracts expiring soon →',
+                    'rows' => $statRows['expiring'],
+                ],
+                [
+                    'key' => 'expired',
+                    'label' => 'Expired',
+                    'value' => $totalExpired,
+                    'sub' => 'Past expiration date',
+                    'color' => '#ef4444',
+                    'icon' => 'fa-exclamation-circle',
+                    'id' => 'ctModalExpired',
+                    'hint' => 'Click to view expired contracts →',
+                    'rows' => $statRows['expired'],
+                ],
+            ];
+        @endphp
+
         <!-- Summary Stats -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="kpi-card blue" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('total-contracts', 'Total Contracts')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Total Contracts</p>
-                    <p class="kpi-value">{{ $totalContracts }}</p>
-                    <p class="kpi-subtitle">All contracts in system</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-file-contract"></i></div>
-            </div>
-
-            <div class="kpi-card green" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('active-contracts', 'Active Contracts')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Active</p>
-                    <p class="kpi-value">{{ $totalActive }}</p>
-                    <p class="kpi-subtitle">Currently active contracts</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
-            </div>
-
-            <div class="kpi-card yellow" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('expiring-contracts', 'Expiring Soon')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Expiring Soon</p>
-                    <p class="kpi-value">{{ $totalExpiring }}</p>
-                    <p class="kpi-subtitle">Require attention</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-clock"></i></div>
-            </div>
-
-            <div class="kpi-card red" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('expired-contracts', 'Expired Contracts')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Expired</p>
-                    <p class="kpi-value">{{ $totalExpired }}</p>
-                    <p class="kpi-subtitle">Past expiration date</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
-            </div>
+        <div class="ct-stats" data-print-section="cards">
+            @foreach($statCards as $card)
+                <button type="button" class="ct-stat" style="--card-color: {{ $card['color'] }};"
+                        data-ct-modal="{{ $card['id'] }}" aria-haspopup="dialog"
+                        aria-label="{{ $card['label'] }} details" title="{{ $card['hint'] }}">
+                    <span class="ct-stat-main">
+                        <span class="ct-stat-label">{{ $card['label'] }}</span>
+                        <span class="ct-stat-value">{{ $card['value'] }}</span>
+                        <span class="ct-stat-sub">{{ $card['sub'] }}</span>
+                        <span class="ct-stat-hint">{{ $card['hint'] }}</span>
+                    </span>
+                    <span class="ct-stat-icon" aria-hidden="true"><i class="fas {{ $card['icon'] }}"></i></span>
+                </button>
+            @endforeach
         </div>
-
-        <!-- Spacer -->
-        <div class="mb-6"></div>
 
         <!-- Header -->
         <div class="content-card px-5 py-4 mb-5">
@@ -327,12 +605,22 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <div class="flex flex-wrap items-center gap-2 shrink-0 no-print">
                     <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipContracts"><i class="fas fa-info-circle"></i> TIP: info</button>
+                    <button type="button" class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-100"
+                            data-ct-print-options data-print-default="cards">
+                        <i class="fas fa-print mr-2"></i>
+                        Print
+                    </button>
                     <a href="{{ route('contracts.export-list', request()->only(['search', 'status', 'department'])) }}"
                        class="inline-flex items-center rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-green-700">
                         <i class="fas fa-file-excel mr-2"></i>
                         Export Excel
+                    </a>
+                    <a href="{{ route('contracts.export-list', array_merge(request()->only(['search', 'status', 'department']), ['format' => 'pdf'])) }}"
+                       class="inline-flex items-center rounded-lg bg-red-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        PDF
                     </a>
                     @if(auth()->user()->canCreateContracts())
                     <a href="{{ route('contracts.create') }}"
@@ -358,14 +646,16 @@
                 <li>The search box filters by contract name automatically, about 600 ms after you stop typing.</li>
                 <li>The "All Status" and "All Departments" dropdowns apply immediately; active filters appear as removable chips with "Clear all".</li>
                 <li>ID, Contract Name, Supplier, Start Date, End Date, PG Amount and Status headers sort on click; the arrow shows direction.</li>
+                <li>Every row is numbered in the No column; "Rows" above the table changes the page size between 5 and 100.</li>
                 <li>Status badges are Active (green), Expiring (amber, with days left) and Expired (red); "Extended Nx" shows under End Date.</li>
                 <li>Each row offers View, Edit and Delete icons, but Edit and Delete only appear when your account may change that contract.</li>
-                <li>"Export Excel" downloads the current search and filters; page links and the result count sit in the footer, KPI cards open a detail list.</li>
+                <li>KPI cards open a detail list with a No column and its own pager; the footer shows numbered pages for the table.</li>
+                <li>Print picks summary cards, the table, or both; Excel and PDF downloads reuse the current search and filters.</li>
             </ul>
         </div>
 
         <!-- Filters & Search -->
-        <form method="GET" action="{{ route('contracts.index') }}" id="contractFilterForm" class="filter-card p-4 mb-4">
+        <form method="GET" action="{{ route('contracts.index') }}" id="contractFilterForm" class="filter-card p-4 mb-4 no-print">
             @if(request('sort_by'))
             <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
             @endif
@@ -464,7 +754,28 @@
         </form>
 
         <!-- Contracts Table -->
-        <div class="table-container">
+        <div class="table-container" data-print-section="table">
+            <div class="ct-toolbar no-print">
+                <form method="GET" action="{{ route('contracts.index') }}" class="ct-perpage">
+                    @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                        @if(is_scalar($value))
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <label for="ctPerPage">Rows</label>
+                    <select name="per_page" id="ctPerPage" onchange="this.form.submit()">
+                        @foreach([5, 10, 25, 50, 100] as $size)
+                            <option value="{{ $size }}" @selected($perPage === $size)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </form>
+                <div class="ct-actions">
+                    <button type="button" class="ct-action-btn" data-ct-print-options data-print-default="table" title="Print this table only">
+                        <i class="fas fa-print"></i> Print table
+                    </button>
+                </div>
+            </div>
+
             @if($contracts->count() > 0)
                 <table class="contracts-table text-left">
                     <thead class="table-header">
@@ -490,21 +801,23 @@
                             };
                         @endphp
                         <tr>
+                            <th style="width:3.5%">No</th>
                             <th class="table-th-sort" style="width:5%">{!! $sortLink('id', 'ID') !!}</th>
-                            <th class="table-th-sort" style="width:18%">{!! $sortLink('name', 'Contract Name') !!}</th>
-                            <th class="table-th-sort" style="width:9.5%">{!! $sortLink('supplier_name', 'Supplier') !!}</th>
-                            <th style="width:11%">Created By</th>
-                            <th class="table-th-sort" style="width:9.5%">{!! $sortLink('start_date', 'Start Date') !!}</th>
-                            <th class="table-th-sort" style="width:9.5%">{!! $sortLink('end_date', 'End Date') !!}</th>
-                            <th class="table-th-sort text-right" style="width:9%">{!! $sortLink('performance_guarantee_amount', 'PG Amount') !!}</th>
-                            <th style="width:9%">PG End Date</th>
+                            <th class="table-th-sort" style="width:16%">{!! $sortLink('name', 'Contract Name') !!}</th>
+                            <th class="table-th-sort" style="width:9%">{!! $sortLink('supplier_name', 'Supplier') !!}</th>
+                            <th style="width:10%">Created By</th>
+                            <th class="table-th-sort" style="width:8.5%">{!! $sortLink('start_date', 'Start Date') !!}</th>
+                            <th class="table-th-sort" style="width:8.5%">{!! $sortLink('end_date', 'End Date') !!}</th>
+                            <th class="table-th-sort text-right" style="width:8.5%">{!! $sortLink('performance_guarantee_amount', 'PG Amount') !!}</th>
+                            <th style="width:8.5%">PG End Date</th>
                             <th class="table-th-sort text-center" style="width:8%">{!! $sortLink('status', 'Status') !!}</th>
-                            <th class="text-right" style="width:11.5%">Actions</th>
+                            <th class="text-right" style="width:14.5%">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($contracts as $contract)
                         <tr class="table-row">
+                            <td class="table-cell text-xs text-gray-400 font-mono whitespace-nowrap">{{ ($contracts->firstItem() ?? 1) + $loop->index }}</td>
                             <td class="table-cell text-xs text-gray-500 font-mono whitespace-nowrap">#{{ $contract->id }}</td>
                             <td class="table-cell">
                                 <a href="{{ route('contracts.show', $contract) }}"
@@ -600,61 +913,41 @@
             <!-- Pagination Footer -->
             @php
                 $paginator = $contracts->appends(request()->query());
-                $currentPage = $paginator->currentPage();
-                $lastPage = $paginator->lastPage();
-                $visiblePages = collect(range(1, max($lastPage, 1)))->filter(function ($page) use ($currentPage, $lastPage) {
-                    return $page === 1 || $page === $lastPage || abs($page - $currentPage) <= 1;
-                });
-                $previousVisiblePage = null;
+                $ctCurrent = $paginator->currentPage();
+                $ctLast = $paginator->lastPage();
+                $ctPages = [];
+                for ($ctPage = 1; $ctPage <= $ctLast; $ctPage++) {
+                    if ($ctPage === 1 || $ctPage === $ctLast || abs($ctPage - $ctCurrent) <= 1) {
+                        $ctPages[] = $ctPage;
+                    } elseif (end($ctPages) !== '...') {
+                        $ctPages[] = '...';
+                    }
+                }
             @endphp
-            <div class="table-footer bg-white border-t border-gray-200 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-sm text-gray-500">
-                    Showing <span class="font-medium text-gray-900">{{ $paginator->firstItem() }}</span>
-                    to <span class="font-medium text-gray-900">{{ $paginator->lastItem() }}</span>
-                    of <span class="font-medium text-gray-900">{{ $paginator->total() }}</span> results
-                </div>
-
-                @if($paginator->hasPages())
-                <nav class="flex items-center gap-1" aria-label="Pagination">
-                    @if($paginator->onFirstPage())
-                    <span class="p-2 rounded-lg text-gray-300 cursor-not-allowed">
-                        <i class="fas fa-chevron-left"></i>
-                        <span class="sr-only">Previous</span>
-                    </span>
+            <div class="ct-pagination no-print">
+                <span>
+                    Showing <strong>{{ $paginator->firstItem() }}–{{ $paginator->lastItem() }}</strong>
+                    of <strong>{{ $paginator->total() }}</strong>
+                </span>
+                <div class="ct-pages">
+                    @if($ctCurrent > 1)
+                        <a class="ct-page-btn" href="{{ $paginator->url($ctCurrent - 1) }}" rel="prev">« Prev</a>
                     @else
-                    <a href="{{ $paginator->previousPageUrl() }}" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
-                        <i class="fas fa-chevron-left"></i>
-                        <span class="sr-only">Previous</span>
-                    </a>
+                        <button type="button" class="ct-page-btn" disabled>« Prev</button>
                     @endif
-
-                    @foreach($visiblePages as $page)
-                        @if($previousVisiblePage !== null && $page - $previousVisiblePage > 1)
-                        <span class="px-2 text-gray-400">...</span>
-                        @endif
-
-                        @if($page === $currentPage)
-                        <span class="px-3.5 py-1.5 text-sm font-medium bg-blue-50 text-blue-600 rounded-lg border border-blue-100">{{ $page }}</span>
+                    @foreach($ctPages as $ctPage)
+                        @if($ctPage === '...')
+                            <span class="ct-page-dots">...</span>
                         @else
-                        <a href="{{ $paginator->url($page) }}" class="px-3.5 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">{{ $page }}</a>
+                            <a class="ct-page-btn {{ $ctPage === $ctCurrent ? 'ct-active' : '' }}" href="{{ $paginator->url($ctPage) }}" @if($ctPage === $ctCurrent) aria-current="page" @endif>{{ $ctPage }}</a>
                         @endif
-
-                        @php $previousVisiblePage = $page; @endphp
                     @endforeach
-
-                    @if($paginator->hasMorePages())
-                    <a href="{{ $paginator->nextPageUrl() }}" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
-                        <i class="fas fa-chevron-right"></i>
-                        <span class="sr-only">Next</span>
-                    </a>
+                    @if($ctCurrent < $ctLast)
+                        <a class="ct-page-btn" href="{{ $paginator->url($ctCurrent + 1) }}" rel="next">Next »</a>
                     @else
-                    <span class="p-2 rounded-lg text-gray-300 cursor-not-allowed">
-                        <i class="fas fa-chevron-right"></i>
-                        <span class="sr-only">Next</span>
-                    </span>
+                        <button type="button" class="ct-page-btn" disabled>Next »</button>
                     @endif
-                </nav>
-                @endif
+                </div>
             </div>
 
             @else
@@ -683,33 +976,109 @@
             </div>
             @endif
         </div>
-
-
     </div>
 </div>
 
-<!-- Stat detail modal -->
-<div id="statModal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="statModalTitle">
-    <div class="absolute inset-0 bg-black/50" onclick="closeStatModal()"></div>
-    <div class="relative mx-auto mt-10 mb-10 w-full max-w-2xl px-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-xl">
-            <div class="flex items-start justify-between px-5 py-4 border-b border-gray-200">
+@foreach($statCards as $card)
+    <div class="ct-modal-bg" id="{{ $card['id'] }}" role="dialog" aria-modal="true" aria-labelledby="{{ $card['id'] }}Title">
+        <div class="ct-modal">
+            <div class="ct-modal-head">
                 <div>
-                    <h3 id="statModalTitle" class="text-lg font-semibold text-gray-800"></h3>
-                    <p id="statModalMeta" class="text-sm text-gray-500 mt-0.5"></p>
+                    <h3 id="{{ $card['id'] }}Title">{{ $card['label'] }}</h3>
+                    <span class="ct-modal-sub">{{ $card['rows']->count() }} record(s) &middot; {{ $card['sub'] }}</span>
                 </div>
-                <button type="button" onclick="closeStatModal()" aria-label="Close"
-                        class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                <button type="button" class="ct-modal-close" aria-label="Close" data-ct-close>×</button>
             </div>
-            <div class="p-5">
-                <div id="statModalLoading" class="text-center py-10 text-gray-500">
-                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading...
-                </div>
-                <div id="statModalEmpty" class="hidden text-center py-10">
-                    <i class="fas fa-inbox text-3xl text-gray-300"></i>
-                    <p class="mt-3 text-gray-600">No records found.</p>
-                </div>
-                <div id="statModalList" class="hidden divide-y divide-gray-100"></div>
+            <div class="ct-modal-body">
+                @if($card['rows']->isEmpty())
+                    <div class="ct-empty">No contracts in this group.</div>
+                @else
+                    <div class="ct-table-wrap">
+                        <table class="ct-table">
+                            <thead>
+                                <tr>
+                                    <th class="ct-roll">No</th>
+                                    <th>Contract</th>
+                                    <th>Supplier</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th class="ct-amount">PG Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($card['rows'] as $row)
+                                    <tr>
+                                        <td class="ct-roll">{{ $loop->iteration }}</td>
+                                        <td>
+                                            <a href="{{ route('contracts.show', $row) }}" class="font-medium text-[#1C75BC] hover:underline">{{ $row->name }}</a>
+                                            <div class="text-[11px] text-gray-400">#{{ $row->id }}{{ $row->department ? ' · ' . ucfirst(str_replace('_', ' ', $row->department)) : '' }}</div>
+                                        </td>
+                                        <td>{{ $row->supplier_name ?? 'N/A' }}</td>
+                                        <td>{{ $row->start_date?->format('M d, Y') ?? '-' }}</td>
+                                        <td>
+                                            {{ $row->end_date?->format('M d, Y') ?? '-' }}
+                                            @if($row->extended_count > 0)
+                                                <div class="text-[11px] text-amber-600">Extended {{ $row->extended_count }}x</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="status-badge
+                                                @if($row->status === 'active') bg-emerald-50 text-emerald-700 border-emerald-100
+                                                @elseif($row->status === 'expiring') bg-amber-50 text-amber-700 border-amber-100
+                                                @elseif($row->status === 'expired') bg-red-50 text-red-700 border-red-100
+                                                @else bg-gray-50 text-gray-600 border-gray-200 @endif">
+                                                {{ ucfirst($row->status) }}
+                                            </span>
+                                            @if($row->status === 'expiring')
+                                                <div class="text-[11px] text-amber-600 mt-0.5">{{ $row->getDaysUntilContractEnd() }} days left</div>
+                                            @endif
+                                        </td>
+                                        <td class="ct-amount">
+                                            @if($row->performance_guarantee_amount)
+                                                ${{ number_format($row->performance_guarantee_amount, 2) }}
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+            <div class="ct-modal-foot">
+                <span class="ct-modal-range"></span>
+                <div class="ct-modal-pages"></div>
+            </div>
+        </div>
+    </div>
+@endforeach
+
+<div class="ct-modal-bg" id="ctModalPrint" role="dialog" aria-modal="true" aria-labelledby="ctPrintTitle">
+    <div class="ct-modal ct-modal-sm">
+        <div class="ct-modal-head">
+            <div>
+                <h3 id="ctPrintTitle">Print Contracts</h3>
+                <span>Choose which sections appear on the printed page</span>
+            </div>
+            <button type="button" class="ct-modal-close" aria-label="Close" data-ct-close>×</button>
+        </div>
+        <div class="ct-modal-body">
+            <div class="ct-print-options">
+                <label><input type="checkbox" class="ct-print-check" value="cards"> Summary cards</label>
+                <label><input type="checkbox" class="ct-print-check" value="table" checked> Contracts table</label>
+            </div>
+            <p id="ctPrintHint" class="ct-print-hint" style="display:none;">Select at least one section to print.</p>
+        </div>
+        <div class="ct-modal-foot" style="display:flex;">
+            <span></span>
+            <div class="ct-modal-pages">
+                <button type="button" class="ct-action-btn" data-ct-close>Cancel</button>
+                <button type="button" class="inline-flex items-center px-3 py-1.5 bg-[#0ea5e9] text-white text-xs font-semibold rounded-lg hover:bg-[#0284c7]" id="ctPrintGo">
+                    <i class="fas fa-print mr-1"></i> Print
+                </button>
             </div>
         </div>
     </div>
@@ -718,124 +1087,225 @@
 
 @section('scripts')
 <script>
-let statRequestSeq = 0;
+    (function () {
+        const form = document.getElementById('contractFilterForm');
+        const input = document.getElementById('contractSearch');
+        if (form && input) {
+            let timer = null;
+            let appliedValue = input.value;
 
-const statTones = {
-    green: 'bg-green-100 text-green-800',
-    amber: 'bg-amber-100 text-amber-800',
-    red: 'bg-red-100 text-red-800',
-    blue: 'bg-blue-100 text-blue-800',
-    gray: 'bg-gray-100 text-gray-700',
-};
+            input.addEventListener('input', function () {
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    if (input.value === appliedValue) return;
+                    appliedValue = input.value;
+                    form.submit();
+                }, 600);
+            });
 
-function escapeStatHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, function (ch) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
-    });
-}
+            form.addEventListener('submit', function () {
+                clearTimeout(timer);
+            });
+        }
+    })();
 
-function openStatModal(scope, title) {
-    const modal = document.getElementById('statModal');
-    if (!modal) return;
+    (function () {
+        'use strict';
 
-    document.getElementById('statModalTitle').textContent = title;
-    document.getElementById('statModalMeta').textContent = '';
-    document.getElementById('statModalList').innerHTML = '';
-    document.getElementById('statModalList').classList.add('hidden');
-    document.getElementById('statModalEmpty').classList.add('hidden');
-    document.getElementById('statModalLoading').classList.remove('hidden');
+        var MODAL_PAGE_SIZE = 10;
 
-    modal.classList.remove('hidden');
-    loadStatSummary(scope);
-}
+        function openModalEl(modal) {
+            if (!modal) return;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
-function closeStatModal() {
-    const modal = document.getElementById('statModal');
-    if (modal) modal.classList.add('hidden');
-}
+        function closeModal(modal) {
+            if (!modal) return;
+            modal.classList.remove('open');
+            if (!document.querySelector('.ct-modal-bg.open')) {
+                document.body.style.overflow = '';
+            }
+        }
 
-async function loadStatSummary(scope) {
-    const seq = ++statRequestSeq;
+        function pageWindow(current, last) {
+            var pages = [];
+            for (var page = 1; page <= last; page++) {
+                if (page === 1 || page === last || Math.abs(page - current) <= 1) {
+                    pages.push(page);
+                } else if (pages[pages.length - 1] !== '...') {
+                    pages.push('...');
+                }
+            }
+            return pages;
+        }
 
-    try {
-        const response = await fetch('{{ url('/dashboard/summary') }}/' + encodeURIComponent(scope), {
-            headers: { 'Accept': 'application/json' },
+        function initModalPager(modal) {
+            if (!modal) return;
+            var table = modal.querySelector('.ct-modal-body .ct-table');
+            if (!table) return;
+
+            var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+            if (!rows.length) return;
+
+            var foot = modal.querySelector('.ct-modal-foot');
+            var rangeNode = foot && foot.querySelector('.ct-modal-range');
+            var pagesNode = foot && foot.querySelector('.ct-modal-pages');
+            if (!foot || !rangeNode || !pagesNode) return;
+
+            var state = modal.ctPager;
+            if (!state) {
+                state = modal.ctPager = { rows: rows, page: 1, foot: foot, range: rangeNode, pages: pagesNode };
+            }
+            state.page = 1;
+            paintModalPage(state, false);
+        }
+
+        function paintModalPage(state, refocus) {
+            var rows = state.rows;
+            var total = rows.length;
+            var lastPage = Math.max(1, Math.ceil(total / MODAL_PAGE_SIZE));
+            state.page = Math.min(Math.max(state.page, 1), lastPage);
+
+            var start = (state.page - 1) * MODAL_PAGE_SIZE;
+            var end = Math.min(start + MODAL_PAGE_SIZE, total);
+
+            rows.forEach(function (row, index) {
+                row.hidden = index < start || index >= end;
+            });
+
+            state.foot.style.display = 'flex';
+            state.range.innerHTML = 'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + total + '</strong>';
+
+            state.pages.textContent = '';
+
+            state.pages.appendChild(pagerButton('« Prev', state.page <= 1, false, function () {
+                goToModalPage(state, state.page - 1);
+            }));
+
+            pageWindow(state.page, lastPage).forEach(function (item) {
+                if (item === '...') {
+                    var dots = document.createElement('span');
+                    dots.className = 'ct-page-dots';
+                    dots.textContent = '...';
+                    state.pages.appendChild(dots);
+                    return;
+                }
+
+                var button = pagerButton(String(item), false, item === state.page, function () {
+                    goToModalPage(state, item);
+                });
+                if (item === state.page) button.setAttribute('aria-current', 'page');
+                state.pages.appendChild(button);
+            });
+
+            state.pages.appendChild(pagerButton('Next »', state.page >= lastPage, false, function () {
+                goToModalPage(state, state.page + 1);
+            }));
+
+            if (refocus) {
+                var active = state.pages.querySelector('.ct-active');
+                if (active) active.focus();
+            }
+        }
+
+        function pagerButton(label, disabled, active, onClick) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'ct-page-btn' + (active ? ' ct-active' : '');
+            button.textContent = label;
+            button.disabled = disabled;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+        function goToModalPage(state, page) {
+            state.page = page;
+            paintModalPage(state, true);
+            var body = state.foot.parentNode.querySelector('.ct-modal-body');
+            if (body) body.scrollTop = 0;
+        }
+
+        var printModal = document.getElementById('ctModalPrint');
+        var printChecks = Array.prototype.slice.call(document.querySelectorAll('.ct-print-check'));
+        var printHint = document.getElementById('ctPrintHint');
+
+        function openPrintOptions(defaultSection) {
+            var wanted = defaultSection || 'table';
+            printChecks.forEach(function (check) {
+                check.checked = check.value === wanted;
+            });
+            if (printHint) printHint.style.display = 'none';
+            openModalEl(printModal);
+        }
+
+        function printSelectedSections() {
+            var selected = printChecks
+                .filter(function (check) { return check.checked; })
+                .map(function (check) { return check.value; });
+
+            if (!selected.length) {
+                if (printHint) printHint.style.display = 'block';
+                return;
+            }
+
+            var sections = document.querySelectorAll('[data-print-section]');
+
+            function restoreSections() {
+                Array.prototype.forEach.call(sections, function (section) {
+                    section.classList.remove('print-hide-section');
+                });
+                window.removeEventListener('afterprint', restoreSections);
+            }
+
+            Array.prototype.forEach.call(sections, function (section) {
+                var key = section.getAttribute('data-print-section');
+                section.classList.toggle('print-hide-section', selected.indexOf(key) === -1);
+            });
+
+            closeModal(printModal);
+            window.addEventListener('afterprint', restoreSections, { once: true });
+            window.print();
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-ct-modal]'), function (button) {
+            button.addEventListener('click', function () {
+                var modal = document.getElementById(button.getAttribute('data-ct-modal'));
+                initModalPager(modal);
+                openModalEl(modal);
+            });
         });
-        const data = await response.json().catch(() => ({}));
 
-        if (!response.ok) throw new Error(data.message || 'Unable to load details.');
-        if (seq !== statRequestSeq) return;
+        Array.prototype.forEach.call(document.querySelectorAll('.ct-modal-bg'), function (backdrop) {
+            backdrop.addEventListener('click', function (event) {
+                if (event.target === backdrop) closeModal(backdrop);
+            });
+        });
 
-        renderStatSummary(data);
-    } catch (error) {
-        if (seq !== statRequestSeq) return;
-        document.getElementById('statModalLoading').classList.add('hidden');
-        const empty = document.getElementById('statModalEmpty');
-        empty.querySelector('p').textContent = error.message;
-        empty.classList.remove('hidden');
-    }
-}
+        Array.prototype.forEach.call(document.querySelectorAll('[data-ct-close]'), function (button) {
+            button.addEventListener('click', function () {
+                closeModal(button.closest('.ct-modal-bg'));
+            });
+        });
 
-function renderStatSummary(data) {
-    document.getElementById('statModalLoading').classList.add('hidden');
-    document.getElementById('statModalMeta').textContent = (data.count ?? 0) + ' record(s)';
+        Array.prototype.forEach.call(document.querySelectorAll('[data-ct-print-options]'), function (button) {
+            button.addEventListener('click', function () {
+                openPrintOptions(button.getAttribute('data-print-default'));
+            });
+        });
 
-    const empty = document.getElementById('statModalEmpty');
-    const list = document.getElementById('statModalList');
-    const items = Array.isArray(data.items) ? data.items : [];
+        var printGo = document.getElementById('ctPrintGo');
+        if (printGo) {
+            printGo.addEventListener('click', printSelectedSections);
+        }
 
-    if (!items.length) {
-        empty.classList.remove('hidden');
-        return;
-    }
-
-    list.innerHTML = items.map(function (item, index) {
-        const title = item.url
-            ? '<a href="' + escapeStatHtml(item.url) + '" class="font-medium text-[#1C75BC] hover:underline">' + escapeStatHtml(item.title) + '</a>'
-            : '<span class="font-medium text-gray-800">' + escapeStatHtml(item.title) + '</span>';
-
-        const badge = item.badge
-            ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ' +
-                (statTones[item.tone] || statTones.gray) + '">' + escapeStatHtml(item.badge) + '</span>'
-            : '';
-
-        return '<div class="flex items-start gap-3 py-2.5">' +
-            '<div class="w-6 shrink-0 pt-0.5 text-right text-xs font-semibold text-gray-400">' + (index + 1) + '</div>' +
-            '<div class="min-w-0 flex-1">' + title +
-            (item.subtitle ? '<div class="text-sm text-gray-600 truncate">' + escapeStatHtml(item.subtitle) + '</div>' : '') +
-            (item.meta ? '<div class="text-xs text-gray-500 mt-0.5">' + escapeStatHtml(item.meta) + '</div>' : '') +
-            '</div>' +
-            (badge ? '<div class="shrink-0">' + badge + '</div>' : '') +
-            '</div>';
-    }).join('');
-
-    list.classList.remove('hidden');
-}
-
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') closeStatModal();
-});
-
-(function () {
-    const form = document.getElementById('contractFilterForm');
-    const input = document.getElementById('contractSearch');
-    if (!form || !input) return;
-
-    let timer = null;
-    let appliedValue = input.value;
-
-    input.addEventListener('input', function () {
-        clearTimeout(timer);
-        timer = setTimeout(function () {
-            if (input.value === appliedValue) return;
-            appliedValue = input.value;
-            form.submit();
-        }, 600);
-    });
-
-    form.addEventListener('submit', function () {
-        clearTimeout(timer);
-    });
-})();
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') return;
+            var open = document.querySelectorAll('.ct-modal-bg.open');
+            if (open.length) {
+                closeModal(open[open.length - 1]);
+            }
+        });
+    })();
 </script>
 @endsection

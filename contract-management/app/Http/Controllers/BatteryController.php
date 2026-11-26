@@ -43,7 +43,35 @@ class BatteryController extends Controller
         return view('batteries.index', compact(
             'batteries', 'brands', 'batteryTypes', 'batteryStatuses', 'drivers',
             'totalBatteries', 'returnedBatteries', 'inServiceBatteries'
-        ));
+        ))->with('statGroups', $this->statGroups());
+    }
+
+    private function scopeQuery(string $scope)
+    {
+        $query = Battery::query()->latest();
+
+        if ($scope === 'in_service') {
+            $query->inService();
+        } elseif ($scope === 'returned') {
+            $query->returned();
+        } elseif ($scope === 'variance') {
+            $query->whereColumn('return_kilometer', '>', 'initial_kilometer');
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array<string, \Illuminate\Database\Eloquent\Collection>
+     */
+    private function statGroups(): array
+    {
+        return [
+            'total' => $this->scopeQuery('total')->get(),
+            'in_service' => $this->scopeQuery('in_service')->get(),
+            'returned' => $this->scopeQuery('returned')->get(),
+            'variance' => $this->scopeQuery('variance')->get(),
+        ];
     }
 
     public function exportExcel(Request $request)

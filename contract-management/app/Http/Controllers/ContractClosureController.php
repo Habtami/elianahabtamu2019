@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ContractClosuresExport;
 use App\Models\Contract;
 use App\Models\ContractClosure;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class ContractClosureController extends Controller
@@ -17,10 +19,74 @@ class ContractClosureController extends Controller
                 ->with('error', 'You are not authorized to view contract closures.');
         }
 
-        $visibleContractIds = Contract::forUser($user)->select('id');
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 10;
+        }
+
+        [$query, $search] = $this->filteredQuery($request);
+
+        $closures = $query->paginate($perPage)->appends($request->query());
+
+        $contracts = Contract::forUser($user)
+            ->whereDoesntHave('closure')
+            ->orderBy('name')
+            ->get();
+
+        return view('contract-closures.index', array_merge(
+            $this->summaryStats(),
+            [
+                'closures' => $closures,
+                'search' => $search,
+                'statGroups' => $this->statGroups(),
+                'contracts' => $contracts,
+                'statuses' => ContractClosure::getStatuses(),
+            ]
+        ));
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->canViewContractClosures()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to export contract closures.');
+        }
+
+        [$query, $search] = $this->filteredQuery($request);
+
+        (new ContractClosuresExport($query->get(), $search))
+            ->download('contract-closures-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->canViewContractClosures()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'You are not authorized to export contract closures.');
+        }
+
+        [$query, $search] = $this->filteredQuery($request);
+        $closures = $query->get();
+
+        return Pdf::loadView('contract-closures.pdf', array_merge(
+            $this->summaryStats(),
+            ['closures' => $closures, 'search' => $search]
+        ))->download('contract-closures-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    /**
+     * @return array{0: \Illuminate\Database\Eloquent\Builder, 1: string}
+     */
+    private function filteredQuery(Request $request): array
+    {
+        $search = trim((string) $request->input('search', ''));
 
         $query = ContractClosure::with(['contract', 'creator', 'completer'])
-            ->whereIn('contract_id', $visibleContractIds);
+            ->whereIn('contract_id', Contract::forUser(auth()->user())->select('id'));
 
         if ($request->filled('status') && array_key_exists($request->status, ContractClosure::getStatuses())) {
             $query->where('status', $request->status);
@@ -34,35 +100,61 @@ class ContractClosureController extends Controller
             $query->whereDate('closing_date', '<=', $request->to);
         }
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('contract', function ($contract) use ($search) {
-                $contract->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('supplier_name', 'like', '%' . $search . '%');
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+
+            $query->whereHas('contract', function ($contract) use ($like) {
+                $contract->where('name', 'like', $like)
+                    ->orWhere('supplier_name', 'like', $like);
             });
         }
 
-        $closures = $query->orderByDesc('closing_date')->orderByDesc('id')
-            ->paginate(10)
-            ->appends($request->query());
+        $query->orderByDesc('closing_date')->orderByDesc('id');
 
-        $base = ContractClosure::whereIn('contract_id', Contract::forUser($user)->select('id'));
+        return [$query, $search];
+    }
 
-        $total = (clone $base)->count();
-        $pending = (clone $base)->where('status', ContractClosure::STATUS_PENDING)->count();
-        $complete = (clone $base)->where('status', ContractClosure::STATUS_COMPLETE)->count();
-        $today = (clone $base)->whereDate('closing_date', now()->toDateString())->count();
+    private function summaryStats(): array
+    {
+        $base = ContractClosure::whereIn('contract_id', Contract::forUser(auth()->user())->select('id'));
 
-        $contracts = Contract::forUser($user)
-            ->whereDoesntHave('closure')
-            ->orderBy('name')
-            ->get();
+        return [
+            'total' => (clone $base)->count(),
+            'pending' => (clone $base)->where('status', ContractClosure::STATUS_PENDING)->count(),
+            'complete' => (clone $base)->where('status', ContractClosure::STATUS_COMPLETE)->count(),
+            'today' => (clone $base)->whereDate('closing_date', now()->toDateString())->count(),
+        ];
+    }
 
-        $statuses = ContractClosure::getStatuses();
+    private function scopeQuery(string $scope)
+    {
+        $query = ContractClosure::with(['contract', 'completer'])
+            ->whereIn('contract_id', Contract::forUser(auth()->user())->select('id'))
+            ->orderByDesc('closing_date')
+            ->orderByDesc('id');
 
-        return view('contract-closures.index', compact(
-            'closures', 'contracts', 'statuses', 'total', 'pending', 'complete', 'today'
-        ));
+        if ($scope === 'pending') {
+            $query->where('status', ContractClosure::STATUS_PENDING);
+        } elseif ($scope === 'complete') {
+            $query->where('status', ContractClosure::STATUS_COMPLETE);
+        } elseif ($scope === 'today') {
+            $query->whereDate('closing_date', now()->toDateString());
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array<string, \Illuminate\Database\Eloquent\Collection>
+     */
+    private function statGroups(): array
+    {
+        return [
+            'total' => $this->scopeQuery('total')->get(),
+            'pending' => $this->scopeQuery('pending')->get(),
+            'complete' => $this->scopeQuery('complete')->get(),
+            'today' => $this->scopeQuery('today')->get(),
+        ];
     }
 
     public function store(Request $request)

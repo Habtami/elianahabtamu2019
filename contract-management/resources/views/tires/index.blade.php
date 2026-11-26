@@ -996,6 +996,205 @@
         margin-top: 0.25rem;
     }
 
+    /* ---------- SHARED REGISTER PATTERN ---------- */
+    .ti-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .ti-stat {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--card-color, #1C75BC);
+        border-radius: 12px;
+        padding: 1.1rem 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .ti-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        border-color: #cbd5e1;
+        border-left-color: var(--card-color, #1C75BC);
+    }
+    .ti-stat:focus-visible { outline: 2px solid var(--card-color, #1C75BC); outline-offset: 2px; }
+    .ti-stat-main { min-width: 0; }
+    .ti-stat-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+    .ti-stat-value {
+        display: block;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 0.3rem;
+        line-height: 1.15;
+    }
+    .ti-stat-sub { display: block; margin-top: 0.35rem; font-size: 0.74rem; font-weight: 500; color: #7a90a6; }
+    .ti-stat-hint {
+        display: block;
+        margin-top: 0.45rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #8aa2b8;
+        opacity: 0;
+        transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .ti-stat:hover .ti-stat-hint,
+    .ti-stat:focus-visible .ti-stat-hint { opacity: 1; color: #1C75BC; }
+    .ti-stat-icon {
+        flex: none;
+        padding-top: 0.1rem;
+        font-size: 1.9rem;
+        line-height: 1;
+        color: var(--card-color, #1C75BC);
+        opacity: 0.22;
+    }
+
+    .ti-modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 25, 45, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1700;
+        padding: 1rem;
+    }
+    .ti-modal-bg.open { display: flex; }
+    .ti-modal {
+        background: #fff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 1080px;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 60px rgba(8, 25, 45, 0.35);
+        overflow: hidden;
+    }
+    .ti-modal.ti-modal-sm { max-width: 480px; }
+    .ti-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.3rem;
+        border-bottom: 1px solid #edf2f8;
+    }
+    .ti-modal-head h3 { margin: 0; font-size: 1.05rem; color: #0f2a44; }
+    .ti-modal-head span { font-size: 0.75rem; color: #6b8299; }
+    .ti-modal-close {
+        border: none;
+        background: #eef2f7;
+        color: #33506e;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .ti-modal-close:hover { background: #dbe6f1; }
+    .ti-modal-body { padding: 1rem 1.3rem 1.4rem; overflow-y: auto; }
+    .ti-modal-foot {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.7rem 1.3rem;
+        border-top: 1px solid #edf2f8;
+        background: #f8fafc;
+        font-size: 0.82rem;
+        color: #6b8299;
+    }
+    .ti-modal-foot strong { color: #1e293b; font-weight: 600; }
+    .ti-modal-pages { display: flex; gap: 0.25rem; align-items: center; flex-wrap: wrap; }
+
+    .ti-table-wrap { overflow-x: auto; }
+    .ti-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .ti-table th {
+        background: #f3f7fc;
+        color: #345572;
+        text-align: left;
+        padding: 0.65rem 0.6rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid #d7e2ee;
+        white-space: nowrap;
+    }
+    .ti-table td {
+        padding: 0.7rem 0.6rem;
+        border-bottom: 1px solid #edf2f8;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+    .ti-table tbody tr:hover td { background: #f8fbff; }
+    .ti-table th.ti-roll,
+    .ti-table td.ti-roll {
+        width: 3.2rem;
+        color: #7a90a6;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .ti-table th.ti-num,
+    .ti-table td.ti-num { text-align: right; font-variant-numeric: tabular-nums; }
+    .ti-empty { text-align: center; color: #8ca3b8; padding: 2rem 1rem; font-style: italic; }
+
+    .ti-print-options { display: flex; flex-direction: column; gap: 0.55rem; }
+    .ti-print-options label {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.88rem;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .ti-print-options input { width: 16px; height: 16px; accent-color: #1C75BC; }
+    .ti-print-hint { margin: 0.7rem 0 0; font-size: 0.78rem; font-weight: 600; color: #b91c1c; }
+
+    .row-no {
+        color: #94A3B8;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        width: 3rem;
+    }
+
+    @media print {
+        @page { size: A4 landscape; margin: 10mm; }
+        .sidebar, .sidebar-toggle, .page-header, .page-footer,
+        .toolbar, .action-btn, .table-controls, .row-actions,
+        .pagination-wrapper, .ti-modal-bg, .table-tip-btn, .table-tip-panel,
+        .no-print { display: none !important; }
+        .print-hide-section { display: none !important; }
+        body { background: #fff; }
+        .main-content, .main-content.expanded { margin-left: 0 !important; }
+        .table-card { box-shadow: none; border: none; }
+        .modern-table { width: 100%; font-size: 9pt; }
+        .modern-table thead { display: table-header-group; }
+        .modern-table th, .modern-table td { border: 1px solid #9aa9b8; padding: 0.3rem 0.35rem; }
+        .modern-table tbody tr:hover { background: transparent; }
+        .ti-stat { box-shadow: none; cursor: default; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
     /* ---------- RESPONSIVE ---------- */
     @media (max-width: 640px) {
         .header-user { align-items: flex-start; text-align: left; }
@@ -1045,54 +1244,72 @@
                 <i class="fas fa-chart-bar" aria-hidden="true"></i> Reports
             </a>
             @endif
+            <button type="button" class="action-btn ghost" data-ti-print-options data-print-default="cards">
+                <i class="fas fa-print" aria-hidden="true"></i> Print
+            </button>
+            <a href="{{ route('tires.export', request()->only(['search', 'status', 'tire_type'])) }}" class="action-btn ghost">
+                <i class="fas fa-file-excel" aria-hidden="true"></i> Excel
+            </a>
+            <a href="{{ route('tires.export', array_merge(request()->only(['search', 'status', 'tire_type']), ['format' => 'pdf'])) }}" class="action-btn ghost">
+                <i class="fas fa-file-pdf" aria-hidden="true"></i> PDF
+            </a>
         </div>
 
         {{-- ========== STAT CARDS ========== --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-
-            <div class="kpi-card blue" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('total-tires', 'Total Tires')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Total Tires</p>
-                    <p class="kpi-value">{{ $totalTires }}</p>
-                    <p class="kpi-subtitle">{{ $activeTires }} active</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-circle-notch" aria-hidden="true"></i></div>
-            </div>
-
-            <div class="kpi-card yellow" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('in-use', 'In Use')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">In Use</p>
-                    <p class="kpi-value">{{ $givenOutTires }}</p>
-                    <p class="kpi-subtitle">Currently given out</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-hand-holding" aria-hidden="true"></i></div>
-            </div>
-
-            <div class="kpi-card green" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('returned', 'Returned')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Returned</p>
-                    <p class="kpi-value">{{ $returnedTires }}</p>
-                    <p class="kpi-subtitle">Previously returned</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-undo-alt" aria-hidden="true"></i></div>
-            </div>
-
-            <div class="kpi-card purple" role="button" tabindex="0" style="cursor:pointer"
-                 onclick="openStatModal('active-drivers', 'Active Drivers')"
-                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                <div>
-                    <p class="kpi-title">Active Drivers</p>
-                    <p class="kpi-value">{{ $activeDriversCount }}</p>
-                    <p class="kpi-subtitle">{{ $tiresOutCount }} tires out</p>
-                </div>
-                <div class="kpi-icon"><i class="fas fa-user-friends" aria-hidden="true"></i></div>
-            </div>
+        @php
+            $tiStatCards = [
+                [
+                    'label' => 'Total Tires',
+                    'value' => $totalTires,
+                    'sub' => $activeTires . ' active',
+                    'color' => '#1C75BC',
+                    'icon' => 'fa-circle-notch',
+                    'id' => 'tiModalTotal',
+                    'hint' => 'Click to view every tire →',
+                ],
+                [
+                    'label' => 'In Use',
+                    'value' => $givenOutTires,
+                    'sub' => 'Currently given out',
+                    'color' => '#f59e0b',
+                    'icon' => 'fa-hand-holding',
+                    'id' => 'tiModalInUse',
+                    'hint' => 'Click to view tires in use →',
+                ],
+                [
+                    'label' => 'Returned',
+                    'value' => $returnedTires,
+                    'sub' => 'Previously returned',
+                    'color' => '#10b981',
+                    'icon' => 'fa-undo-alt',
+                    'id' => 'tiModalReturned',
+                    'hint' => 'Click to view returned tires →',
+                ],
+                [
+                    'label' => 'Active Drivers',
+                    'value' => $activeDriversCount,
+                    'sub' => $tiresOutCount . ' tires out',
+                    'color' => '#8b5cf6',
+                    'icon' => 'fa-user-friends',
+                    'id' => 'tiModalDrivers',
+                    'hint' => 'Click to view active drivers →',
+                ],
+            ];
+        @endphp
+        <div class="ti-stats" data-print-section="cards">
+            @foreach($tiStatCards as $card)
+                <button type="button" class="ti-stat" style="--card-color: {{ $card['color'] }};"
+                        data-ti-modal="{{ $card['id'] }}" aria-haspopup="dialog"
+                        aria-label="{{ $card['label'] }} details" title="{{ $card['hint'] }}">
+                    <span class="ti-stat-main">
+                        <span class="ti-stat-label">{{ $card['label'] }}</span>
+                        <span class="ti-stat-value">{{ $card['value'] }}</span>
+                        <span class="ti-stat-sub">{{ $card['sub'] }}</span>
+                        <span class="ti-stat-hint">{{ $card['hint'] }}</span>
+                    </span>
+                    <span class="ti-stat-icon" aria-hidden="true"><i class="fas {{ $card['icon'] }}"></i></span>
+                </button>
+            @endforeach
         </div>
 
         {{-- ========== UNIFIED FILTER TOOLBAR ========== --}}
@@ -1129,7 +1346,7 @@
         </form>
 
         {{-- ========== TABLE CARD ========== --}}
-        <div class="table-card">
+        <div class="table-card" data-print-section="table">
             <div class="table-card-header">
                 <h3 class="table-card-title">
                     <i class="fas fa-list-ul" style="color:var(--epss-blue);" aria-hidden="true"></i>
@@ -1142,11 +1359,17 @@
                     <input type="text" id="quick-filter" placeholder="Quick filter..."
                            aria-label="Quick filter current page">
                     <select id="page-size" aria-label="Rows per page">
+                        <option value="5">5 / page</option>
                         <option value="10" selected>10 / page</option>
                         <option value="25">25 / page</option>
                         <option value="50">50 / page</option>
                         <option value="100">100 / page</option>
                     </select>
+                    <button type="button" class="page-btn" data-ti-print-options data-print-default="table"
+                            title="Print this table only" aria-label="Print this table only"
+                            style="height:auto; padding:0.4rem 0.7rem;">
+                        <i class="fas fa-print" aria-hidden="true"></i>
+                    </button>
                 </div>
                 @endif
             </div>
@@ -1155,28 +1378,30 @@
             <div id="tipTires" class="table-tip-panel no-print">
                 <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
                 <ul>
-                    <li>Each row is one tire: ID, type, serial, plate, given by, driver, initial and current KM, KM difference, status.</li>
+                    <li>Each row is one tire: No, ID, type, serial, plate, given by, driver, initial and current KM, KM difference, status.</li>
                     <li>Status is only In Use or Returned; returned tires cannot be given out again or edited.</li>
                     <li>Click a column heading to sort; quick filter narrows the loaded rows and pagination starts again at page one.</li>
+                    <li>Rows changes the page size between 5 and 100; the footer keeps numbered pages and the row count visible.</li>
                     <li>Search, status and tire type in the toolbar reload the list from the server; Reset clears all three.</li>
                     <li>Row actions open details, give, history or edit, shown only when your role and the tire status allow.</li>
-                    <li>KPI cards open detail lists, and the history action shows that tire's give and return records in a modal.</li>
+                    <li>KPI cards open a detail list with a No column and its own pager; Print, Excel and PDF reuse the active filters.</li>
                 </ul>
             </div>
             <div class="overflow-x-auto">
                 <table id="tires-table" class="modern-table">
                     <thead>
                         <tr>
-                            <th data-sort="0" class="sortable" tabindex="0" role="button" aria-sort="none">ID <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                            <th data-sort="1" class="sortable" tabindex="0" role="button" aria-sort="none">Tire Type <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                            <th data-sort="2" class="sortable" tabindex="0" role="button" aria-sort="none">Serial Number <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                             <th data-sort="3" class="sortable" tabindex="0" role="button" aria-sort="none">Plate Number <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                             <th data-sort="4" class="sortable" tabindex="0" role="button" aria-sort="none">Given By <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                             <th data-sort="5" class="sortable" tabindex="0" role="button" aria-sort="none">Driver <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                              <th data-sort="6" class="sortable" tabindex="0" role="button" aria-sort="none">Initial KM <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                              <th data-sort="7" class="sortable" tabindex="0" role="button" aria-sort="none">Current KM <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                              <th data-sort="8" class="sortable" tabindex="0" role="button" aria-sort="none">KM Difference <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
-                              <th data-sort="9" class="sortable" tabindex="0" role="button" aria-sort="none">Status <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                            <th class="row-no" style="cursor:default;">No</th>
+                            <th data-sort="1" class="sortable" tabindex="0" role="button" aria-sort="none">ID <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                            <th data-sort="2" class="sortable" tabindex="0" role="button" aria-sort="none">Tire Type <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                            <th data-sort="3" class="sortable" tabindex="0" role="button" aria-sort="none">Serial Number <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                             <th data-sort="4" class="sortable" tabindex="0" role="button" aria-sort="none">Plate Number <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                             <th data-sort="5" class="sortable" tabindex="0" role="button" aria-sort="none">Given By <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                             <th data-sort="6" class="sortable" tabindex="0" role="button" aria-sort="none">Driver <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                              <th data-sort="7" class="sortable" tabindex="0" role="button" aria-sort="none">Initial KM <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                              <th data-sort="8" class="sortable" tabindex="0" role="button" aria-sort="none">Current KM <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                              <th data-sort="9" class="sortable" tabindex="0" role="button" aria-sort="none">KM Difference <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
+                              <th data-sort="10" class="sortable" tabindex="0" role="button" aria-sort="none">Status <i class="fas fa-sort sort-icon" aria-hidden="true"></i></th>
                               <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
@@ -1210,6 +1435,7 @@
                             }
                         @endphp
                         <tr>
+                            <td class="row-no"></td>
                             <td><span class="tire-id">#{{ $tire->id }}</span></td>
                             <td>
                                 <span class="tire-type-tag">
@@ -1488,28 +1714,139 @@
             aria-label="Close photo">&times;</button>
 </div>
 
-<!-- Stat detail modal -->
-<div id="statModal" class="hidden fixed inset-0 z-50 overflow-y-auto" style="z-index: 1200" role="dialog" aria-modal="true" aria-labelledby="statModalTitle">
-    <div class="absolute inset-0 bg-black/50" onclick="closeStatModal()"></div>
-    <div class="relative mx-auto mt-10 mb-10 w-full max-w-2xl px-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-xl">
-            <div class="flex items-start justify-between px-5 py-4 border-b border-gray-200">
-                <div>
-                    <h3 id="statModalTitle" class="text-lg font-semibold text-gray-800"></h3>
-                    <p id="statModalMeta" class="text-sm text-gray-500 mt-0.5"></p>
-                </div>
-                <button type="button" onclick="closeStatModal()" aria-label="Close"
-                        class="text-gray-400 hover:text-gray-600 text-2xl leading-none p-2 -m-2">&times;</button>
+{{-- Tire detail modals --}}
+@foreach([
+    ['id' => 'tiModalTotal', 'label' => 'Total Tires', 'rows' => $statRows['total']],
+    ['id' => 'tiModalInUse', 'label' => 'In Use', 'rows' => $statRows['in_use']],
+    ['id' => 'tiModalReturned', 'label' => 'Returned', 'rows' => $statRows['returned']],
+] as $tiModal)
+<div class="ti-modal-bg" id="{{ $tiModal['id'] }}" role="dialog" aria-modal="true" aria-labelledby="{{ $tiModal['id'] }}Title">
+    <div class="ti-modal">
+        <div class="ti-modal-head">
+            <div>
+                <h3 id="{{ $tiModal['id'] }}Title">{{ $tiModal['label'] }}</h3>
+                <span>{{ $tiModal['rows']->count() }} tire(s)</span>
             </div>
-            <div class="p-5">
-                <div id="statModalLoading" class="text-center py-10 text-gray-500">
-                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading...
+            <button type="button" class="ti-modal-close" aria-label="Close" data-ti-close>&times;</button>
+        </div>
+        <div class="ti-modal-body">
+            @if($tiModal['rows']->isEmpty())
+                <div class="ti-empty">No tires in this group.</div>
+            @else
+                <div class="ti-table-wrap">
+                    <table class="ti-table">
+                        <thead>
+                            <tr>
+                                <th class="ti-roll">No</th>
+                                <th>ID</th>
+                                <th>Tire</th>
+                                <th>Serial</th>
+                                <th>Plate</th>
+                                <th>Driver</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($tiModal['rows'] as $rowTire)
+                                @php($rowGive = $rowTire->tireGives->sortByDesc('id')->first())
+                                <tr>
+                                    <td class="ti-roll">{{ $loop->iteration }}</td>
+                                    <td>#{{ $rowTire->id }}</td>
+                                    <td>{{ $rowTire->tire_type }}</td>
+                                    <td>{{ $rowTire->serial_number }}</td>
+                                    <td>{{ $rowTire->plate_number ?: '—' }}</td>
+                                    <td>{{ $rowGive?->driver?->name ?? '—' }}</td>
+                                    <td>
+                                        @if($rowTire->isGivenOut())
+                                            <span class="status-pill in-use"><span class="dot"></span> In Use</span>
+                                        @else
+                                            <span class="status-pill returned"><span class="dot"></span> Returned</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <div id="statModalEmpty" class="hidden text-center py-10">
-                    <i class="fas fa-inbox text-3xl text-gray-300"></i>
-                    <p class="mt-3 text-gray-600">No records found.</p>
+            @endif
+        </div>
+        <div class="ti-modal-foot">
+            <span class="ti-modal-range"></span>
+            <div class="ti-modal-pages"></div>
+        </div>
+    </div>
+</div>
+@endforeach
+
+{{-- Drivers detail modal --}}
+<div class="ti-modal-bg" id="tiModalDrivers" role="dialog" aria-modal="true" aria-labelledby="tiModalDriversTitle">
+    <div class="ti-modal">
+        <div class="ti-modal-head">
+            <div>
+                <h3 id="tiModalDriversTitle">Active Drivers</h3>
+                <span>{{ $statRows['drivers']->count() }} driver(s)</span>
+            </div>
+            <button type="button" class="ti-modal-close" aria-label="Close" data-ti-close>&times;</button>
+        </div>
+        <div class="ti-modal-body">
+            @if($statRows['drivers']->isEmpty())
+                <div class="ti-empty">No active drivers registered.</div>
+            @else
+                <div class="ti-table-wrap">
+                    <table class="ti-table">
+                        <thead>
+                            <tr>
+                                <th class="ti-roll">No</th>
+                                <th>Driver</th>
+                                <th>Phone</th>
+                                <th class="ti-num">Tires Out</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($statRows['drivers'] as $rowDriver)
+                                <tr>
+                                    <td class="ti-roll">{{ $loop->iteration }}</td>
+                                    <td>{{ $rowDriver->name }}</td>
+                                    <td>{{ $rowDriver->phone ?: '—' }}</td>
+                                    <td class="ti-num">{{ $rowDriver->tires_out_count }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <div id="statModalList" class="hidden divide-y divide-gray-100"></div>
+            @endif
+        </div>
+        <div class="ti-modal-foot">
+            <span class="ti-modal-range"></span>
+            <div class="ti-modal-pages"></div>
+        </div>
+    </div>
+</div>
+
+{{-- Print chooser modal --}}
+<div class="ti-modal-bg" id="tiModalPrint" role="dialog" aria-modal="true" aria-labelledby="tiPrintTitle">
+    <div class="ti-modal ti-modal-sm">
+        <div class="ti-modal-head">
+            <div>
+                <h3 id="tiPrintTitle">Print Tire Tracking</h3>
+                <span>Choose which sections appear on the printed page</span>
+            </div>
+            <button type="button" class="ti-modal-close" aria-label="Close" data-ti-close>&times;</button>
+        </div>
+        <div class="ti-modal-body">
+            <div class="ti-print-options">
+                <label><input type="checkbox" class="ti-print-check" value="cards"> Summary cards</label>
+                <label><input type="checkbox" class="ti-print-check" value="table" checked> Inventory table</label>
+            </div>
+            <p id="tiPrintHint" class="ti-print-hint" style="display:none;">Select at least one section to print.</p>
+        </div>
+        <div class="ti-modal-foot" style="display:flex;">
+            <span></span>
+            <div class="ti-modal-pages">
+                <button type="button" class="action-btn ghost" data-ti-close>Cancel</button>
+                <button type="button" class="action-btn primary" id="tiPrintGo">
+                    <i class="fas fa-print" aria-hidden="true"></i> Print
+                </button>
             </div>
         </div>
     </div>
@@ -1694,7 +2031,7 @@
             if (pageRows.length === 0) {
                 const tr = document.createElement('tr');
                 const td = document.createElement('td');
-                td.colSpan = 11;
+                td.colSpan = 12;
                 td.style.textAlign = 'center';
                 td.style.padding = '2rem';
                 td.style.color = '#94A3B8';
@@ -1707,45 +2044,47 @@
                 return;
             }
 
-            pageRows.forEach(function (r) { tbody.appendChild(r); });
+            pageRows.forEach(function (r, i) {
+                const noCell = r.querySelector('.row-no');
+                if (noCell) noCell.textContent = start + i + 1;
+                tbody.appendChild(r);
+            });
 
             infoEl.innerHTML = 'Showing <strong>' + (start + 1) + '&ndash;' +
                 Math.min(end, total) + '</strong> of <strong>' + total + '</strong> results';
 
             controlsEl.innerHTML = '';
-            if (totalPages > 1) {
-                controlsEl.appendChild(makeBtn(
-                    '<i class="fas fa-chevron-left" style="font-size:0.7rem;" aria-hidden="true"></i>',
-                    currentPage === 1,
-                    'Previous page',
-                    function () { currentPage--; render(); }
-                ));
+            controlsEl.appendChild(makeBtn(
+                '<i class="fas fa-chevron-left" style="font-size:0.7rem;" aria-hidden="true"></i>',
+                currentPage === 1,
+                'Previous page',
+                function () { currentPage--; render(); }
+            ));
 
-                buildPageRange(currentPage, totalPages).forEach(function (p) {
-                    if (p === '...') {
-                        const dots = document.createElement('span');
-                        dots.className = 'page-dots';
-                        dots.textContent = '\u2026';
-                        controlsEl.appendChild(dots);
-                    } else {
-                        const btn = makeBtn(String(p), false, 'Page ' + p, function () {
-                            currentPage = p; render();
-                        });
-                        if (p === currentPage) {
-                            btn.classList.add('active');
-                            btn.setAttribute('aria-current', 'page');
-                        }
-                        controlsEl.appendChild(btn);
+            buildPageRange(currentPage, totalPages).forEach(function (p) {
+                if (p === '...') {
+                    const dots = document.createElement('span');
+                    dots.className = 'page-dots';
+                    dots.textContent = '\u2026';
+                    controlsEl.appendChild(dots);
+                } else {
+                    const btn = makeBtn(String(p), false, 'Page ' + p, function () {
+                        currentPage = p; render();
+                    });
+                    if (p === currentPage) {
+                        btn.classList.add('active');
+                        btn.setAttribute('aria-current', 'page');
                     }
-                });
+                    controlsEl.appendChild(btn);
+                }
+            });
 
-                controlsEl.appendChild(makeBtn(
-                    '<i class="fas fa-chevron-right" style="font-size:0.7rem;" aria-hidden="true"></i>',
-                    currentPage === totalPages,
-                    'Next page',
-                    function () { currentPage++; render(); }
-                ));
-            }
+            controlsEl.appendChild(makeBtn(
+                '<i class="fas fa-chevron-right" style="font-size:0.7rem;" aria-hidden="true"></i>',
+                currentPage === totalPages,
+                'Next page',
+                function () { currentPage++; render(); }
+            ));
         }
 
         function makeBtn(html, disabled, label, onClick) {
@@ -2532,106 +2871,209 @@
     });
 
     /* ============================================================
-       STAT CARD DETAIL MODAL
+       STAT CARD DETAIL MODALS + PRINT CHOOSER
        ============================================================ */
-    let statRequestSeq = 0;
+    (function () {
+        'use strict';
 
-    const statTones = {
-        green: 'bg-green-100 text-green-800',
-        amber: 'bg-amber-100 text-amber-800',
-        red: 'bg-red-100 text-red-800',
-        blue: 'bg-blue-100 text-blue-800',
-        gray: 'bg-gray-100 text-gray-700',
-    };
+        var MODAL_PAGE_SIZE = 10;
 
-    function openStatModal(scope, title) {
-        const modal = document.getElementById('statModal');
-        if (!modal) return;
+        function openModalEl(modal) {
+            if (!modal) return;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
-        document.getElementById('statModalTitle').textContent = title;
-        document.getElementById('statModalMeta').textContent = '';
-        document.getElementById('statModalList').innerHTML = '';
-        document.getElementById('statModalList').classList.add('hidden');
-        document.getElementById('statModalEmpty').classList.add('hidden');
-        document.getElementById('statModalLoading').classList.remove('hidden');
+        function closeModal(modal) {
+            if (!modal) return;
+            modal.classList.remove('open');
+            if (!document.querySelector('.ti-modal-bg.open')) {
+                document.body.style.overflow = '';
+            }
+        }
 
-        modal.classList.remove('hidden');
-        loadStatSummary(scope);
-    }
+        function pageWindow(current, last) {
+            var pages = [];
+            for (var page = 1; page <= last; page++) {
+                if (page === 1 || page === last || Math.abs(page - current) <= 1) {
+                    pages.push(page);
+                } else if (pages[pages.length - 1] !== '...') {
+                    pages.push('...');
+                }
+            }
+            return pages;
+        }
 
-    function closeStatModal() {
-        const modal = document.getElementById('statModal');
-        if (modal) modal.classList.add('hidden');
-    }
+        function initModalPager(modal) {
+            if (!modal) return;
+            var table = modal.querySelector('.ti-modal-body .ti-table');
+            if (!table) return;
 
-    async function loadStatSummary(scope) {
-        const seq = ++statRequestSeq;
+            var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+            if (!rows.length) return;
 
-        try {
-            const response = await fetch('{{ url('/tires/summary') }}/' + encodeURIComponent(scope), {
-                headers: { 'Accept': 'application/json' },
+            var foot = modal.querySelector('.ti-modal-foot');
+            var rangeNode = foot && foot.querySelector('.ti-modal-range');
+            var pagesNode = foot && foot.querySelector('.ti-modal-pages');
+            if (!foot || !rangeNode || !pagesNode) return;
+
+            var state = modal.tiPager;
+            if (!state) {
+                state = modal.tiPager = { rows: rows, page: 1, foot: foot, range: rangeNode, pages: pagesNode };
+            }
+            state.page = 1;
+            paintModalPage(state, false);
+        }
+
+        function paintModalPage(state, refocus) {
+            var rows = state.rows;
+            var total = rows.length;
+            var lastPage = Math.max(1, Math.ceil(total / MODAL_PAGE_SIZE));
+            state.page = Math.min(Math.max(state.page, 1), lastPage);
+
+            var start = (state.page - 1) * MODAL_PAGE_SIZE;
+            var end = Math.min(start + MODAL_PAGE_SIZE, total);
+
+            rows.forEach(function (row, index) {
+                row.hidden = index < start || index >= end;
             });
-            const data = await response.json().catch(() => ({}));
 
-            if (!response.ok) throw new Error(data.message || 'Unable to load details.');
-            if (seq !== statRequestSeq) return;
+            state.foot.style.display = 'flex';
+            state.range.innerHTML = 'Showing <strong>' + (start + 1) + '\u2013' + end + '</strong> of <strong>' + total + '</strong>';
+            state.pages.textContent = '';
 
-            renderStatSummary(data);
-        } catch (error) {
-            if (seq !== statRequestSeq) return;
-            document.getElementById('statModalLoading').classList.add('hidden');
-            const empty = document.getElementById('statModalEmpty');
-            empty.querySelector('p').textContent = error.message;
-            empty.classList.remove('hidden');
+            state.pages.appendChild(pagerButton('\u00ab Prev', state.page <= 1, false, function () {
+                goToModalPage(state, state.page - 1);
+            }));
+
+            pageWindow(state.page, lastPage).forEach(function (item) {
+                if (item === '...') {
+                    var dots = document.createElement('span');
+                    dots.className = 'page-dots';
+                    dots.textContent = '...';
+                    state.pages.appendChild(dots);
+                    return;
+                }
+                var button = pagerButton(String(item), false, item === state.page, function () {
+                    goToModalPage(state, item);
+                });
+                if (item === state.page) button.setAttribute('aria-current', 'page');
+                state.pages.appendChild(button);
+            });
+
+            state.pages.appendChild(pagerButton('Next \u00bb', state.page >= lastPage, false, function () {
+                goToModalPage(state, state.page + 1);
+            }));
+
+            if (refocus) {
+                var active = state.pages.querySelector('.page-btn.active');
+                if (active) active.focus();
+            }
         }
-    }
 
-    function renderStatSummary(data) {
-        document.getElementById('statModalLoading').classList.add('hidden');
-        document.getElementById('statModalMeta').textContent = (data.count ?? 0) + ' record(s)';
-
-        const empty = document.getElementById('statModalEmpty');
-        const list = document.getElementById('statModalList');
-        const items = Array.isArray(data.items) ? data.items : [];
-
-        if (!items.length) {
-            empty.classList.remove('hidden');
-            return;
+        function pagerButton(label, disabled, active, onClick) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'page-btn' + (active ? ' active' : '');
+            button.textContent = label;
+            button.disabled = disabled;
+            button.addEventListener('click', onClick);
+            return button;
         }
 
-        list.innerHTML = items.map(function (item, index) {
-            const title = item.url
-                ? '<a href="' + escapeHtml(item.url) + '" class="font-medium text-[#1C75BC] hover:underline">' + escapeHtml(item.title) + '</a>'
-                : '<span class="font-medium text-gray-800">' + escapeHtml(item.title) + '</span>';
+        function goToModalPage(state, page) {
+            state.page = page;
+            paintModalPage(state, true);
+            var body = state.foot.parentNode.querySelector('.ti-modal-body');
+            if (body) body.scrollTop = 0;
+        }
 
-            const badge = item.badge
-                ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ' +
-                    (statTones[item.tone] || statTones.gray) + '">' + escapeHtml(item.badge) + '</span>'
-                : '';
+        var printModal = document.getElementById('tiModalPrint');
+        var printChecks = Array.prototype.slice.call(document.querySelectorAll('.ti-print-check'));
+        var printHint = document.getElementById('tiPrintHint');
 
-            return '<div class="flex items-start gap-3 py-2.5">' +
-                '<div class="w-6 shrink-0 pt-0.5 text-right text-xs font-semibold text-gray-400">' + (index + 1) + '</div>' +
-                '<div class="min-w-0 flex-1">' + title +
-                (item.subtitle ? '<div class="text-sm text-gray-600 truncate">' + escapeHtml(item.subtitle) + '</div>' : '') +
-                (item.meta ? '<div class="text-xs text-gray-500 mt-0.5">' + escapeHtml(item.meta) + '</div>' : '') +
-                '</div>' +
-                (badge ? '<div class="shrink-0">' + badge + '</div>' : '') +
-                '</div>';
-        }).join('');
+        function openPrintOptions(defaultSection) {
+            var wanted = defaultSection || 'table';
+            printChecks.forEach(function (check) {
+                check.checked = check.value === wanted;
+            });
+            if (printHint) printHint.style.display = 'none';
+            openModalEl(printModal);
+        }
 
-        list.classList.remove('hidden');
-    }
+        function printSelectedSections() {
+            var selected = printChecks
+                .filter(function (check) { return check.checked; })
+                .map(function (check) { return check.value; });
 
-    window.openStatModal = openStatModal;
-    window.closeStatModal = closeStatModal;
+            if (!selected.length) {
+                if (printHint) printHint.style.display = 'block';
+                return;
+            }
+
+            var sections = document.querySelectorAll('[data-print-section]');
+
+            function restoreSections() {
+                Array.prototype.forEach.call(sections, function (section) {
+                    section.classList.remove('print-hide-section');
+                });
+                window.removeEventListener('afterprint', restoreSections);
+            }
+
+            Array.prototype.forEach.call(sections, function (section) {
+                var key = section.getAttribute('data-print-section');
+                section.classList.toggle('print-hide-section', selected.indexOf(key) === -1);
+            });
+
+            closeModal(printModal);
+            window.addEventListener('afterprint', restoreSections, { once: true });
+            window.print();
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-ti-modal]'), function (button) {
+            button.addEventListener('click', function () {
+                var modal = document.getElementById(button.getAttribute('data-ti-modal'));
+                initModalPager(modal);
+                openModalEl(modal);
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('.ti-modal-bg'), function (backdrop) {
+            backdrop.addEventListener('click', function (event) {
+                if (event.target === backdrop) closeModal(backdrop);
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-ti-close]'), function (button) {
+            button.addEventListener('click', function () {
+                closeModal(button.closest('.ti-modal-bg'));
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-ti-print-options]'), function (button) {
+            button.addEventListener('click', function () {
+                openPrintOptions(button.getAttribute('data-print-default'));
+            });
+        });
+
+        var printGo = document.getElementById('tiPrintGo');
+        if (printGo) {
+            printGo.addEventListener('click', printSelectedSections);
+        }
+
+        window.tiCloseTopModal = function () {
+            var open = document.querySelectorAll('.ti-modal-bg.open');
+            if (!open.length) return false;
+            closeModal(open[open.length - 1]);
+            return true;
+        };
+    })();
 
     /* Global Escape handler */
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
 
-        const statModal = document.getElementById('statModal');
-        if (statModal && !statModal.classList.contains('hidden')) {
-            closeStatModal();
+        if (window.tiCloseTopModal && window.tiCloseTopModal()) {
             return;
         }
         const lightbox = document.getElementById('photo-lightbox');

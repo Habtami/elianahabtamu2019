@@ -55,115 +55,144 @@ class TireController extends Controller
         $tires = $query->with(['tireGives.givenBy', 'tireGives.driver', 'tireReturns'])->latest()->get();
 
         $tireTypes = Tire::getTireTypes();
-        $totalTires = Tire::count();
+
+        $statRelations = ['tireGives.givenBy', 'tireGives.driver', 'tireReturns'];
+        $statTires = Tire::with($statRelations)->orderByDesc('id')->get();
+        $statInUse = Tire::with($statRelations)
+            ->whereHas('tireGives', function ($q) {
+                $q->where('is_returned', false);
+            })
+            ->orderByDesc('id')->get();
+        $statReturned = Tire::with($statRelations)
+            ->whereHas('tireGives', function ($q) {
+                $q->where('is_returned', true);
+            })
+            ->whereDoesntHave('tireGives', function ($q) {
+                $q->where('is_returned', false);
+            })
+            ->orderByDesc('id')->get();
+        $statDrivers = Driver::active()
+            ->withCount(['tireGives as tires_out_count' => function ($q) {
+                $q->where('is_returned', false);
+            }])
+            ->orderBy('name')->get();
+
+        $statRows = [
+            'total' => $statTires,
+            'in_use' => $statInUse,
+            'returned' => $statReturned,
+            'drivers' => $statDrivers,
+        ];
+
+        $totalTires = $statTires->count();
         $activeTires = Tire::where('is_active', true)->count();
         $inactiveTires = Tire::where('is_active', false)->count();
-        $givenOutTires = Tire::whereHas('tireGives', function ($q) {
-            $q->where('is_returned', false);
-        })->count();
-        $returnedTires = Tire::whereHas('tireGives', function ($q) {
-            $q->where('is_returned', true);
-        })->whereDoesntHave('tireGives', function ($q) {
-            $q->where('is_returned', false);
-        })->count();
-        $activeDriversCount = Driver::active()->count();
+        $givenOutTires = $statInUse->count();
+        $returnedTires = $statReturned->count();
+        $activeDriversCount = $statDrivers->count();
         $tiresOutCount = $givenOutTires;
         $driversList = Driver::active()->orderBy('name')->get(['id', 'name', 'phone']);
 
         return view('tires.index', compact(
             'tires', 'tireTypes', 'totalTires', 'activeTires', 'inactiveTires', 'givenOutTires',
-            'returnedTires', 'activeDriversCount', 'tiresOutCount', 'driversList'
+            'returnedTires', 'activeDriversCount', 'tiresOutCount', 'driversList', 'statRows'
         ));
     }
 
-    public function summary(Request $request, string $scope)
+    public function exportList(Request $request)
     {
-        $user = auth()->user();
+        $query = Tire::query();
 
-        if (! $user->canAccessTireTracking()) {
-            return response()->json(['message' => 'You are not authorized to view tire details.'], 403);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('serial_number', 'like', '%'.$search.'%')
+                    ->orWhere('tire_type', 'like', '%'.$search.'%')
+                    ->orWhere('plate_number', 'like', '%'.$search.'%');
+            });
         }
 
-        switch ($scope) {
-            case 'total-tires':
-                $title = 'Total Tires';
-                $items = Tire::with('tireGives.driver')->orderByDesc('id')->limit(100)->get()
-                    ->map(fn (Tire $tire) => $this->tireSummaryItem($tire));
-                break;
-
-            case 'in-use':
-                $title = 'In Use';
-                $items = Tire::with('tireGives.driver')
-                    ->whereHas('tireGives', fn ($q) => $q->where('is_returned', false))
-                    ->orderByDesc('id')->limit(100)->get()
-                    ->map(fn (Tire $tire) => $this->tireSummaryItem($tire, 'in_use'));
-                break;
-
-            case 'returned':
-                $title = 'Returned';
-                $items = Tire::with('tireGives.driver')
-                    ->whereHas('tireGives', fn ($q) => $q->where('is_returned', true))
-                    ->whereDoesntHave('tireGives', fn ($q) => $q->where('is_returned', false))
-                    ->orderByDesc('id')->limit(100)->get()
-                    ->map(fn (Tire $tire) => $this->tireSummaryItem($tire, 'returned'));
-                break;
-
-            case 'active-drivers':
-                $title = 'Active Drivers';
-                $items = Driver::active()->orderBy('name')->limit(100)->get()
-                    ->map(function (Driver $driver) {
-                        $out = $driver->tireGives()->where('is_returned', false)->count();
-
-                        return [
-                            'title' => $driver->name,
-                            'subtitle' => $driver->license_number ? 'License '.$driver->license_number : '—',
-                            'meta' => $out.' tire(s) out',
-                            'badge' => 'Active',
-                            'tone' => 'green',
-                            'url' => route('drivers.show', $driver->id),
-                        ];
-                    });
-                break;
-
-            default:
-                return response()->json(['message' => 'Unknown summary scope.'], 404);
-        }
-
-        return response()->json([
-            'title' => $title,
-            'count' => $items->count(),
-            'items' => $items->values(),
-        ]);
-    }
-
-    private function tireSummaryItem(Tire $tire, ?string $state = null): array
-    {
-        $activeGive = $tire->tireGives->firstWhere('is_returned', false);
-        $state = $state ?: ($activeGive
-            ? 'in_use'
-            : ($tire->tireGives->contains('is_returned', true) ? 'returned' : 'available'));
-
-        $meta = [];
-
-        if ($state === 'in_use' && $activeGive) {
-            $meta[] = $activeGive->driver->name ?? 'No driver';
-            if ($activeGive->give_date) {
-                $meta[] = 'Given '.$activeGive->give_date->format('M d, Y');
+        if ($request->has('status')) {
+            if ($request->status === 'in_use') {
+                $query->whereHas('tireGives', function ($q) {
+                    $q->where('is_returned', false);
+                });
+            } elseif ($request->status === 'returned') {
+                $query->whereHas('tireGives', function ($q) {
+                    $q->where('is_returned', true);
+                })->whereDoesntHave('tireGives', function ($q) {
+                    $q->where('is_returned', false);
+                });
             }
         }
 
-        if ($tire->plate_number) {
-            $meta[] = 'Plate '.$tire->plate_number;
+        if ($request->filled('tire_type')) {
+            $query->where('tire_type', $request->tire_type);
         }
 
-        return [
-            'title' => $tire->serial_number,
-            'subtitle' => $tire->tire_type,
-            'meta' => $meta ? implode(' · ', $meta) : null,
-            'badge' => ['in_use' => 'In Use', 'returned' => 'Returned', 'available' => 'Available'][$state],
-            'tone' => ['in_use' => 'amber', 'returned' => 'green', 'available' => 'blue'][$state],
-            'url' => route('tires.show', $tire),
-        ];
+        $tires = $query->with(['tireGives.driver', 'tireGives.givenBy', 'tireReturns'])
+            ->orderByDesc('id')->get();
+
+        $rows = $tires->map(function (Tire $tire) {
+            $latestGive = $tire->tireGives->sortByDesc('id')->first();
+
+            if ($latestGive && ! $latestGive->is_returned) {
+                $currentKm = $latestGive->given_kilometer;
+            } else {
+                $latestReturn = $tire->tireReturns->sortByDesc('id')->first();
+                $currentKm = $latestReturn ? $latestReturn->current_kilometer : $tire->initial_kilometer;
+            }
+
+            return [
+                'id' => $tire->id,
+                'type' => $tire->tire_type,
+                'serial' => $tire->serial_number,
+                'plate' => $tire->plate_number,
+                'giver' => $latestGive?->givenBy?->name,
+                'driver' => $latestGive?->driver?->name,
+                'initial_km' => $tire->initial_kilometer,
+                'current_km' => $currentKm,
+                'km_diff' => ($currentKm ?? 0) - ($tire->initial_kilometer ?? 0),
+                'status' => $tire->tireGives->contains(function ($give) {
+                    return ! $give->is_returned;
+                }) ? 'In Use' : 'Returned',
+            ];
+        })->values();
+
+        $filters = collect([
+            $request->filled('search') ? 'Search: '.$request->search : null,
+            $request->status === 'in_use' ? 'Status: In Use' : null,
+            $request->status === 'returned' ? 'Status: Returned' : null,
+            $request->filled('tire_type') ? 'Type: '.$request->tire_type : null,
+        ])->filter()->values();
+
+        if ($request->input('format') === 'pdf') {
+            return Pdf::loadView('tires.inventory-pdf', compact('rows', 'filters'))
+                ->download('tire-inventory-'.now()->format('Ymd-His').'.pdf');
+        }
+
+        $excel = new \App\Helpers\ExcelExport(
+            ['No', 'ID', 'Tire Type', 'Serial Number', 'Plate Number', 'Given By', 'Driver', 'Initial KM', 'Current KM', 'KM Difference', 'Status'],
+            'Tire Inventory'
+        );
+
+        foreach ($rows as $index => $row) {
+            $excel->addRow([
+                $index + 1,
+                $row['id'],
+                $row['type'],
+                $row['serial'],
+                $row['plate'] ?? '',
+                $row['giver'] ?? '',
+                $row['driver'] ?? '',
+                $row['initial_km'] ?? '',
+                $row['current_km'] ?? '',
+                $row['km_diff'],
+                $row['status'],
+            ]);
+        }
+
+        $excel->download('tire-inventory-'.now()->format('Ymd-His').'.xlsx');
     }
 
     public function create()
