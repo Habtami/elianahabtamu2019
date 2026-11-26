@@ -4,6 +4,17 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Telegram Logs</h1>
+        <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipTelegramLogs"><i class="fas fa-info-circle"></i> TIP: info</button>
+    </div>
+
+    <div id="tipTelegramLogs" class="table-tip-panel no-print">
+        <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+        <ul>
+            <li>Each row records one Telegram message with its send date, chat ID, message text, type and status.</li>
+            <li>Message text is shortened to 80 characters so long notifications keep the row compact.</li>
+            <li>Type shows as a grey badge; Status is green when sent, red when failed, amber for anything else.</li>
+            <li>There is no search or paging here: the log arrives as one list, and empty results say "No logs found".</li>
+        </ul>
     </div>
 
     <div class="card">

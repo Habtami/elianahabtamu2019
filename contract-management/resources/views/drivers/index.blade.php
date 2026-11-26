@@ -1035,6 +1035,7 @@
                     <span class="tsr-count-badge" id="visibleCount">{{ $drivers->total() }}</span>
                 </h3>
                 <div class="tsr-header-actions">
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipDrivers"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <a href="{{ route('exports.drivers', $queryState) }}" class="tsr-btn-export">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel
                     </a>
@@ -1043,6 +1044,8 @@
                     </div>
                 </div>
             </div>
+
+            <div id="tipDrivers" class="table-tip-panel no-print"><h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4><ul><li>KPI cards at the top summarise total, active, inactive, expiring and expired drivers; clicking a card opens a detail modal for that group.</li><li>Status pills (All, Active, Inactive, Expiring, Expired) and the search box reload the list with matching drivers.</li><li>Quick filter and the Drivers count badge narrow only the rows currently shown on this page, without reloading.</li><li>Columns show driver, licence number and expiry, phone, active status and active tire count; expiry shows Expired or Expiring tags.</li><li>Row actions open history, change status, view, edit or delete, depending on permission; Excel exports the current filters.</li><li>The history modal shows summary counts plus a timeline of registration, profile/status changes and tire give and return records.</li></ul></div>
 
             @if($drivers->isNotEmpty())
             <div class="tsr-table-wrapper">

@@ -198,10 +198,15 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 print-card">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 px-6 py-4 border-b border-gray-200">
             <h2 class="text-lg font-semibold text-gray-800">Procurement Records</h2>
-            <span class="text-sm text-gray-500">
-                {{ $paginatedRows->total() }} record(s) &middot; page {{ $paginatedRows->currentPage() }} of {{ $paginatedRows->lastPage() }}
-            </span>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-500">
+                    {{ $paginatedRows->total() }} record(s) &middot; page {{ $paginatedRows->currentPage() }} of {{ $paginatedRows->lastPage() }}
+                </span>
+                <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipProcurementReport"><i class="fas fa-info-circle"></i> TIP: info</button>
+            </div>
         </div>
+
+        <div id="tipProcurementReport" class="table-tip-panel no-print"><h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4><ul><li>From and To dates filter purchase orders by approval date and contracts by start date; Category limits results to purchases or tenders.</li><li>KPI cards show total procurement, the purchase versus tender split, and ICB and NCB tender totals with record counts.</li><li>Four charts (spend share, top suppliers, material group, monthly trend) follow the same filters and hide when a group has no data.</li><li>Records list category, type, reference, supplier, date and amount, newest first, fifteen per page, with a hint when nothing matches.</li><li>Footer totals for purchase, tender and grand total cover every filtered record, not only the rows on this page.</li><li>Print, Excel and PDF buttons reuse the active filters and date range; tip panels and filter controls stay out of printouts.</li></ul></div>
 
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">

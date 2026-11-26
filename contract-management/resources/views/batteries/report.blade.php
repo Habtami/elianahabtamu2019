@@ -676,6 +676,7 @@
                         <a href="{{ route('batteries.report.export.excel') }}" class="rep-btn secondary rep-mini" title="Export this table to Excel">📊 Excel</a>
                         <a href="{{ route('batteries.report.export.pdf') }}" class="rep-btn secondary rep-mini" title="Export this table to PDF">📄 PDF</a>
                         <button type="button" class="rep-btn secondary rep-mini" data-rep-print-options data-print-default="issues" title="Print this table only">🖨️ Print</button>
+                        <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipBatteryReport"><i class="fas fa-info-circle"></i> TIP: info</button>
                     </div>
                     <form method="GET" action="{{ route('batteries.report') }}" class="rep-perpage no-print">
                         @if($dateField)
@@ -696,6 +697,19 @@
                     </form>
                 </div>
             </div>
+
+            <div id="tipBatteryReport" class="table-tip-panel no-print">
+                <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+                <ul>
+                    <li>Date basis picks Date Given or Date of Manufacture; From and To limit every card, chart and table here.</li>
+                    <li>Four cards count total, in-service, returned and batteries with issues; click a card to open its full list.</li>
+                    <li>Status Split donut and Issues by Category bars summarise the filtered records; the month chart switches Bars, Line or Area.</li>
+                    <li>The issues table lists severity, serial, plate, type/brand, driver, status and findings; severity chips are high, medium or low.</li>
+                    <li>Rows sets the page size, page links sit below the table, and View opens that battery's details plus its history.</li>
+                    <li>Print opens a chooser for summary cards, charts and the issues table; Excel and PDF export every issue finding.</li>
+                </ul>
+            </div>
+
             <div class="rep-table-wrap">
                 <table class="rep-table">
                     <thead>

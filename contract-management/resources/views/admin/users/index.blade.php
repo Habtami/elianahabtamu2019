@@ -674,6 +674,7 @@
                     All Users
                 </h2>
                 <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipUsers"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <div class="text-sm text-gray-600">
                         Showing {{ $users->firstItem() ?? 0 }}-{{ $users->lastItem() ?? 0 }} of {{ $users->total() }} users
                     </div>
@@ -682,6 +683,18 @@
                     </a>
                 </div>
             </div>
+        </div>
+
+        <div id="tipUsers" class="table-tip-panel no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li>Search matches name, email or role; Export Excel downloads the current search and filters; per-page offers 5 to 100.</li>
+                <li>Status and Role filters stay in the URL and appear as removable chips with a Clear link.</li>
+                <li>Name, Email, Role and Department headers toggle ascending or descending sort; the arrow shows direction.</li>
+                <li>Row icons open history, open edit, reset the password, activate or deactivate, or delete the account.</li>
+                <li>History, password reset, status toggle and delete are hidden for your own account and for super admins.</li>
+                <li>The history dialog lists the latest 50 activity entries with type, time, IP address and reason; KPI cards open paged lists.</li>
+            </ul>
         </div>
 
         <!-- Toolbar: search + per page directly above the table -->

@@ -826,10 +826,23 @@
                     <a href="{{ route('tires.return.pdf', $exportQuery) }}" class="tsr-btn-export">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF
                     </a>
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipTireReturns"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <div class="tsr-quick-filter">
                         <input type="text" id="quickFilter" placeholder="Quick filter...">
                     </div>
                 </div>
+            </div>
+
+            <div id="tipTireReturns" class="table-tip-panel no-print">
+                <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+                <ul>
+                    <li>Each row is one outstanding tire issue: roll number, tire serial and type, driver, plate, issued by, give date, KM at issue, days out.</li>
+                    <li>Days out turn red past 30; the Overdue pill and its count use the same 30-day rule.</li>
+                    <li>Search queries the server after a short pause; the All, &le; 30 days and Overdue pills filter, Reset clears everything.</li>
+                    <li>Click a column heading to sort by roll, tire, driver, plate, issued by, give date, KM or days out.</li>
+                    <li>Quick filter hides rows on the current page and updates the count badge; Excel and PDF export the active search, filter and sort.</li>
+                    <li>KPI cards (Tires Out, Drivers, Overdue, Avg Days Out) open a paginated modal listing the records behind each figure.</li>
+                </ul>
             </div>
 
             @if($tireReturns->isNotEmpty())

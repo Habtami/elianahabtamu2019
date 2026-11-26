@@ -69,11 +69,24 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipPermissions"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <span class="text-xs text-gray-500">
                         <i class="fas fa-info-circle mr-1"></i>
                         Super Administrator always keeps every permission.
                     </span>
                 </div>
+            </div>
+
+            <div id="tipPermissions" class="table-tip-panel no-print">
+                <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+                <ul>
+                    <li>Rows are permissions grouped under module header rows; each role column holds one checkbox per permission.</li>
+                    <li>"Toggle all" in a role heading ticks or clears every box for that role, and the count beside it updates live.</li>
+                    <li>Super Administrator is always fully granted, so its column is disabled and its toggle is greyed out.</li>
+                    <li>A small "modified" note marks any box that differs from that role's default setting.</li>
+                    <li>"Save Permissions" stores every ticked box; "Reset to Defaults" asks for confirmation, then restores the shipped matrix.</li>
+                    <li>Below the matrix, each role card summarises the permissions that role currently holds, grouped by module.</li>
+                </ul>
             </div>
 
             <div class="overflow-x-auto">

@@ -172,13 +172,29 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0"><i class="fas fa-hard-drive me-2"></i>Backups List</h5>
-                    <form action="{{ route('backup.create') }}" method="POST" id="manualBackupForm">
-                        @csrf
-                        <button type="submit" class="btn btn-primary btn-sm" id="backupButton">
-                            <i class="fas fa-database me-1"></i>Create Manual Backup
-                        </button>
-                    </form>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipBackup"><i class="fas fa-info-circle"></i> TIP: info</button>
+                        <form action="{{ route('backup.create') }}" method="POST" id="manualBackupForm">
+                            @csrf
+                            <button type="submit" class="btn btn-primary btn-sm" id="backupButton">
+                                <i class="fas fa-database me-1"></i>Create Manual Backup
+                            </button>
+                        </form>
+                    </div>
                 </div>
+
+                <div id="tipBackup" class="table-tip-panel no-print">
+                    <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+                    <ul>
+                        <li>Each row is one backup file with name, size, date, creator, type, storage state, email status and recipients.</li>
+                        <li>Search, page length (10 to All) and column sorting are built in; rows start ordered by Date Created, newest first.</li>
+                        <li>Skipped runs are tinted amber, show a "No changes" storage badge and their skip reason instead of action buttons.</li>
+                        <li>Type badges read Manual or Scheduled; Storage reads Destination, Copied, Fallback (local), Storage only or Copy failed.</li>
+                        <li>Email status reads Sent, Failed, No recipients or Pending; recipients fall back to the admin list when none were stored.</li>
+                        <li>Action icons open a per-file history timeline, download the dump, or delete it after a confirmation prompt.</li>
+                    </ul>
+                </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover table-striped align-middle" id="backupsTable">

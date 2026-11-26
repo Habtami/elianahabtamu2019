@@ -292,7 +292,20 @@
                 @if(request()->has('search') || request()->has('brand'))
                     <a href="{{ route('batteries.index') }}" class="batt-btn secondary small" style="text-decoration:none;">Clear</a>
                 @endif
+                <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipBatteries"><i class="fas fa-info-circle"></i> TIP: info</button>
             </form>
+        </div>
+
+        <div id="tipBatteries" class="table-tip-panel no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li>Columns show serial, material code, battery type, brand, plate, driver, initial and return KM, difference and status.</li>
+                <li>Search matches serial, type, plate and driver; the brand filter and rows-per-page limit the register.</li>
+                <li>Status stays "In service" until a battery is returned; Difference shows for returned rows or when return KM exceeds initial.</li>
+                <li>Row actions are permission-based: History opens the audit trail, Return needs the exact serial, plus Edit and Del.</li>
+                <li>Give Battery registers a battery and can add a new material code, type, brand or driver inline; difference recalculates automatically.</li>
+                <li>Header totals count all, in-service and returned rows; Excel and PDF export the active search and brand filter.</li>
+            </ul>
         </div>
 
         <div class="batt-table-wrap">

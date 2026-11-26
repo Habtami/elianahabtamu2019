@@ -703,6 +703,54 @@
             .topbar-right { gap: 0.35rem; }
             .topbar-icon-btn { width: 36px; height: 36px; }
         }
+
+        /* Shared "TIP: info" table guidance used by every register table */
+        .table-tip-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.65rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            font-family: inherit;
+            line-height: 1.4;
+            border-radius: 7px;
+            border: 1px solid #dbe6f1;
+            background: #fff;
+            color: #33506e;
+            cursor: pointer;
+        }
+        .table-tip-btn:hover { background: #f1f5f9; }
+        .table-tip-btn.table-tip-btn-active { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
+
+        .table-tip-panel {
+            display: none;
+            margin: 0 1.5rem 1rem;
+            padding: 0.9rem 1.1rem;
+            border: 1px solid #bfdbfe;
+            border-left: 4px solid #3b82f6;
+            border-radius: 10px;
+            background: #eff6ff;
+            font-size: 0.82rem;
+            color: #1e3a5f;
+        }
+        .table-tip-panel.open { display: block; }
+        .table-tip-panel h4 {
+            margin: 0 0 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #1d4ed8;
+        }
+        .table-tip-panel ul { margin: 0; padding-left: 1.1rem; }
+        .table-tip-panel li { margin-bottom: 0.3rem; line-height: 1.45; }
+        .table-tip-panel li:last-child { margin-bottom: 0; }
+        .table-tip-panel strong { color: #0f2a44; }
+
+        @media print {
+            .table-tip-btn, .table-tip-panel { display: none !important; }
+        }
     </style>
     @yield('styles')
 </head>
@@ -1260,6 +1308,17 @@
                     timeEl.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 }, 30000);
             }
+        });
+
+        // Shared "TIP: info" toggles for register tables
+        document.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-table-tip]');
+            if (!button) return;
+            var panel = document.getElementById(button.getAttribute('aria-controls'));
+            if (!panel) return;
+            var open = panel.classList.toggle('open');
+            button.setAttribute('aria-expanded', open ? 'true' : 'false');
+            button.classList.toggle('table-tip-btn-active', open);
         });
     </script>
     @yield('scripts')

@@ -1138,6 +1138,7 @@
                 </h3>
                 @if($tireCount > 0)
                 <div class="table-controls">
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipTires"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <input type="text" id="quick-filter" placeholder="Quick filter..."
                            aria-label="Quick filter current page">
                     <select id="page-size" aria-label="Rows per page">
@@ -1151,6 +1152,17 @@
             </div>
 
             @if($tireCount > 0)
+            <div id="tipTires" class="table-tip-panel no-print">
+                <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+                <ul>
+                    <li>Each row is one tire: ID, type, serial, plate, given by, driver, initial and current KM, KM difference, status.</li>
+                    <li>Status is only In Use or Returned; returned tires cannot be given out again or edited.</li>
+                    <li>Click a column heading to sort; quick filter narrows the loaded rows and pagination starts again at page one.</li>
+                    <li>Search, status and tire type in the toolbar reload the list from the server; Reset clears all three.</li>
+                    <li>Row actions open details, give, history or edit, shown only when your role and the tire status allow.</li>
+                    <li>KPI cards open detail lists, and the history action shows that tire's give and return records in a modal.</li>
+                </ul>
+            </div>
             <div class="overflow-x-auto">
                 <table id="tires-table" class="modern-table">
                     <thead>

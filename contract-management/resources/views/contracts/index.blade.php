@@ -328,6 +328,7 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipContracts"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <a href="{{ route('contracts.export-list', request()->only(['search', 'status', 'department'])) }}"
                        class="inline-flex items-center rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-green-700">
                         <i class="fas fa-file-excel mr-2"></i>
@@ -349,6 +350,18 @@
                     @endif
                 </div>
             </div>
+        </div>
+
+        <div id="tipContracts" class="table-tip-panel no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li>The search box filters by contract name automatically, about 600 ms after you stop typing.</li>
+                <li>The "All Status" and "All Departments" dropdowns apply immediately; active filters appear as removable chips with "Clear all".</li>
+                <li>ID, Contract Name, Supplier, Start Date, End Date, PG Amount and Status headers sort on click; the arrow shows direction.</li>
+                <li>Status badges are Active (green), Expiring (amber, with days left) and Expired (red); "Extended Nx" shows under End Date.</li>
+                <li>Each row offers View, Edit and Delete icons, but Edit and Delete only appear when your account may change that contract.</li>
+                <li>"Export Excel" downloads the current search and filters; page links and the result count sit in the footer, KPI cards open a detail list.</li>
+            </ul>
         </div>
 
         <!-- Filters & Search -->

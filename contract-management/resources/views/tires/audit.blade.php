@@ -4,7 +4,21 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Audit Trail</h1>
-        <a href="{{ route('tires.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipTireAudit"><i class="fas fa-info-circle"></i> TIP: info</button>
+            <a href="{{ route('tires.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div id="tipTireAudit" class="table-tip-panel no-print">
+        <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+        <ul>
+            <li>Each row is one logged change: timestamp, user (or System), action badge, subject type, description and properties.</li>
+            <li>Action badges are colour-coded: Created green, Updated amber, Deleted red; Type names the affected model, such as Tire.</li>
+            <li>Type filters Tires, Drivers, Tire Gives and Tire Returns; Action filters Created, Updated and Deleted.</li>
+            <li>Date from and date to limit the trail; press Filter to apply, filters do not submit on their own.</li>
+            <li>Properties shows a shortened JSON excerpt (100 characters); pagination links appear when more records exist.</li>
+        </ul>
     </div>
 
     <form method="GET" class="row g-3 mb-3">

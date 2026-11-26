@@ -23,6 +23,7 @@
                             <p class="mb-0 opacity-75">Comprehensive insights and performance metrics for contract management</p>
                         </div>
                         <div class="d-flex gap-2">
+                            <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipContractReports"><i class="fas fa-info-circle"></i> TIP: info</button>
                             <button onclick="refreshData(event)" class="btn btn-light btn-sm">
                                 <i class="fas fa-sync-alt me-1"></i>Refresh
                             </button>
@@ -65,6 +66,18 @@
                             <i class="fas fa-clock me-1"></i>Last updated: {{ $lastUpdated->format('M d, Y H:i') }}
                         </div>
                     </div>
+                </div>
+
+                <div id="tipContractReports" class="table-tip-panel no-print">
+                    <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+                    <ul>
+                        <li>"Date Range" (Last 6 months, Last 12 months, Year to date) and the 6M / 12M / YTD buttons reload every panel for that period.</li>
+                        <li>Type a start and end date and press "Apply", or use Today, Week, Month, Quarter to reload with that period.</li>
+                        <li>The four cards (Total Contracts, Active Contracts, Expiring Soon, Expired Contracts) show counts and percentages; click one to list those contracts.</li>
+                        <li>"Contract Creation Trend", "Contracts by Department" and "Contracts by Status" charts follow the selected period.</li>
+                        <li>Expand "Recent Activity" to see Time, Contract, Action, User and Details for the latest contract updates.</li>
+                        <li>"Refresh" reloads the page (it also refreshes every 5 minutes); "Export" downloads the dashboard data as CSV.</li>
+                    </ul>
                 </div>
 
                 <div class="card-body">

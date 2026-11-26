@@ -101,9 +101,24 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 px-6 py-4 border-b border-gray-200">
             <h2 class="text-lg font-semibold text-gray-800">Contract Closings</h2>
-            <span class="text-sm text-gray-500">
-                {{ $closures->total() }} record(s) &middot; page {{ $closures->currentPage() }} of {{ $closures->lastPage() }}
-            </span>
+            <div class="flex items-center gap-3">
+                <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipContractClosures"><i class="fas fa-info-circle"></i> TIP: info</button>
+                <span class="text-sm text-gray-500">
+                    {{ $closures->total() }} record(s) &middot; page {{ $closures->currentPage() }} of {{ $closures->lastPage() }}
+                </span>
+            </div>
+        </div>
+
+        <div id="tipContractClosures" class="table-tip-panel no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li>Search matches contract or supplier name; Status, Closing From and Closing To narrow the list, then press "Filter"; "Reset" clears everything.</li>
+                <li>Each row lists Contract (with supplier), Department, Contract End Date, Closing Date, Status and Actions.</li>
+                <li>Green "Complete" badges also show who completed the closing and when; amber badges are still pending.</li>
+                <li>"Complete" turns a pending closing into a completed one after a confirmation prompt, and only appears for users allowed to complete closures.</li>
+                <li>"View" opens the closing details; the header shows the record count and current page, with page links below the table.</li>
+                <li>"New Closing Request" records a contract and closing date; a new closing stays pending until Finance or an administrator completes it.</li>
+            </ul>
         </div>
 
         <div class="overflow-x-auto">

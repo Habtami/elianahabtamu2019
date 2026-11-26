@@ -871,7 +871,19 @@
                 <button type="button" class="btn btn-secondary-custom btn-sm no-print" onclick="exportTable('givesTable', 'recent-gives')">
                     <i class="fas fa-file-excel mr-1"></i>Export
                 </button>
+                <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipTireReports"><i class="fas fa-info-circle"></i> TIP: info</button>
             </div>
+        </div>
+        <div id="tipTireReports" class="table-tip-panel no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li>Apply reloads every section for the chosen From/To dates; Reset restores the last six months.</li>
+                <li>KPI cards (Total, Active, Given Out, Given Today, Returned Today) open modals listing the tires behind each number.</li>
+                <li>Each insight card opens a modal with key metrics and a per-item breakdown for that finding.</li>
+                <li>Charts show monthly gives versus returns and tire type distribution; each Download saves the chart as a PNG.</li>
+                <li>Recent Gives filters by search and status; Recent Returns filters by positive, negative or zero KM difference.</li>
+                <li>Print Report lets you tick sections (gives, returns, stats, insights, charts); table Export downloads visible rows as CSV.</li>
+            </ul>
         </div>
         <div class="table-responsive">
             <table class="data-table" id="givesTable">

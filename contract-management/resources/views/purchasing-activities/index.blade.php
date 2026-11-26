@@ -240,6 +240,33 @@
     .pa-badge.blue { background: #dbeafe; color: #1d4ed8; }
     .pa-modal-sub { font-size: 0.72rem; color: #7a90a6; }
 
+    .pa-action-btn-active { background: #fdf3e7; border-color: #f3d5b0; color: #92400e; }
+
+    .pa-tip {
+        display: none;
+        margin: 1rem 1.5rem 0;
+        padding: 0.9rem 1.1rem;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #3b82f6;
+        border-radius: 10px;
+        background: #eff6ff;
+        font-size: 0.82rem;
+        color: #1e3a5f;
+    }
+    .pa-tip.open { display: block; }
+    .pa-tip h4 {
+        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #1d4ed8;
+    }
+    .pa-tip ul { margin: 0; padding-left: 1.1rem; }
+    .pa-tip li { margin-bottom: 0.3rem; line-height: 1.45; }
+    .pa-tip li:last-child { margin-bottom: 0; }
+    .pa-tip strong { color: #0f2a44; }
+
     .pa-print-options { display: flex; flex-direction: column; gap: 0.55rem; }
     .pa-print-options label {
         display: flex;
@@ -413,6 +440,9 @@
             </div>
             <div class="flex flex-wrap items-center gap-2 no-print">
                 <div class="pa-actions">
+                    <button type="button" class="pa-action-btn" data-pa-tip aria-expanded="false" aria-controls="paTipBox">
+                        <i class="fas fa-info-circle"></i> TIP: info
+                    </button>
                     <button type="button" class="pa-action-btn" data-pa-print-options data-print-default="table" title="Print this table only">
                         <i class="fas fa-print"></i> Print
                     </button>
@@ -431,6 +461,18 @@
                     </select>
                 </form>
             </div>
+        </div>
+
+        <div id="paTipBox" class="pa-tip no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li><strong>Request Date</strong> is when the request reached purchasing; use the Request From/To filters above to narrow the register to a period.</li>
+                <li><strong>Document</strong> is either a Proforma or a Request for Quotation. New document types can be registered directly from the New Activity form.</li>
+                <li><strong>Material Group</strong>, <strong>Unit</strong> and <strong>Procurement Type</strong> (Purchase or Tender) describe what is being requested; new procurement types can also be registered from the form.</li>
+                <li><strong>Status</strong> stays Pending until someone with completion rights marks the activity Complete; then the completer and time are shown.</li>
+                <li>The filter bar and the KPI cards are independent: the cards open their full list regardless of the filters, while the table follows the filters.</li>
+                <li><strong>Rows</strong> changes the page size, and Print follows the current filters and page size.</li>
+            </ul>
         </div>
 
         <div class="pa-table-scroll overflow-x-auto">
@@ -1033,6 +1075,16 @@
         var printGo = document.getElementById('paPrintGo');
         if (printGo) {
             printGo.addEventListener('click', printSelectedSections);
+        }
+
+        var tipButton = document.querySelector('[data-pa-tip]');
+        var tipBox = document.getElementById('paTipBox');
+        if (tipButton && tipBox) {
+            tipButton.addEventListener('click', function () {
+                var open = tipBox.classList.toggle('open');
+                tipButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+                tipButton.classList.toggle('pa-action-btn-active', open);
+            });
         }
 
         document.addEventListener('keydown', function (e) {

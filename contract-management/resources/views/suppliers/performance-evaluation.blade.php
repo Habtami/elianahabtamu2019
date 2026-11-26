@@ -98,10 +98,13 @@
 
             <div style="margin-bottom:12px; display:flex; justify-content:flex-end; gap:12px; align-items:center;">
                 <div style="display:flex;gap:8px">
+                    <button type="button" class="table-tip-btn" data-table-tip aria-expanded="false" aria-controls="tipSupplierPerformance"><i class="fas fa-info-circle"></i> TIP: info</button>
                     <button id="exportData" class="action-btn"><i class="fas fa-download"></i>&nbsp;Export</button>
                     <button id="resetFilters" class="action-btn" style="background:#6c757d">Reset</button>
                 </div>
             </div>
+
+            <div id="tipSupplierPerformance" class="table-tip-panel no-print"><h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4><ul><li>Two tabs: Performance Overview holds the stats and table; Rate Suppliers explains rating and links back to the overview.</li><li>Stat cards show total suppliers, average rating, top performers rated Excellent, and suppliers flagged as needing improvement.</li><li>Columns list supplier name and contract count, Quality and On-Time Delivery as percentages, and Cost and Communication out of five.</li><li>Overall Rating percent plus a coloured status badge from the star average: 4.5+ Excellent, 3.5+ Good, 2.5+ Average, lower Needs Improvement.</li><li>Search filters suppliers, the page-length menu paginates ten rows, Reset clears search, and Export downloads the table to Excel.</li><li>Rate Supplier opens a star modal; ratings average into an overall score, and only contract creators can rate while others see View Only.</li></ul></div>
 
             <div class="table-responsive">
                 <table id="supplierTable" class="performance-table display">
