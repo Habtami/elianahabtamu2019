@@ -131,9 +131,4 @@ class ExportController extends Controller
 
         $excel->download('returns_export.xlsx');
     }
-
-    public function logs()
-    {
-        return view('exports.logs');
-    }
 }

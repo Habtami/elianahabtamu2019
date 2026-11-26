@@ -220,7 +220,7 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
 
     // Export Logs
     Route::get('/exports/logs', [ExportController::class, 'index'])->name('exports.logs');
-    Route::get('/exports', [ExportController::class, 'logs'])->name('exports.index');
+    Route::get('/exports', [ExportController::class, 'index'])->name('exports.index');
     Route::get('/exports/drivers', [ExportController::class, 'drivers'])->name('exports.drivers');
     Route::get('/exports/tires', [ExportController::class, 'tires'])->name('exports.tires');
     Route::get('/exports/returns', [ExportController::class, 'returns'])->name('exports.returns');
