@@ -181,9 +181,6 @@ Route::middleware(['auth', 'NoCache'])->group(function () {
     Route::get('/payment-requests', [PaymentRequestController::class, 'index'])->name('payment-requests.index');
     Route::get('/payment-requests/export/excel', [PaymentRequestController::class, 'exportExcel'])->name('payment-requests.export.excel');
     Route::get('/payment-requests/export/pdf', [PaymentRequestController::class, 'exportPdf'])->name('payment-requests.export.pdf');
-    Route::get('/payment-requests/summary/{scope}', [PaymentRequestController::class, 'summary'])
-        ->whereIn('scope', ['total', 'pending', 'complete'])
-        ->name('payment-requests.summary');
     Route::post('/payment-requests', [PaymentRequestController::class, 'store'])->name('payment-requests.store');
     Route::post('/payment-requests/procurement-types', [PaymentRequestController::class, 'storeProcurementType'])
         ->name('payment-requests.procurement-types.store');

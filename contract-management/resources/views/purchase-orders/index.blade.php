@@ -240,6 +240,33 @@
     .po-modal-person { color: #33506e; margin-top: 0.25rem; }
     .po-modal-sub { font-size: 0.72rem; color: #7a90a6; }
 
+    .po-action-btn-active { background: #eef6fd; border-color: #bfdcf3; color: #1664a0; }
+
+    .po-tip {
+        display: none;
+        margin: 1rem 1.5rem 0;
+        padding: 0.9rem 1.1rem;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #3b82f6;
+        border-radius: 10px;
+        background: #eff6ff;
+        font-size: 0.82rem;
+        color: #1e3a5f;
+    }
+    .po-tip.open { display: block; }
+    .po-tip h4 {
+        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #1d4ed8;
+    }
+    .po-tip ul { margin: 0; padding-left: 1.1rem; }
+    .po-tip li { margin-bottom: 0.3rem; line-height: 1.45; }
+    .po-tip li:last-child { margin-bottom: 0; }
+    .po-tip strong { color: #0f2a44; }
+
     .po-print-options { display: flex; flex-direction: column; gap: 0.55rem; }
     .po-print-options label {
         display: flex;
@@ -368,6 +395,9 @@
                     <a href="{{ route('purchase-orders.export.pdf', request()->query()) }}" class="po-action-btn" title="Export this list to PDF">
                         <i class="fas fa-file-pdf"></i> PDF
                     </a>
+                    <button type="button" class="po-action-btn" data-po-tip aria-expanded="false" aria-controls="poTipBox">
+                        <i class="fas fa-info-circle"></i> TIP: info
+                    </button>
                     <button type="button" class="po-action-btn" data-po-print-options data-print-default="table" title="Print this table only">
                         <i class="fas fa-print"></i> Print
                     </button>
@@ -416,6 +446,18 @@
                     @endif
                 </form>
             </div>
+        </div>
+
+        <div id="poTipBox" class="po-tip no-print">
+            <h4><i class="fas fa-info-circle mr-1"></i>How this table works</h4>
+            <ul>
+                <li><strong>Amount (ETB)</strong> decides the route: above ETB 400,000 needs the GS Manager and then the DDG; ETB 400,000 or less needs the GS Manager only.</li>
+                <li><strong>1st Approval (GS Manager)</strong> must be recorded first.</li>
+                <li><strong>2nd Approval (DDG)</strong> stays <strong>Locked</strong> until the first approval exists; for orders at or below ETB 400,000 it shows <strong>Not Required</strong>.</li>
+                <li><strong>Status</strong> is Pending, First Approved or Approved, depending on the two signatures.</li>
+                <li>Search matches the PO number or either approver&rsquo;s name. <strong>Rows</strong> changes the page size, and the KPI cards open the full list regardless of the search.</li>
+                <li>Excel, PDF and Print follow the current search, sort and page size.</li>
+            </ul>
         </div>
 
         <div class="po-table-scroll overflow-x-auto">
@@ -1004,6 +1046,16 @@
         var printGo = document.getElementById('poPrintGo');
         if (printGo) {
             printGo.addEventListener('click', printSelectedSections);
+        }
+
+        var tipButton = document.querySelector('[data-po-tip]');
+        var tipBox = document.getElementById('poTipBox');
+        if (tipButton && tipBox) {
+            tipButton.addEventListener('click', function () {
+                var open = tipBox.classList.toggle('open');
+                tipButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+                tipButton.classList.toggle('po-action-btn-active', open);
+            });
         }
 
         document.addEventListener('keydown', function (e) {

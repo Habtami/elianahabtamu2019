@@ -22,15 +22,21 @@ class PaymentRequestController extends Controller
                 ->with('error', 'You are not authorized to view payment requests.');
         }
 
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 10;
+        }
+
         [$query, $search] = $this->filteredQuery($request);
 
-        $paymentRequests = $query->paginate(5)->appends($request->query());
+        $paymentRequests = $query->paginate($perPage)->appends($request->query());
 
         return view('payment-requests.index', array_merge(
             $this->summaryStats(),
             [
                 'paymentRequests' => $paymentRequests,
                 'search' => $search,
+                'statGroups' => $this->statGroups(),
                 'materialGroups' => Contract::getMaterialGroups(),
                 'procurementTypes' => ProcurementType::activeNames(),
                 'paymentTypes' => PaymentType::activeNames(),
@@ -69,59 +75,6 @@ class PaymentRequestController extends Controller
             $this->summaryStats(),
             ['requests' => $requests, 'search' => $search]
         ))->download('payment-requests-' . now()->format('Ymd-His') . '.pdf');
-    }
-
-    public function summary(string $scope)
-    {
-        $user = auth()->user();
-
-        if (!$user->canViewPaymentRequests()) {
-            return response()->json(['message' => 'You are not authorized to view payment requests.'], 403);
-        }
-
-        switch ($scope) {
-            case 'pending':
-                $query = PaymentRequest::with(['gsApprover', 'financeApprover'])
-                    ->whereNull('finance_approved_at');
-                $label = 'Pending Payment Requests';
-                break;
-            case 'complete':
-                $query = PaymentRequest::with(['gsApprover', 'financeApprover'])
-                    ->whereNotNull('finance_approved_at');
-                $label = 'Completed Payment Requests';
-                break;
-            default:
-                $query = PaymentRequest::with(['gsApprover', 'financeApprover']);
-                $label = 'Total Payment Requests';
-                break;
-        }
-
-        $total = (clone $query)->count();
-
-        $items = $query->orderByDesc('id')
-            ->limit(50)
-            ->get()
-            ->map(fn (PaymentRequest $paymentRequest) => [
-                'reference' => $paymentRequest->getReference(),
-                'date' => $paymentRequest->payment_request_date?->format('M d, Y'),
-                'gs_status' => $paymentRequest->isGsApproved() ? 'Approved' : 'Pending',
-                'gs_approver' => $paymentRequest->gsApprover->name ?? null,
-                'gs_approved_at' => $paymentRequest->gs_approved_at?->format('M d, Y H:i'),
-                'finance_status' => $paymentRequest->getFinanceStatusLabel(),
-                'finance_approver' => $paymentRequest->financeApprover->name ?? null,
-                'finance_approved_at' => $paymentRequest->finance_approved_at?->format('M d, Y H:i'),
-                'status' => $paymentRequest->getStatusLabel(),
-                'status_key' => $paymentRequest->getStatus(),
-                'remarks' => $paymentRequest->remarks,
-            ]);
-
-        return response()->json([
-            'scope' => $scope,
-            'label' => $label,
-            'total' => $total,
-            'items' => $items,
-            'limited' => $total > $items->count(),
-        ]);
     }
 
     /**
@@ -176,6 +129,33 @@ class PaymentRequestController extends Controller
             'total' => PaymentRequest::count(),
             'pending' => PaymentRequest::whereNull('finance_approved_at')->count(),
             'complete' => PaymentRequest::whereNotNull('finance_approved_at')->count(),
+        ];
+    }
+
+    private function scopeQuery(string $scope)
+    {
+        $query = PaymentRequest::with(['gsApprover', 'financeApprover'])
+            ->orderByDesc('payment_request_date')
+            ->orderByDesc('id');
+
+        if ($scope === 'pending') {
+            $query->whereNull('finance_approved_at');
+        } elseif ($scope === 'complete') {
+            $query->whereNotNull('finance_approved_at');
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array<string, \Illuminate\Database\Eloquent\Collection>
+     */
+    private function statGroups(): array
+    {
+        return [
+            'total' => $this->scopeQuery('total')->get(),
+            'pending' => $this->scopeQuery('pending')->get(),
+            'complete' => $this->scopeQuery('complete')->get(),
         ];
     }
 
