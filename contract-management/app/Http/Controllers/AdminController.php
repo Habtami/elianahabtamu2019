@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ReportMeta;
 use App\Models\ActivityLog;
 use App\Models\Role;
 use App\Models\User;
@@ -672,9 +673,12 @@ class AdminController extends Controller
 
     public function activityLogs(Request $request)
     {
-        $query = \App\Models\ActivityLog::with(['contract' => function ($q) {
-            $q->withTrashed();
-        }, 'actor'])->latest();
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 10;
+        }
+
+        $query = $this->activityLogQuery();
 
         // Default: Show all, but allow time-based filtering
         $range = $request->get('range', 'all');
@@ -716,30 +720,71 @@ class AdminController extends Controller
 
         // If export is requested
         if ($request->has('export')) {
-            return $this->exportActivityLogs($query->get(), $range);
+            $exportLogs = $query->get();
+            $reportMeta = ReportMeta::build($exportLogs, $this->activityLogFilters($request), null, null, 'created_at');
+
+            return $this->exportActivityLogs($exportLogs, $range, $reportMeta);
         }
 
-        $logs = $query->paginate(25)->appends($request->query());
+        $logs = $query->paginate($perPage)->appends($request->query());
 
-        // KPI Summaries for the selected range (or 24h if all)
-        $statsRange = $range !== 'all' ? $range : 'day';
-        $statsDate = match($statsRange) {
-            'day' => now()->subDay(),
-            'week' => now()->subWeek(),
-            'month' => now()->subMonth(),
-            'year' => now()->subYear(),
-            default => now()->subDay()
-        };
+        $reportMeta = ReportMeta::build(
+            $logs->getCollection(),
+            $this->activityLogFilters($request),
+            null,
+            null,
+            'created_at',
+            $logs->total()
+        );
 
-        $stats = [
-            'total' => \App\Models\ActivityLog::where('created_at', '>=', $statsDate)->count(),
-            'errors' => \App\Models\ActivityLog::where('severity', 'danger')->where('created_at', '>=', $statsDate)->count(),
-            'logins' => \App\Models\ActivityLog::where('activity_type', 'login')->where('created_at', '>=', $statsDate)->count(),
-            'updates' => \App\Models\ActivityLog::where('activity_type', 'contract_update')->where('created_at', '>=', $statsDate)->count(),
-            'current_range' => $range
+        $statGroups = [
+            'total' => $this->activityLogQuery()->get(),
+            'logins' => $this->activityLogQuery()->where('activity_type', 'login')->get(),
+            'updates' => $this->activityLogQuery()->where('activity_type', 'contract_update')->get(),
+            'critical' => $this->activityLogQuery()->where('severity', 'danger')->get(),
         ];
-        
-        return view('admin.activity_logs.index', compact('logs', 'stats'));
+
+        return view('admin.activity_logs.index', compact('logs', 'statGroups', 'reportMeta'));
+    }
+
+    private function activityLogQuery()
+    {
+        return ActivityLog::with(['contract' => function ($q) {
+            $q->withTrashed();
+        }, 'actor'])->latest();
+    }
+
+    /**
+     * @return array<int, string|null>
+     */
+    private function activityLogFilters(Request $request): array
+    {
+        $typeLabels = [
+            'login' => 'Successful logins',
+            'failed_login' => 'Failed logins',
+            'logout' => 'Logouts',
+            'contract_create' => 'Insertions',
+            'contract_update' => 'Updates',
+            'contract_delete' => 'Deletions',
+            'system_error' => 'System errors',
+            'admin_action' => 'Admin actions',
+            'password_reset_request' => 'Password resets',
+        ];
+        $severityLabels = ['info' => 'Info', 'warning' => 'Warning', 'danger' => 'Critical'];
+        $rangeLabels = [
+            'today' => 'Today',
+            'yesterday' => 'Yesterday',
+            'week' => 'Last 7 days',
+            'month' => 'Last 30 days',
+            'year' => 'Last year',
+        ];
+
+        return [
+            isset($rangeLabels[$request->input('range')]) ? 'Range: '.$rangeLabels[$request->input('range')] : null,
+            isset($typeLabels[$request->input('type')]) ? 'Category: '.$typeLabels[$request->input('type')] : null,
+            isset($severityLabels[$request->input('severity')]) ? 'Severity: '.$severityLabels[$request->input('severity')] : null,
+            $request->filled('search') ? 'Search: '.$request->input('search') : null,
+        ];
     }
 
     public function userHistory(User $user)
@@ -770,7 +815,7 @@ class AdminController extends Controller
         ]);
     }
 
-    private function exportActivityLogs($logs, $range)
+    private function exportActivityLogs($logs, $range, ?array $reportMeta = null)
     {
         $filename = "activity_report_" . ($range ?: 'all') . "_" . date('Y-m-d') . ".csv";
         $headers = [
@@ -783,8 +828,16 @@ class AdminController extends Controller
 
         $columns = ['Timestamp', 'Type', 'Severity', 'Actor', 'Description', 'Reason', 'IP Address', 'User Agent'];
 
-        $callback = function() use($logs, $columns) {
+        $callback = function() use($logs, $columns, $reportMeta) {
             $file = fopen('php://output', 'w');
+
+            foreach (ReportMeta::sheetLines($reportMeta, 'Activity Logs') as $line) {
+                fputcsv($file, [$line]);
+            }
+            if ($reportMeta) {
+                fputcsv($file, []);
+            }
+
             fputcsv($file, $columns);
 
             foreach ($logs as $log) {
